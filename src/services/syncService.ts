@@ -10,18 +10,43 @@ export const syncService = {
         ]);
 
         return {
-            incomes: incomes.data || [],
-            spendings: spendings.data || [],
-            obligations: obligations.data || []
+            incomes: (incomes.data || []).map(inc => ({
+                id: inc.id,
+                name: inc.name,
+                amount: Number(inc.amount),
+                category: inc.category,
+                date: inc.date,
+                frequency: inc.frequency
+            })) as Income[],
+            spendings: (spendings.data || []).map(s => ({
+                id: s.id,
+                name: s.name,
+                amount: Number(s.amount),
+                category: s.category,
+                date: s.date,
+                kind: s.kind,
+                linkedObligationId: s.linked_obligation_id
+            })) as Spending[],
+            obligations: (obligations.data || []).map(o => ({
+                id: o.id,
+                name: o.name,
+                type: o.type,
+                amount: Number(o.amount),
+                totalMonths: o.total_months,
+                paidMonths: o.paid_months,
+                balance: Number(o.balance),
+                interestRate: Number(o.interest_rate),
+                status: o.status,
+                startDate: o.start_date
+            })) as Obligation[]
         };
     },
 
     async syncIncome(profileId: string, incomes: Income[]) {
-        // Basic sync: delete and re-insert for simplicity in this version
-        // A more robust sync would check for changes/IDs
         await supabase.from('incomes').delete().eq('profile_id', profileId);
         if (incomes.length > 0) {
             const dataToInsert = incomes.map(inc => ({
+                id: inc.id,
                 profile_id: profileId,
                 name: inc.name,
                 amount: inc.amount,
@@ -37,6 +62,7 @@ export const syncService = {
         await supabase.from('spendings').delete().eq('profile_id', profileId);
         if (spendings.length > 0) {
             const dataToInsert = spendings.map(s => ({
+                id: s.id,
                 profile_id: profileId,
                 name: s.name,
                 amount: s.amount,
@@ -53,6 +79,7 @@ export const syncService = {
         await supabase.from('obligations').delete().eq('profile_id', profileId);
         if (obligations.length > 0) {
             const dataToInsert = obligations.map(o => ({
+                id: o.id,
                 profile_id: profileId,
                 name: o.name,
                 type: o.type,

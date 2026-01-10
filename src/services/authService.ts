@@ -8,12 +8,13 @@ export interface UserProfile {
 
 export const authService = {
     async loginOrRegister(userId: string, pin: string): Promise<{ profile: UserProfile | null; error: string | null }> {
+        const normalizedId = userId.toLowerCase().trim();
         try {
             // 1. Check if user exists
             const { data: existingUser, error: fetchError } = await supabase
                 .from('profiles')
                 .select('*')
-                .eq('user_id_text', userId)
+                .eq('user_id_text', normalizedId)
                 .single();
 
             if (fetchError && fetchError.code !== 'PGRST116') {
@@ -31,7 +32,7 @@ export const authService = {
                 // 3. Register new user
                 const { data: newUser, error: createError } = await supabase
                     .from('profiles')
-                    .insert([{ user_id_text: userId, pin_hash: pin }])
+                    .insert([{ user_id_text: normalizedId, pin_hash: pin }])
                     .select()
                     .single();
 
