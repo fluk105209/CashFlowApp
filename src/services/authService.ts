@@ -44,5 +44,18 @@ export const authService = {
         } catch (err: any) {
             return { profile: null, error: err.message };
         }
+    },
+
+    async updatePin(profileId: string, newPin: string): Promise<{ error: string | null }> {
+        try {
+            const { error } = await supabase
+                .from('profiles')
+                .update({ pin_hash: newPin })
+                .eq('id', profileId);
+
+            return { error: error ? error.message : null };
+        } catch (err: any) {
+            return { error: err.message };
+        }
     }
 };

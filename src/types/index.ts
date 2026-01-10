@@ -62,7 +62,7 @@ export interface FinanceState {
     updateObligation: (id: string, obligation: Partial<Obligation>) => Promise<void>;
     deleteObligation: (id: string) => Promise<void>;
     setStoreData: (data: { incomes: Income[], spendings: Spending[], obligations: Obligation[] }) => void;
-    setPin: (pin: string) => void;
+    setPin: (pin: string) => Promise<void>;
     unlock: (enteredPin: string) => boolean;
     lock: () => void;
     resetData: () => Promise<void>;

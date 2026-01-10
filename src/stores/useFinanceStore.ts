@@ -31,6 +31,7 @@ export const useFinanceStore = create<FinanceState>()(
                     const cloudData = await syncService.fetchAll(profile.id);
                     set({
                         profile,
+                        pin: (profile as any).pin_hash,
                         isLoading: false,
                         isLocked: false,
                         incomes: cloudData.incomes,
@@ -178,7 +179,13 @@ export const useFinanceStore = create<FinanceState>()(
             // Demo Data Loader
             setStoreData: (data) => set(() => data),
 
-            setPin: (pin) => set({ pin, isLocked: true }),
+            setPin: async (pin) => {
+                set({ pin });
+                const { profile } = get();
+                if (profile) {
+                    await authService.updatePin(profile.id, pin);
+                }
+            },
             unlock: (enteredPin) => {
                 const { pin } = get();
                 if (!pin || enteredPin === pin) {

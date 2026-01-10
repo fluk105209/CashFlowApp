@@ -13,9 +13,10 @@ export const SettingsPage: React.FC = () => {
     const [confirmPin, setConfirmPin] = useState('');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [isUpdating, setIsUpdating] = useState(false);
     const navigate = useNavigate();
 
-    const handleSetPin = (e: React.FormEvent) => {
+    const handleSetPin = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
         setSuccess('');
@@ -30,14 +31,21 @@ export const SettingsPage: React.FC = () => {
             return;
         }
 
-        setPin(newPin);
-        setSuccess('PIN changed successfully!');
-        setNewPin('');
-        setConfirmPin('');
+        setIsUpdating(true);
+        try {
+            await setPin(newPin);
+            setSuccess('PIN changed successfully!');
+            setNewPin('');
+            setConfirmPin('');
+        } catch (err: any) {
+            setError('Failed to update PIN. Please try again.');
+        } finally {
+            setIsUpdating(false);
+        }
     };
 
-    const handleReset = () => {
-        resetData();
+    const handleReset = async () => {
+        await resetData();
         navigate('/');
     };
 
@@ -104,8 +112,8 @@ export const SettingsPage: React.FC = () => {
                         {error && <p className="text-destructive text-xs font-medium">{error}</p>}
                         {success && <p className="text-emerald-500 text-xs font-medium">{success}</p>}
 
-                        <Button type="submit" className="w-full rounded-xl">
-                            {pin ? 'Update PIN' : 'Set PIN'}
+                        <Button type="submit" className="w-full rounded-xl" disabled={isUpdating}>
+                            {isUpdating ? 'Updating...' : (pin ? 'Update PIN' : 'Set PIN')}
                         </Button>
                     </form>
                 </div>
