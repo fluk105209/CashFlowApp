@@ -1,8 +1,9 @@
 import { useNavigate, useLocation, Routes, Route, Link } from "react-router-dom"
-import { LayoutDashboard, Calendar as CalendarIcon, List, Loader2, Settings } from "lucide-react"
+import { LayoutDashboard, Calendar as CalendarIcon, List, Loader2, Settings, LogOut } from "lucide-react"
 import { ThemeToggle } from "@/components/ThemeToggle"
 import { motion, AnimatePresence } from "framer-motion"
 import { lazy, Suspense } from "react"
+import { useFinanceStore } from "@/stores/useFinanceStore"
 
 // Lazy load feature components for performance
 const DashboardPage = lazy(() => import("@/features/Dashboard/DashboardPage").then(module => ({ default: module.DashboardPage })))
@@ -10,15 +11,25 @@ const CalendarView = lazy(() => import("@/features/Calendar/CalendarView").then(
 const TransactionsPage = lazy(() => import("@/features/Transactions/TransactionsPage").then(module => ({ default: module.TransactionsPage })))
 const SettingsPage = lazy(() => import("@/features/Settings/SettingsPage").then(module => ({ default: module.SettingsPage })))
 const PinLock = lazy(() => import("@/components/PinLock").then(module => ({ default: module.PinLock })))
+const LoginPage = lazy(() => import("@/features/Auth/LoginPage").then(module => ({ default: module.LoginPage })))
 
 function App() {
   const navigate = useNavigate()
   const location = useLocation()
+  const { profile, logout } = useFinanceStore()
 
   const isDashboard = location.pathname === '/'
   const isCalendar = location.pathname === '/calendar'
   const isTransactions = location.pathname.startsWith('/transactions')
   const isSettings = location.pathname === '/settings'
+
+  if (!profile) {
+    return (
+      <Suspense fallback={null}>
+        <LoginPage />
+      </Suspense>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans antialiased p-4 md:p-8">
@@ -42,6 +53,13 @@ function App() {
             transition={{ duration: 0.5 }}
           >
             <ThemeToggle />
+            <button
+              onClick={() => logout()}
+              className="p-2 rounded-md hover:bg-muted transition-colors text-muted-foreground hover:text-destructive"
+              title="Logout"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
             <div className="flex bg-muted rounded-lg p-1">
               <button
                 onClick={() => navigate('/')}

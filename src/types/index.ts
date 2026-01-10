@@ -45,23 +45,25 @@ export interface FinanceState {
     isLocked: boolean;
     isLoading: boolean;
     error: string | null;
+    profile: any | null;
 
+    login: (userId: string, pin: string) => Promise<{ success: boolean; error?: string }>;
+    logout: () => void;
     initialize: () => Promise<void>;
-    addIncome: (income: Omit<Income, 'id'>) => void;
-    updateIncome: (id: string, income: Partial<Income>) => void;
-    deleteIncome: (id: string) => void;
-    // ... (rest of the interface stays the same)
+    addIncome: (income: Omit<Income, 'id'>) => Promise<void>;
+    updateIncome: (id: string, income: Partial<Income>) => Promise<void>;
+    deleteIncome: (id: string) => Promise<void>;
 
-    addSpending: (spending: Omit<Spending, 'id'>) => void;
-    updateSpending: (id: string, spending: Partial<Spending>) => void;
-    deleteSpending: (id: string) => void;
+    addSpending: (spending: Omit<Spending, 'id'>) => Promise<void>;
+    updateSpending: (id: string, spending: Partial<Spending>) => Promise<void>;
+    deleteSpending: (id: string) => Promise<void>;
 
-    addObligation: (obligation: Omit<Obligation, 'id'>) => void;
-    updateObligation: (id: string, obligation: Partial<Obligation>) => void;
-    deleteObligation: (id: string) => void;
+    addObligation: (obligation: Omit<Obligation, 'id'>) => Promise<void>;
+    updateObligation: (id: string, obligation: Partial<Obligation>) => Promise<void>;
+    deleteObligation: (id: string) => Promise<void>;
     setStoreData: (data: { incomes: Income[], spendings: Spending[], obligations: Obligation[] }) => void;
     setPin: (pin: string) => void;
-    unlock: (pin: string) => boolean;
+    unlock: (enteredPin: string) => boolean;
     lock: () => void;
-    resetData: () => void;
+    resetData: () => Promise<void>;
 }
