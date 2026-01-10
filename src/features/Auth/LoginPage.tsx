@@ -6,11 +6,13 @@ import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Lock, User, ShieldCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 export function LoginPage() {
     const [userId, setUserId] = useState('');
     const [pin, setPin] = useState('');
     const { login, isLoading, error } = useFinanceStore();
+    const { t, i18n } = useTranslation();
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -31,9 +33,9 @@ export function LoginPage() {
                         <div className="mx-auto w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-indigo-200 dark:shadow-none">
                             <ShieldCheck className="text-white h-6 w-6" />
                         </div>
-                        <CardTitle className="text-2xl font-bold tracking-tight">Cloud Sync Login</CardTitle>
+                        <CardTitle className="text-2xl font-bold tracking-tight">{t('auth.login_title')}</CardTitle>
                         <CardDescription>
-                            Enter your User ID and 6-digit PIN to access your data on any device.
+                            {t('auth.login_desc')}
                         </CardDescription>
                     </CardHeader>
                     <form onSubmit={handleLogin}>
@@ -44,12 +46,12 @@ export function LoginPage() {
                                 </div>
                             )}
                             <div className="space-y-2">
-                                <Label htmlFor="userId" className="text-sm font-medium">User ID</Label>
+                                <Label htmlFor="userId" className="text-sm font-medium">{t('auth.user_id')}</Label>
                                 <div className="relative">
                                     <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                                     <Input
                                         id="userId"
-                                        placeholder="Enter your User ID"
+                                        placeholder={t('auth.user_id')}
                                         className="pl-10 h-11"
                                         value={userId}
                                         onChange={(e) => setUserId(e.target.value)}
@@ -59,7 +61,7 @@ export function LoginPage() {
                                 </div>
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="pin" className="text-sm font-medium">6-Digit PIN</Label>
+                                <Label htmlFor="pin" className="text-sm font-medium">{t('auth.pin')}</Label>
                                 <div className="relative">
                                     <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                                     <Input
@@ -82,11 +84,29 @@ export function LoginPage() {
                                 className="w-full h-11 text-base font-semibold bg-indigo-600 hover:bg-indigo-700 transition-all duration-300 shadow-lg shadow-indigo-100 dark:shadow-none"
                                 disabled={isLoading || pin.length !== 6 || !userId}
                             >
-                                {isLoading ? "Synchronizing..." : "Login / Register"}
+                                {isLoading ? t('auth.syncing') : t('auth.login_btn')}
                             </Button>
                             <p className="text-xs text-center text-muted-foreground px-4">
-                                If the User ID doesn't exist, a new profile will be created automatically.
+                                {t('auth.login_subtext')}
                             </p>
+
+                            <div className="flex items-center justify-center gap-4 mt-2">
+                                <button
+                                    type="button"
+                                    onClick={() => i18n.changeLanguage('en')}
+                                    className={`text-xs font-medium transition-colors ${i18n.language.startsWith('en') ? 'text-indigo-600 dark:text-indigo-400 underline underline-offset-4' : 'text-muted-foreground hover:text-foreground'}`}
+                                >
+                                    English
+                                </button>
+                                <div className="w-[1px] h-3 bg-border" />
+                                <button
+                                    type="button"
+                                    onClick={() => i18n.changeLanguage('th')}
+                                    className={`text-xs font-medium transition-colors ${i18n.language.startsWith('th') ? 'text-indigo-600 dark:text-indigo-400 underline underline-offset-4' : 'text-muted-foreground hover:text-foreground'}`}
+                                >
+                                    ไทย
+                                </button>
+                            </div>
                         </CardFooter>
                     </form>
                 </Card>

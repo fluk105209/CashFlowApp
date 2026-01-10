@@ -1,0 +1,99 @@
+{
+    "common": {
+        "save": "Save",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "edit": "Edit",
+        "loading": "Loading...",
+        "no_data": "No data found",
+        "no_items_found": "No items found.",
+        "back": "Back",
+        "view_all_with_count": "View All ({{count}})",
+        "show_less": "Show Less"
+    },
+    "nav": {
+        "dashboard": "Dashboard",
+        "calendar": "Calendar",
+        "transactions": "Transactions",
+        "settings": "Settings"
+    },
+    "auth": {
+        "login_title": "Cloud Sync Login",
+        "login_desc": "Enter your User ID and 6-digit PIN to access your data on any device.",
+        "user_id": "User ID",
+        "pin": "6-Digit PIN",
+        "login_btn": "Login / Register",
+        "login_subtext": "If the User ID doesn't exist, a new profile will be created automatically.",
+        "incorrect_pin": "Incorrect PIN",
+        "syncing": "Synchronizing..."
+    },
+    "dashboard": {
+        "title": "Cash Flow",
+        "subtitle": "Manage your finances",
+        "total_balance": "Total Balance",
+        "net_monthly": "Actual Monthly Net",
+        "income": "Income",
+        "actual_expenses": "Actual Expenses",
+        "spending": "Spending",
+        "obligations": "Obligations",
+        "obligations_breakdown": "Monthly Obligations Breakdown",
+        "total_planned": "Total Planned Payment",
+        "total_debt_balance": "Total Debt Balance",
+        "installments": "Installments",
+        "consumer_debt": "Consumer Debt",
+        "est_interest": "Est. Monthly Interest",
+        "recent_transactions": "Recent Transactions",
+        "view_all": "View All"
+    },
+    "settings": {
+        "title": "Settings",
+        "subtitle": "Manage your profile and security",
+        "appearance": "Appearance",
+        "dark_mode": "Dark Mode",
+        "dark_mode_desc": "Adjust the application theme",
+        "language": "Language",
+        "language_desc": "Switch between English and Thai",
+        "security": "Security",
+        "profile_pin": "Profile PIN",
+        "pin_desc_change": "Change your current 6-digit PIN",
+        "pin_desc_set": "Set a 6-digit PIN to secure your data",
+        "new_pin": "New PIN",
+        "confirm_pin": "Confirm PIN",
+        "update_pin": "Update PIN",
+        "set_pin": "Set PIN",
+        "updating": "Updating...",
+        "account": "Account",
+        "logout": "Logout",
+        "logout_desc": "Sign out of your account on this device",
+        "danger_zone": "Danger Zone",
+        "reset_data": "Reset All Data",
+        "reset_desc": "This will permanently delete all your incomes, expenses, and obligations. This action cannot be undone.",
+        "reset_btn": "Reset Everything",
+        "confirm_reset": "Confirm Total Reset",
+        "reset_warning": "Are you absolutely sure you want to reset all your data? This will clear everything and take you back to the home page.",
+        "yes_reset": "Yes, Reset Everything"
+    },
+    "income": {
+        "title": "Incomes",
+        "add_btn": "Add Income",
+        "name": "Income Name",
+        "amount": "Amount",
+        "category": "Category",
+        "date": "Date",
+        "frequency": "Frequency",
+        "monthly": "Monthly",
+        "one_time": "One-Time"
+    },
+    "spending": {
+        "title": "Spendings",
+        "add_btn": "Add Spending",
+        "name": "Spending Name",
+        "amount": "Amount",
+        "category": "Category",
+        "date": "Date"
+    },
+    "obligations": {
+        "title": "Obligations",
+        "add_btn": "Add Obligation"
+    }
+}

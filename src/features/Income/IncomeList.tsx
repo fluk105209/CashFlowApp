@@ -7,6 +7,7 @@ import type { Income } from "@/types"
 import { motion, AnimatePresence } from "framer-motion"
 import { Link } from "react-router-dom"
 import { format, parseISO } from "date-fns"
+import { useTranslation } from "react-i18next"
 
 interface Props {
     limit?: number
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export function IncomeList({ limit, items }: Props) {
+    const { t } = useTranslation()
     const { incomes: storeIncomes, deleteIncome } = useFinanceStore()
     const [isExpanded, setIsExpanded] = useState(false)
 
@@ -23,7 +25,7 @@ export function IncomeList({ limit, items }: Props) {
     if (dataSource.length === 0) {
         return (
             <div className="text-center text-sm text-muted-foreground py-8 border-2 border-dashed rounded-lg">
-                No income sources found.
+                {t('common.no_items_found')}
             </div>
         )
     }
@@ -61,7 +63,7 @@ export function IncomeList({ limit, items }: Props) {
                             <IncomeModal
                                 initialData={income}
                                 trigger={
-                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary">
+                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" title={t('common.edit')}>
                                         <Edit className="h-4 w-4" />
                                     </Button>
                                 }
@@ -71,6 +73,7 @@ export function IncomeList({ limit, items }: Props) {
                                 size="icon"
                                 className="h-8 w-8 text-muted-foreground hover:text-destructive"
                                 onClick={() => deleteIncome(income.id)}
+                                title={t('common.delete')}
                             >
                                 <Trash2 className="h-4 w-4" />
                             </Button>
@@ -85,7 +88,7 @@ export function IncomeList({ limit, items }: Props) {
                         variant="ghost"
                         className="w-full text-muted-foreground hover:text-primary text-xs flex items-center gap-1"
                     >
-                        View All ({dataSource.length}) <ExternalLink className="h-3 w-3" />
+                        {t('common.view_all_with_count', { count: dataSource.length })} <ExternalLink className="h-3 w-3" />
                     </Button>
                 </Link>
             )}
@@ -96,7 +99,7 @@ export function IncomeList({ limit, items }: Props) {
                     className="w-full text-muted-foreground hover:text-primary text-xs"
                     onClick={() => setIsExpanded(false)}
                 >
-                    <div className="flex items-center gap-1">Show Less <ChevronUp className="h-3 w-3" /></div>
+                    <div className="flex items-center gap-1">{t('common.show_less')} <ChevronUp className="h-3 w-3" /></div>
                 </Button>
             )}
         </div>

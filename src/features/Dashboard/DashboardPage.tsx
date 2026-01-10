@@ -9,8 +9,10 @@ import { useFinanceStore } from "@/stores/useFinanceStore"
 import { motion } from "framer-motion"
 import { useEffect } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useTranslation } from "react-i18next"
 
 export function DashboardPage() {
+    const { t } = useTranslation()
     const { incomes, spendings, obligations, isLoading, initialize } = useFinanceStore()
 
     useEffect(() => {
@@ -72,17 +74,17 @@ export function DashboardPage() {
             >
                 <Card className="bg-primary text-primary-foreground border-none shadow-lg">
                     <CardHeader className="pb-2">
-                        <CardDescription className="text-primary-foreground/70">Actual Monthly Net</CardDescription>
+                        <CardDescription className="text-primary-foreground/70">{t('dashboard.net_monthly')}</CardDescription>
                         <CardTitle className="text-4xl font-bold">฿ {netCashFlow.toLocaleString()}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="flex justify-between text-sm opacity-90 mt-2">
                             <div>
-                                <span className="block text-xs opacity-70">Income</span>
+                                <span className="block text-xs opacity-70">{t('dashboard.income')}</span>
                                 <span className="text-emerald-300">+฿ {totalIncome.toLocaleString()}</span>
                             </div>
                             <div className="text-right">
-                                <span className="block text-xs opacity-70">Actual Expenses</span>
+                                <span className="block text-xs opacity-70">{t('dashboard.actual_expenses')}</span>
                                 <span className="text-rose-300">-฿ {totalSpending.toLocaleString()}</span>
                             </div>
                         </div>
@@ -97,32 +99,32 @@ export function DashboardPage() {
             >
                 <Card className="border-dashed bg-muted/30">
                     <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-muted-foreground">Monthly Obligations Breakdown</CardTitle>
+                        <CardTitle className="text-sm font-medium text-muted-foreground">{t('dashboard.obligations_breakdown')}</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
                         <div className="flex justify-between items-center">
-                            <span className="text-sm">Total Planned Payment</span>
+                            <span className="text-sm">{t('dashboard.total_planned')}</span>
                             <span className="font-semibold text-rose-500">฿ {totalObligationsPlanned.toLocaleString()}</span>
                         </div>
                         <div className="h-[1px] bg-border/50" />
 
                         <div className="flex justify-between items-center text-xs font-medium">
-                            <span>Total Debt Balance</span>
+                            <span>{t('dashboard.total_debt_balance')}</span>
                             <span>฿ {(totalInstallmentBalance + totalDebtBalance).toLocaleString()}</span>
                         </div>
 
                         <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground bg-muted/20 p-2 rounded-md">
                             <div>
-                                <span className="block opacity-70 text-[10px]">Installments</span>
+                                <span className="block opacity-70 text-[10px]">{t('dashboard.installments')}</span>
                                 <span className="font-medium">฿ {totalInstallmentBalance.toLocaleString()}</span>
                             </div>
                             <div className="text-right">
-                                <span className="block opacity-70 text-[10px]">Consumer Debt</span>
+                                <span className="block opacity-70 text-[10px]">{t('dashboard.consumer_debt')}</span>
                                 <span className="font-medium">฿ {totalDebtBalance.toLocaleString()}</span>
                             </div>
                         </div>
                         <div className="flex justify-between items-center text-xs text-muted-foreground pt-1 border-t border-border/50">
-                            <span>Est. Monthly Interest</span>
+                            <span>{t('dashboard.est_interest')}</span>
                             <span>฿ {estMonthlyInterest.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
                         </div>
                     </CardContent>
@@ -132,7 +134,7 @@ export function DashboardPage() {
             <div className="space-y-6">
                 <section>
                     <div className="flex items-center justify-between mb-3">
-                        <h3 className="font-semibold text-lg">Incomes</h3>
+                        <h3 className="font-semibold text-lg">{t('income.title')}</h3>
                         <IncomeModal />
                     </div>
                     <IncomeList limit={3} />
@@ -140,7 +142,7 @@ export function DashboardPage() {
 
                 <section>
                     <div className="flex items-center justify-between mb-3">
-                        <h3 className="font-semibold text-lg">Expenses</h3>
+                        <h3 className="font-semibold text-lg">{t('spending.title')}</h3>
                         <SpendingModal />
                     </div>
                     <SpendingList limit={3} />
@@ -148,7 +150,7 @@ export function DashboardPage() {
 
                 <section>
                     <div className="flex items-center justify-between mb-3">
-                        <h3 className="font-semibold text-lg">Obligations</h3>
+                        <h3 className="font-semibold text-lg">{t('obligations.title')}</h3>
                         <ObligationModal />
                     </div>
                     <ObligationList limit={3} />

@@ -3,6 +3,7 @@ import { LayoutDashboard, Calendar as CalendarIcon, List, Loader2, Settings } fr
 import { motion, AnimatePresence } from "framer-motion"
 import { lazy, Suspense } from "react"
 import { useFinanceStore } from "@/stores/useFinanceStore"
+import { useTranslation } from "react-i18next"
 
 // Lazy load feature components for performance
 const DashboardPage = lazy(() => import("@/features/Dashboard/DashboardPage").then(module => ({ default: module.DashboardPage })))
@@ -13,6 +14,7 @@ const PinLock = lazy(() => import("@/components/PinLock").then(module => ({ defa
 const LoginPage = lazy(() => import("@/features/Auth/LoginPage").then(module => ({ default: module.LoginPage })))
 
 function App() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
   const { profile } = useFinanceStore()
@@ -40,8 +42,8 @@ function App() {
             transition={{ duration: 0.5 }}
           >
             <Link to="/">
-              <h1 className="text-2xl font-bold tracking-tight">Cash Flow</h1>
-              <p className="text-sm text-muted-foreground">Manage your finances</p>
+              <h1 className="text-2xl font-bold tracking-tight">{t('dashboard.title')}</h1>
+              <p className="text-sm text-muted-foreground">{t('dashboard.subtitle')}</p>
             </Link>
           </motion.div>
 
@@ -67,6 +69,7 @@ function App() {
               </button>
               <button
                 onClick={() => navigate('/calendar')}
+                title={t('nav.calendar')}
                 className={`p-2 rounded-md transition-all relative ${isCalendar ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
               >
                 {isCalendar && (
@@ -80,6 +83,7 @@ function App() {
               </button>
               <button
                 onClick={() => navigate('/transactions')}
+                title={t('nav.transactions')}
                 className={`p-2 rounded-md transition-all relative ${isTransactions ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
               >
                 {isTransactions && (
@@ -93,6 +97,7 @@ function App() {
               </button>
               <button
                 onClick={() => navigate('/settings')}
+                title={t('nav.settings')}
                 className={`p-2 rounded-md transition-all relative ${isSettings ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
               >
                 {isSettings && (

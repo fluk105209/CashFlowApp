@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useFinanceStore } from '@/stores/useFinanceStore';
-import { Shield, Trash2, ArrowLeft, Key, AlertTriangle, Moon, LogOut } from 'lucide-react';
+import { Shield, Trash2, ArrowLeft, Key, AlertTriangle, Moon, LogOut, Languages } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { useNavigate } from 'react-router-dom';
 
 export const SettingsPage: React.FC = () => {
+    const { t, i18n } = useTranslation();
     const { pin, setPin, resetData, logout } = useFinanceStore();
     const [newPin, setNewPin] = useState('');
     const [confirmPin, setConfirmPin] = useState('');
@@ -62,21 +64,53 @@ export const SettingsPage: React.FC = () => {
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
                 <div>
-                    <h2 className="text-2xl font-bold tracking-tight">Settings</h2>
-                    <p className="text-sm text-muted-foreground">Manage your profile and security</p>
+                    <h2 className="text-2xl font-bold tracking-tight">{t('settings.title')}</h2>
+                    <p className="text-sm text-muted-foreground">{t('settings.subtitle')}</p>
                 </div>
             </div>
 
             <section className="space-y-4">
                 <div className="flex items-center gap-2 mb-2">
+                    <Languages className="h-5 w-5 text-primary" />
+                    <h3 className="text-lg font-semibold">{t('settings.language')}</h3>
+                </div>
+
+                <div className="bg-card rounded-2xl p-6 border shadow-sm space-y-4">
+                    <div className="flex items-center justify-between">
+                        <div className="space-y-0.5">
+                            <h4 className="font-medium">{t('settings.language')}</h4>
+                            <p className="text-sm text-muted-foreground">{t('settings.language_desc')}</p>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                        <Button
+                            variant={i18n.language.startsWith('en') ? 'default' : 'outline'}
+                            onClick={() => i18n.changeLanguage('en')}
+                            className="rounded-xl"
+                        >
+                            English
+                        </Button>
+                        <Button
+                            variant={i18n.language.startsWith('th') ? 'default' : 'outline'}
+                            onClick={() => i18n.changeLanguage('th')}
+                            className="rounded-xl"
+                        >
+                            ไทย
+                        </Button>
+                    </div>
+                </div>
+            </section>
+
+            <section className="space-y-4">
+                <div className="flex items-center gap-2 mb-2">
                     <Moon className="h-5 w-5 text-primary" />
-                    <h3 className="text-lg font-semibold">Appearance</h3>
+                    <h3 className="text-lg font-semibold">{t('settings.appearance')}</h3>
                 </div>
 
                 <div className="bg-card rounded-2xl p-6 border shadow-sm flex items-center justify-between">
                     <div className="space-y-0.5">
-                        <h4 className="font-medium">Dark Mode</h4>
-                        <p className="text-sm text-muted-foreground">Adjust the application theme</p>
+                        <h4 className="font-medium">{t('settings.dark_mode')}</h4>
+                        <p className="text-sm text-muted-foreground">{t('settings.dark_mode_desc')}</p>
                     </div>
                     <ThemeToggle />
                 </div>
@@ -85,15 +119,15 @@ export const SettingsPage: React.FC = () => {
             <section className="space-y-4">
                 <div className="flex items-center gap-2 mb-2">
                     <Shield className="h-5 w-5 text-primary" />
-                    <h3 className="text-lg font-semibold">Security</h3>
+                    <h3 className="text-lg font-semibold">{t('settings.security')}</h3>
                 </div>
 
                 <div className="bg-card rounded-2xl p-6 border shadow-sm space-y-4">
                     <div className="flex items-center justify-between">
                         <div className="space-y-0.5">
-                            <h4 className="font-medium">Profile PIN</h4>
+                            <h4 className="font-medium">{t('settings.profile_pin')}</h4>
                             <p className="text-sm text-muted-foreground">
-                                {pin ? 'Change your current 6-digit PIN' : 'Set a 6-digit PIN to secure your data'}
+                                {pin ? t('settings.pin_desc_change') : t('settings.pin_desc_set')}
                             </p>
                         </div>
                         <Key className="h-5 w-5 text-muted-foreground" />
@@ -102,7 +136,7 @@ export const SettingsPage: React.FC = () => {
                     <form onSubmit={handleSetPin} className="space-y-4 pt-2">
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <label className="text-sm font-medium">New PIN</label>
+                                <label className="text-sm font-medium">{t('settings.new_pin')}</label>
                                 <Input
                                     type="password"
                                     maxLength={6}
@@ -113,7 +147,7 @@ export const SettingsPage: React.FC = () => {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-sm font-medium">Confirm PIN</label>
+                                <label className="text-sm font-medium">{t('settings.confirm_pin')}</label>
                                 <Input
                                     type="password"
                                     maxLength={6}
@@ -129,7 +163,7 @@ export const SettingsPage: React.FC = () => {
                         {success && <p className="text-emerald-500 text-xs font-medium">{success}</p>}
 
                         <Button type="submit" className="w-full rounded-xl" disabled={isUpdating}>
-                            {isUpdating ? 'Updating...' : (pin ? 'Update PIN' : 'Set PIN')}
+                            {isUpdating ? t('settings.updating') : (pin ? t('settings.update_pin') : t('settings.set_pin'))}
                         </Button>
                     </form>
                 </div>
@@ -138,13 +172,13 @@ export const SettingsPage: React.FC = () => {
             <section className="space-y-4">
                 <div className="flex items-center gap-2 mb-2">
                     <LogOut className="h-5 w-5 text-muted-foreground" />
-                    <h3 className="text-lg font-semibold">Account</h3>
+                    <h3 className="text-lg font-semibold">{t('settings.account')}</h3>
                 </div>
 
                 <div className="bg-card rounded-2xl p-6 border shadow-sm space-y-4">
                     <div className="space-y-1">
-                        <h4 className="font-medium">Logout</h4>
-                        <p className="text-sm text-muted-foreground">Sign out of your account on this device</p>
+                        <h4 className="font-medium">{t('settings.logout')}</h4>
+                        <p className="text-sm text-muted-foreground">{t('settings.logout_desc')}</p>
                     </div>
                     <Button
                         variant="outline"
@@ -152,7 +186,7 @@ export const SettingsPage: React.FC = () => {
                         className="w-full rounded-xl flex items-center gap-2 hover:bg-destructive hover:text-destructive-foreground hover:border-destructive transition-all"
                     >
                         <LogOut className="h-4 w-4" />
-                        Log Out
+                        {t('settings.logout')}
                     </Button>
                 </div>
             </section>
@@ -160,36 +194,36 @@ export const SettingsPage: React.FC = () => {
             <section className="space-y-4">
                 <div className="flex items-center gap-2 mb-2">
                     <Trash2 className="h-5 w-5 text-destructive" />
-                    <h3 className="text-lg font-semibold text-destructive">Danger Zone</h3>
+                    <h3 className="text-lg font-semibold text-destructive">{t('settings.danger_zone')}</h3>
                 </div>
 
                 <div className="bg-destructive/5 rounded-2xl p-6 border border-destructive/20 shadow-sm space-y-4">
                     <div className="space-y-0.5">
-                        <h4 className="font-medium text-destructive">Reset All Data</h4>
+                        <h4 className="font-medium text-destructive">{t('settings.reset_data')}</h4>
                         <p className="text-sm text-destructive/70">
-                            This will permanently delete all your incomes, expenses, and obligations. This action cannot be undone.
+                            {t('settings.reset_desc')}
                         </p>
                     </div>
 
                     <Dialog>
                         <DialogTrigger asChild>
                             <Button variant="destructive" className="w-full rounded-xl">
-                                Reset Everything
+                                {t('settings.reset_btn')}
                             </Button>
                         </DialogTrigger>
                         <DialogContent className="sm:max-w-[425px] rounded-3xl">
                             <DialogHeader>
                                 <DialogTitle className="flex items-center gap-2">
                                     <AlertTriangle className="h-5 w-5 text-destructive" />
-                                    Confirm Total Reset
+                                    {t('settings.confirm_reset')}
                                 </DialogTitle>
                                 <DialogDescription className="pt-2">
-                                    Are you absolutely sure you want to reset all your data? This will clear everything and take you back to the home page.
+                                    {t('settings.reset_warning')}
                                 </DialogDescription>
                             </DialogHeader>
                             <DialogFooter className="gap-2 sm:gap-0">
-                                <Button variant="outline" onClick={() => { }} className="rounded-xl">Cancel</Button>
-                                <Button variant="destructive" onClick={handleReset} className="rounded-xl">Yes, Reset Everything</Button>
+                                <Button variant="outline" onClick={() => { }} className="rounded-xl">{t('common.cancel')}</Button>
+                                <Button variant="destructive" onClick={handleReset} className="rounded-xl">{t('settings.yes_reset')}</Button>
                             </DialogFooter>
                         </DialogContent>
                     </Dialog>
