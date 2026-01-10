@@ -15,7 +15,7 @@ interface Props {
 }
 
 export function IncomeList({ limit, items }: Props) {
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
     const { incomes: storeIncomes, deleteIncome } = useFinanceStore()
     const [isExpanded, setIsExpanded] = useState(false)
 
@@ -48,11 +48,13 @@ export function IncomeList({ limit, items }: Props) {
                         <div className="flex flex-col gap-1">
                             <div className="font-medium">{income.name}</div>
                             <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
-                                <span className="capitalize">{income.category}</span>
+                                <span className="capitalize">{t(`categories.${income.category}`, { defaultValue: income.category })}</span>
                                 <span>•</span>
                                 <div className="flex items-center gap-1">
                                     <Calendar className="h-2.5 w-2.5" />
-                                    {format(parseISO(income.date), 'MMM d, yyyy')}
+                                    {i18n.language.startsWith('th')
+                                        ? `${format(parseISO(income.date), 'd')} ${t(`months.${parseISO(income.date).getMonth()}`).substring(0, 3)} ${parseISO(income.date).getFullYear() + 543}`
+                                        : format(parseISO(income.date), 'MMM d, yyyy')}
                                 </div>
                             </div>
                         </div>

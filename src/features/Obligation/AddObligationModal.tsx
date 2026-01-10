@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
     Dialog,
     DialogContent,
@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label"
 import { useFinanceStore } from "@/stores/useFinanceStore"
 import type { Obligation, ObligationType } from '@/types'
 import { CreditCard, Smartphone, Car, Home, Banknote, HelpCircle } from "lucide-react"
+import { useTranslation } from "react-i18next"
 import { cn } from "@/lib/utils"
 
 interface Props {
@@ -22,6 +23,7 @@ interface Props {
 }
 
 export function ObligationModal({ initialData, trigger }: Props) {
+    const { t } = useTranslation()
     const [open, setOpen] = useState(false)
     const { addObligation, updateObligation } = useFinanceStore()
     const isEdit = !!initialData
@@ -37,10 +39,25 @@ export function ObligationModal({ initialData, trigger }: Props) {
     const [totalMonths, setTotalMonths] = useState('')
     const [paidMonths, setPaidMonths] = useState('0')
     const [creditLimit, setCreditLimit] = useState('')
+    const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0])
 
     // Initialize form on open
+    const resetForm = () => {
+        setStep(1)
+        setType('installment')
+        setName('')
+        setAmount('')
+        setBalance('')
+        setInterestRate('')
+        setTotalMonths('')
+        setPaidMonths('0')
+        setCreditLimit('')
+        setStartDate(new Date().toISOString().split('T')[0]) // Reset startDate
+    }
+
     useEffect(() => {
         if (open && initialData) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setStep(2)
             setType(initialData.type)
             setName(initialData.name)
@@ -50,6 +67,7 @@ export function ObligationModal({ initialData, trigger }: Props) {
             setTotalMonths(initialData.totalMonths?.toString() || '')
             setPaidMonths(initialData.paidMonths?.toString() || '0')
             setCreditLimit(initialData.creditLimit?.toString() || '')
+            setStartDate(initialData.startDate ? new Date(initialData.startDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0])
         } else if (open && !initialData) {
             resetForm()
         }
@@ -66,22 +84,12 @@ export function ObligationModal({ initialData, trigger }: Props) {
             if (mParams.monthly > 0 && mParams.total > 0) {
                 const remainingMonths = Math.max(0, mParams.total - mParams.paid)
                 const calculatedRemaining = remainingMonths * mParams.monthly
+                // eslint-disable-next-line react-hooks/set-state-in-effect
                 setBalance(calculatedRemaining.toString())
             }
         }
     }, [amount, totalMonths, paidMonths, type])
 
-    const resetForm = () => {
-        setStep(1)
-        setType('installment')
-        setName('')
-        setAmount('')
-        setBalance('')
-        setInterestRate('')
-        setTotalMonths('')
-        setPaidMonths('0')
-        setCreditLimit('')
-    }
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
@@ -97,7 +105,7 @@ export function ObligationModal({ initialData, trigger }: Props) {
             paidMonths: paidMonths ? parseInt(paidMonths) : undefined,
             creditLimit: creditLimit ? parseFloat(creditLimit) : undefined,
             status: (initialData?.status || 'active') as 'active' | 'closed',
-            startDate: initialData?.startDate || new Date().toISOString(),
+            startDate: startDate || new Date().toISOString(), // Use startDate from state
         }
 
         if (isEdit && initialData) {
@@ -110,114 +118,191 @@ export function ObligationModal({ initialData, trigger }: Props) {
         if (!isEdit) resetForm()
     }
 
-    const typeOptions: { id: ObligationType; label: string; icon: any }[] = [
-        { id: 'installment', label: 'Fixed Installment', icon: Smartphone },
-        { id: 'credit-card', label: 'Credit Card / Loan', icon: CreditCard },
-        { id: 'personal-loan', label: 'Personal Loan', icon: Banknote },
-        { id: 'car-loan', label: 'Car Loan', icon: Car },
-        { id: 'home-loan', label: 'Home Loan', icon: Home },
-        { id: 'other', label: 'Other', icon: HelpCircle },
-    ]
-
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 {trigger || (
-                    <Button size="sm" variant="default" className="bg-rose-600 hover:bg-rose-700 text-white">
-                        + Add Obligation
+                    <Button size="sm" variant="outline">
+                        + {t('obligations.add_btn')}
                     </Button>
                 )}
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>{isEdit ? 'Edit Obligation' : 'Add Monthly Obligation'}</DialogTitle>
+                    <DialogTitle>{isEdit ? t('obligations.edit') : t('obligations.add')}</DialogTitle>
                     <DialogDescription>
-                        {step === 1 ? "Select the type of obligation." : "Enter the details."}
+                        {isEdit ? t('obligations.desc_edit') : t('obligations.desc_add')}
                     </DialogDescription>
                 </DialogHeader>
 
-                {step === 1 && (
-                    <div className="grid grid-cols-2 gap-3 py-4">
-                        {typeOptions.map((opt) => (
-                            <div
-                                key={opt.id}
-                                className={cn(
-                                    "cursor-pointer flex flex-col items-center justify-center p-4 rounded-lg border-2 hover:bg-muted/50 transition-all",
-                                    type === opt.id ? "border-primary bg-primary/5" : "border-transparent bg-muted/20"
-                                )}
-                                onClick={() => setType(opt.id)}
-                            >
-                                <opt.icon className={cn("h-8 w-8 mb-2", type === opt.id ? "text-primary" : "text-muted-foreground")} />
-                                <span className={cn("text-xs font-semibold", type === opt.id ? "text-primary" : "text-muted-foreground")}>{opt.label}</span>
-                            </div>
+                <div className="py-4">
+                    {/* Stepper Header */}
+                    <div className="flex items-center mb-6 px-2">
+                        {[1, 2].map((s) => (
+                            <React.Fragment key={s}>
+                                <div className={cn(
+                                    "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-colors",
+                                    step === s ? "bg-primary border-primary text-primary-foreground" :
+                                        step > s ? "bg-emerald-500 border-emerald-500 text-white" : "border-muted-foreground/30 text-muted-foreground"
+                                )}>
+                                    {step > s ? "✓" : s}
+                                </div>
+                                {s === 1 && <div className={cn("flex-1 h-0.5 mx-2", step > 1 ? "bg-emerald-500" : "bg-muted/30")} />}
+                            </React.Fragment>
                         ))}
                     </div>
-                )}
 
-                {step === 2 && (
-                    <form id="obligation-form" onSubmit={handleSubmit} className="grid gap-4 py-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="name">Name</Label>
-                            <Input id="name" placeholder="e.g. iPhone, Visa Card" value={name} onChange={e => setName(e.target.value)} required />
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor="amount">
-                                {type === 'credit-card' ? 'Minimum Payment' : 'Monthly Payment'}
-                            </Label>
-                            <Input id="amount" type="number" placeholder="0.00" value={amount} onChange={e => setAmount(e.target.value)} required />
-                        </div>
-
-                        {/* Balance / Total Amount */}
-                        <div className="space-y-2">
-                            <Label htmlFor="balance">
-                                {type === 'installment' ? 'Remaining Balance (Auto-calc)' : 'Outstanding Balance'}
-                            </Label>
-                            <Input id="balance" type="number" placeholder="0.00" value={balance} onChange={e => setBalance(e.target.value)} />
-                        </div>
-
-                        {type === 'installment' && (
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label>Total Months</Label>
-                                    <Input type="number" value={totalMonths} onChange={e => setTotalMonths(e.target.value)} placeholder="10" />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label>Paid Months</Label>
-                                    <Input type="number" value={paidMonths} onChange={e => setPaidMonths(e.target.value)} placeholder="0" />
+                    <form onSubmit={handleSubmit}>
+                        {step === 1 ? (
+                            <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
+                                <p className="text-sm text-muted-foreground">{t('obligations.step_1_desc')}</p>
+                                <div className="grid grid-cols-2 gap-3">
+                                    {[
+                                        { id: 'installment', icon: Smartphone, label: t('obligation_types.installment') },
+                                        { id: 'credit-card', icon: CreditCard, label: t('obligation_types.credit-card') },
+                                        { id: 'personal-loan', icon: Banknote, label: t('obligation_types.personal-loan') },
+                                        { id: 'car-loan', icon: Car, label: t('obligation_types.car-loan') },
+                                        { id: 'home-loan', icon: Home, label: t('obligation_types.home-loan') },
+                                        { id: 'other', icon: HelpCircle, label: t('obligation_types.other') },
+                                    ].map((item) => (
+                                        <button
+                                            key={item.id}
+                                            type="button"
+                                            onClick={() => setType(item.id as ObligationType)}
+                                            className={cn(
+                                                "p-4 rounded-xl border-2 text-left transition-all hover:bg-muted/50 flex flex-col gap-2",
+                                                type === item.id ? "border-primary bg-primary/5 shadow-sm" : "border-transparent bg-muted/30"
+                                            )}
+                                        >
+                                            <item.icon className={cn("h-5 w-5", type === item.id ? "text-primary" : "text-muted-foreground")} />
+                                            <span className="text-xs font-bold">{item.label}</span>
+                                        </button>
+                                    ))}
                                 </div>
                             </div>
-                        )}
+                        ) : (
+                            <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="name">{t('obligations.name')}</Label>
+                                    <Input
+                                        id="name"
+                                        placeholder={t('obligations.placeholder_name')}
+                                        value={name}
+                                        onChange={(e) => setName(e.target.value)}
+                                        required
+                                    />
+                                </div>
 
-                        {type === 'credit-card' && (
-                            <div className="space-y-2">
-                                <Label>Credit Limit (Optional)</Label>
-                                <Input type="number" value={creditLimit} onChange={e => setCreditLimit(e.target.value)} placeholder="e.g. 50000" />
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="amount">
+                                            {type === 'credit-card' ? t('obligations.amount_min') : t('obligations.amount')}
+                                        </Label>
+                                        <Input
+                                            id="amount"
+                                            type="number"
+                                            placeholder="0.00"
+                                            value={amount}
+                                            onChange={(e) => setAmount(e.target.value)}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="balance">{t('obligations.balance')}</Label>
+                                        <Input
+                                            id="balance"
+                                            type="number"
+                                            placeholder="0.00"
+                                            value={balance}
+                                            onChange={(e) => setBalance(e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+
+                                {type === 'installment' && (
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="totalMonths">{t('obligations.total_months')}</Label>
+                                            <Input
+                                                id="totalMonths"
+                                                type="number"
+                                                placeholder="12"
+                                                value={totalMonths}
+                                                onChange={(e) => setTotalMonths(e.target.value)}
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="paidMonths">{t('obligations.paid_months')}</Label>
+                                            <Input
+                                                id="paidMonths"
+                                                type="number"
+                                                placeholder="0"
+                                                value={paidMonths}
+                                                onChange={(e) => setPaidMonths(e.target.value)}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+
+                                {type === 'credit-card' && (
+                                    <div className="space-y-2">
+                                        <Label htmlFor="creditLimit">{t('obligations.limit')}</Label>
+                                        <Input
+                                            id="creditLimit"
+                                            type="number"
+                                            placeholder="50000"
+                                            value={creditLimit}
+                                            onChange={(e) => setCreditLimit(e.target.value)}
+                                        />
+                                    </div>
+                                )}
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="interestRate">{t('obligations.interest')}</Label>
+                                        <Input
+                                            id="interestRate"
+                                            type="number"
+                                            placeholder="0.00"
+                                            step="0.01"
+                                            value={interestRate}
+                                            onChange={(e) => setInterestRate(e.target.value)}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="startDate">{t('obligations.start_date')}</Label>
+                                        <Input
+                                            id="startDate"
+                                            type="date"
+                                            value={startDate}
+                                            onChange={(e) => setStartDate(e.target.value)}
+                                        />
+                                    </div>
+                                </div>
                             </div>
                         )}
 
-                        {type !== 'installment' && (
-                            <div className="space-y-2">
-                                <Label>Interest Rate (APR %)</Label>
-                                <Input type="number" value={interestRate} onChange={e => setInterestRate(e.target.value)} placeholder="16.0" />
-                            </div>
-                        )}
+                        <DialogFooter className="mt-6 flex-row gap-2 sm:justify-between">
+                            {step === 1 ? (
+                                <>
+                                    <div />
+                                    <Button type="button" onClick={() => setStep(2)}>
+                                        {t('common.next')}
+                                    </Button>
+                                </>
+                            ) : (
+                                <>
+                                    <Button type="button" variant="ghost" onClick={() => setStep(1)}>
+                                        {t('common.back')}
+                                    </Button>
+                                    <Button type="submit">
+                                        {t('common.save')}
+                                    </Button>
+                                </>
+                            )}
+                        </DialogFooter>
                     </form>
-                )}
-
-                <DialogFooter className="flex justify-between sm:justify-between w-full">
-                    {step === 2 && !isEdit ? (
-                        <Button type="button" variant="ghost" onClick={() => setStep(1)}>Back</Button>
-                    ) : (
-                        <div />
-                    )}
-
-                    {step === 1 ? (
-                        <Button type="button" onClick={() => setStep(2)}>Next</Button>
-                    ) : (
-                        <Button type="submit" form="obligation-form">Save</Button>
-                    )}
-                </DialogFooter>
+                </div>
             </DialogContent>
         </Dialog>
     )

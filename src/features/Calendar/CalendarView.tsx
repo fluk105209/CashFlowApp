@@ -18,8 +18,10 @@ import { Button } from "@/components/ui/button"
 import { DayDetailModal } from "./DayDetailModal"
 import { FinanceChart } from "./FinanceChart"
 import { cn } from "@/lib/utils"
+import { useTranslation } from "react-i18next"
 
 export function CalendarView() {
+    const { t, i18n } = useTranslation()
     const { incomes, spendings } = useFinanceStore()
     const [currentDate, setCurrentDate] = useState(new Date())
     const [selectedDate, setSelectedDate] = useState<Date | null>(null)
@@ -138,7 +140,9 @@ export function CalendarView() {
 
                 return {
                     date: format(month, 'yyyy-MM-dd'),
-                    label: format(month, 'MMM'),
+                    label: i18n.language.startsWith('th')
+                        ? t(`months.${month.getMonth()}`).substring(0, 3)
+                        : format(month, 'MMM'),
                     income: inc,
                     expense: exp,
                     net: runningYearBalance // Cumulative Year Savings and prior history
@@ -146,7 +150,7 @@ export function CalendarView() {
             })
         }
         return []
-    }, [viewMode, currentDate, dailyData, incomes, spendings, monthStart, monthEnd, previousBalance])
+    }, [viewMode, currentDate, dailyData, incomes, spendings, monthStart, monthEnd, previousBalance, i18n.language, t])
 
 
     // Handlers
@@ -174,14 +178,20 @@ export function CalendarView() {
             <div className="flex flex-col gap-3">
                 <div className="flex items-center justify-between">
                     <h2 className="text-xl font-bold">
-                        {viewMode === 'graph-year' ? format(currentDate, 'yyyy') : format(currentDate, 'MMMM yyyy')}
+                        {viewMode === 'graph-year'
+                            ? i18n.language.startsWith('th')
+                                ? (currentDate.getFullYear() + 543).toString()
+                                : format(currentDate, 'yyyy')
+                            : i18n.language.startsWith('th')
+                                ? `${t(`months.${currentDate.getMonth()}`)} ${currentDate.getFullYear() + 543}`
+                                : format(currentDate, 'MMMM yyyy')}
                     </h2>
                     <div className="flex items-center gap-1">
                         <Button variant="outline" size="icon" onClick={prevMonth}>
                             <ChevronLeft className="h-4 w-4" />
                         </Button>
                         <Button variant="outline" onClick={goToday} className="text-xs">
-                            Today
+                            {t('common.today')}
                         </Button>
                         <Button variant="outline" size="icon" onClick={nextMonth}>
                             <ChevronRight className="h-4 w-4" />
@@ -196,19 +206,19 @@ export function CalendarView() {
                             onClick={() => setViewMode('grid')}
                             className={cn("px-3 py-1.5 rounded-md transition-all flex items-center gap-1", viewMode === 'grid' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground')}
                         >
-                            <CalendarIcon className="h-3 w-3" /> Grid
+                            <CalendarIcon className="h-3 w-3" /> {t('calendar.grid')}
                         </button>
                         <button
                             onClick={() => setViewMode('graph-month')}
                             className={cn("px-3 py-1.5 rounded-md transition-all flex items-center gap-1", viewMode === 'graph-month' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground')}
                         >
-                            <BarChart3 className="h-3 w-3" /> Month
+                            <BarChart3 className="h-3 w-3" /> {t('calendar.month')}
                         </button>
                         <button
                             onClick={() => setViewMode('graph-year')}
                             className={cn("px-3 py-1.5 rounded-md transition-all flex items-center gap-1", viewMode === 'graph-year' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground')}
                         >
-                            <LineChart className="h-3 w-3" /> Year
+                            <LineChart className="h-3 w-3" /> {t('calendar.year')}
                         </button>
                     </div>
 
@@ -219,15 +229,15 @@ export function CalendarView() {
             {viewMode !== 'graph-year' && (
                 <div className="grid grid-cols-3 gap-2 text-center text-xs">
                     <div className="bg-card border p-2 rounded-lg shadow-sm">
-                        <div className="text-muted-foreground mb-1">Income</div>
+                        <div className="text-muted-foreground mb-1">{t('dashboard.income')}</div>
                         <div className="font-bold text-emerald-600">+{monthlySummary.income.toLocaleString()}</div>
                     </div>
                     <div className="bg-card border p-2 rounded-lg shadow-sm">
-                        <div className="text-muted-foreground mb-1">Expense</div>
+                        <div className="text-muted-foreground mb-1">{t('dashboard.spending')}</div>
                         <div className="font-bold text-rose-600">-{monthlySummary.expense.toLocaleString()}</div>
                     </div>
                     <div className="bg-card border p-2 rounded-lg shadow-sm">
-                        <div className="text-muted-foreground mb-1">Net</div>
+                        <div className="text-muted-foreground mb-1">{t('common.net')}</div>
                         <div className={cn("font-bold", monthlySummary.net >= 0 ? "text-blue-600" : "text-orange-600")}>
                             {monthlySummary.net.toLocaleString()}
                         </div>
@@ -240,7 +250,15 @@ export function CalendarView() {
                 <>
                     {/* Calendar Grid Header */}
                     <div className="grid grid-cols-7 gap-1 text-center text-xs mb-1">
-                        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
+                        {[
+                            t('calendar.sun'),
+                            t('calendar.mon'),
+                            t('calendar.tue'),
+                            t('calendar.wed'),
+                            t('calendar.thu'),
+                            t('calendar.fri'),
+                            t('calendar.sat')
+                        ].map(d => (
                             <div key={d} className="text-muted-foreground font-medium py-1">{d}</div>
                         ))}
                     </div>

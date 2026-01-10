@@ -9,7 +9,15 @@
         "no_items_found": "No items found.",
         "back": "Back",
         "view_all_with_count": "View All ({{count}})",
-        "show_less": "Show Less"
+        "show_less": "Show Less",
+        "today": "Today",
+        "all": "All",
+        "loading_app": "Loading your financial view...",
+        "status": "Status",
+        "net": "Net",
+        "next": "Next",
+        "apr": "APR",
+        "per_month": "/mo"
     },
     "nav": {
         "dashboard": "Dashboard",
@@ -25,7 +33,10 @@
         "login_btn": "Login / Register",
         "login_subtext": "If the User ID doesn't exist, a new profile will be created automatically.",
         "incorrect_pin": "Incorrect PIN",
-        "syncing": "Synchronizing..."
+        "cloud_load_error": "Failed to load cloud data",
+        "syncing": "Synchronizing...",
+        "sync_success": "Synced",
+        "sync_error": "Sync Error"
     },
     "dashboard": {
         "title": "Cash Flow",
@@ -45,6 +56,32 @@
         "recent_transactions": "Recent Transactions",
         "view_all": "View All"
     },
+    "calendar": {
+        "grid": "Grid",
+        "month": "Month",
+        "year": "Year",
+        "day_detail": "Day Details",
+        "no_data_day": "No records for this day.",
+        "sun": "Sun",
+        "mon": "Mon",
+        "tue": "Tue",
+        "wed": "Wed",
+        "thu": "Thu",
+        "fri": "Fri",
+        "sat": "Sat"
+    },
+    "transactions": {
+        "title": "Transactions",
+        "subtitle": "Search and filter your records",
+        "search_placeholder": "Search by name...",
+        "filter_category": "Category",
+        "filter_month": "Month",
+        "filter_year": "Year",
+        "all_months": "All Months",
+        "tab_income": "Income",
+        "tab_expense": "Expense",
+        "tab_obligation": "Obligation"
+    },
     "settings": {
         "title": "Settings",
         "subtitle": "Manage your profile and security",
@@ -59,6 +96,8 @@
         "pin_desc_set": "Set a 6-digit PIN to secure your data",
         "new_pin": "New PIN",
         "confirm_pin": "Confirm PIN",
+        "placeholder_new_pin": "Enter 6 digits",
+        "placeholder_confirm_pin": "Confirm digits",
         "update_pin": "Update PIN",
         "set_pin": "Set PIN",
         "updating": "Updating...",
@@ -71,29 +110,110 @@
         "reset_btn": "Reset Everything",
         "confirm_reset": "Confirm Total Reset",
         "reset_warning": "Are you absolutely sure you want to reset all your data? This will clear everything and take you back to the home page.",
-        "yes_reset": "Yes, Reset Everything"
+        "yes_reset": "Yes, Reset Everything",
+        "pin_length_error": "PIN must be 6 digits and contain only numbers.",
+        "pin_match_error": "PINs do not match.",
+        "pin_update_success": "PIN changed successfully!",
+        "pin_update_error": "Failed to update PIN. Please try again."
     },
     "income": {
         "title": "Incomes",
+        "add": "Add Income",
+        "edit": "Edit Income",
         "add_btn": "Add Income",
         "name": "Income Name",
-        "amount": "Amount",
+        "amount": "Amount (Monthly)",
         "category": "Category",
         "date": "Date",
         "frequency": "Frequency",
-        "monthly": "Monthly",
-        "one_time": "One-Time"
+        "desc_add": "Add a new source of income.",
+        "desc_edit": "Update income details.",
+        "placeholder_name": "e.g. Salary, Freelance"
     },
     "spending": {
         "title": "Spendings",
-        "add_btn": "Add Spending",
-        "name": "Spending Name",
+        "add": "Add Expense",
+        "edit": "Edit Expense",
+        "add_btn": "Add Expense",
+        "name": "Expense Name",
         "amount": "Amount",
         "category": "Category",
-        "date": "Date"
+        "date": "Date",
+        "type": "Expense Type",
+        "normal": "Normal Expense",
+        "pay_obligation": "Pay Obligation",
+        "select_obligation": "Select Obligation",
+        "placeholder_name": "e.g. Lunch",
+        "desc_add": "Record a new expense or payment.",
+        "desc_edit": "Update expense details.",
+        "obligation_badge": "Obligation"
     },
     "obligations": {
         "title": "Obligations",
-        "add_btn": "Add Obligation"
+        "add": "Add Obligation",
+        "edit": "Edit Obligation",
+        "add_btn": "Add Obligation",
+        "name": "Obligation Name",
+        "type": "Obligation Type",
+        "amount": "Monthly Payment",
+        "balance": "Total Balance",
+        "limit": "Credit Limit",
+        "interest": "Interest Rate (%)",
+        "months": "Total Months",
+        "paid_months": "Paid Months",
+        "start_date": "Start Date",
+        "desc_add": "Track your loans, credit cards, or installments.",
+        "desc_edit": "Update obligation details.",
+        "placeholder_name": "e.g. Car Loan, Credit Card",
+        "active": "Active",
+        "closed": "Closed",
+        "step_1_desc": "Select the type of obligation you want to track.",
+        "amount_min": "Min Payment",
+        "total_months": "Total Months"
+    },
+    "categories": {
+        "Salary": "Salary",
+        "Freelance": "Freelance",
+        "Business": "Business",
+        "Investment": "Investment",
+        "Gift": "Gift",
+        "Other": "Other",
+        "Food": "Food",
+        "Transport": "Transport",
+        "Housing": "Housing",
+        "Entertainment": "Entertainment",
+        "Health": "Health",
+        "Shopping": "Shopping",
+        "Travel": "Travel",
+        "Utilities": "Utilities",
+        "Obligation Payment": "Obligation Payment"
+    },
+    "obligation_types": {
+        "installment": "Installment",
+        "credit-card": "Credit Card",
+        "personal-loan": "Personal Loan",
+        "car-loan": "Car Loan",
+        "home-loan": "Home Loan",
+        "other": "Other"
+    },
+    "frequencies": {
+        "monthly": "Monthly",
+        "yearly": "Yearly",
+        "one-time": "One-time",
+        "irregular": "Irregular"
+    },
+    "months": {
+        "0": "January",
+        "1": "February",
+        "2": "March",
+        "3": "April",
+        "4": "May",
+        "5": "June",
+        "6": "July",
+        "7": "August",
+        "8": "September",
+        "9": "October",
+        "10": "November",
+        "11": "December"
     }
 }

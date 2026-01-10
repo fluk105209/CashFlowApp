@@ -11,7 +11,7 @@ import { useNavigate } from 'react-router-dom';
 
 export const SettingsPage: React.FC = () => {
     const { t, i18n } = useTranslation();
-    const { pin, setPin, resetData, logout } = useFinanceStore();
+    const { pin, setPin, resetData, logout, setLanguage } = useFinanceStore();
     const [newPin, setNewPin] = useState('');
     const [confirmPin, setConfirmPin] = useState('');
     const [error, setError] = useState('');
@@ -25,23 +25,23 @@ export const SettingsPage: React.FC = () => {
         setSuccess('');
 
         if (newPin.length !== 6 || !/^\d+$/.test(newPin)) {
-            setError('PIN must be 6 digits and contain only numbers.');
+            setError(t('settings.pin_length_error'));
             return;
         }
 
         if (newPin !== confirmPin) {
-            setError('PINs do not match.');
+            setError(t('settings.pin_match_error'));
             return;
         }
 
         setIsUpdating(true);
         try {
             await setPin(newPin);
-            setSuccess('PIN changed successfully!');
+            setSuccess(t('settings.pin_update_success'));
             setNewPin('');
             setConfirmPin('');
-        } catch (err: any) {
-            setError('Failed to update PIN. Please try again.');
+        } catch {
+            setError(t('settings.pin_update_error'));
         } finally {
             setIsUpdating(false);
         }
@@ -85,14 +85,14 @@ export const SettingsPage: React.FC = () => {
                     <div className="grid grid-cols-2 gap-2">
                         <Button
                             variant={i18n.language.startsWith('en') ? 'default' : 'outline'}
-                            onClick={() => i18n.changeLanguage('en')}
+                            onClick={() => setLanguage('en')}
                             className="rounded-xl"
                         >
                             English
                         </Button>
                         <Button
                             variant={i18n.language.startsWith('th') ? 'default' : 'outline'}
-                            onClick={() => i18n.changeLanguage('th')}
+                            onClick={() => setLanguage('th')}
                             className="rounded-xl"
                         >
                             ไทย
@@ -140,7 +140,7 @@ export const SettingsPage: React.FC = () => {
                                 <Input
                                     type="password"
                                     maxLength={6}
-                                    placeholder="Enter 6 digits"
+                                    placeholder={t('settings.placeholder_new_pin')}
                                     value={newPin}
                                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewPin(e.target.value)}
                                     className="rounded-xl"
@@ -151,7 +151,7 @@ export const SettingsPage: React.FC = () => {
                                 <Input
                                     type="password"
                                     maxLength={6}
-                                    placeholder="Confirm digits"
+                                    placeholder={t('settings.placeholder_confirm_pin')}
                                     value={confirmPin}
                                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfirmPin(e.target.value)}
                                     className="rounded-xl"

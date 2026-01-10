@@ -8,6 +8,7 @@ import {
     Legend,
     ResponsiveContainer
 } from 'recharts';
+import { useTranslation } from 'react-i18next';
 
 interface DataPoint {
     date: string;
@@ -21,31 +22,40 @@ interface FinanceChartProps {
     data: DataPoint[];
 }
 
-export function FinanceChart({ data }: FinanceChartProps) {
+// Custom Tooltip
+interface CustomTooltipProps {
+    active?: boolean;
+    payload?: readonly { value: number; name: string }[];
+    label?: string | number;
+    t: (key: string) => string;
+}
 
-    // Custom Tooltip
-    const CustomTooltip = ({ active, payload, label }: any) => {
-        if (active && payload && payload.length) {
-            return (
-                <div className="bg-background border rounded-lg shadow-lg p-3 text-xs">
-                    <p className="font-bold mb-1">{label}</p>
-                    <p className="text-emerald-600">
-                        Income: +{payload[0].value.toLocaleString()}
-                    </p>
-                    <p className="text-rose-600">
-                        Expense: -{payload[1].value.toLocaleString()}
-                    </p>
-                    <div className="mt-1 pt-1 border-t flex justify-between gap-4 font-bold">
-                        <span>Net:</span>
-                        <span className={payload[2].value >= 0 ? "text-blue-600" : "text-orange-600"}>
-                            {payload[2].value.toLocaleString()}
-                        </span>
-                    </div>
+const CustomTooltip = ({ active, payload, label, t }: CustomTooltipProps) => {
+    if (active && payload && payload.length) {
+        return (
+            <div className="bg-background border rounded-lg shadow-lg p-3 text-xs">
+                <p className="font-bold mb-1">{label}</p>
+                <p className="text-emerald-600">
+                    {t('dashboard.income')}: +{payload[0].value.toLocaleString()}
+                </p>
+                <p className="text-rose-600">
+                    {t('dashboard.spending')}: -{payload[1].value.toLocaleString()}
+                </p>
+                <div className="mt-1 pt-1 border-t flex justify-between gap-4 font-bold">
+                    <span>{t('common.net')}:</span>
+                    <span className={payload[2].value >= 0 ? "text-blue-600" : "text-orange-600"}>
+                        {payload[2].value.toLocaleString()}
+                    </span>
                 </div>
-            );
-        }
-        return null;
-    };
+            </div>
+        );
+    }
+    return null;
+};
+
+export function FinanceChart({ data }: FinanceChartProps) {
+    const { t } = useTranslation();
+
 
     return (
         <div className="w-full h-[300px] mt-4">
@@ -72,12 +82,12 @@ export function FinanceChart({ data }: FinanceChartProps) {
                         axisLine={false}
                         tickFormatter={(value) => `${value >= 1000 ? (value / 1000).toFixed(0) + 'k' : value}`}
                     />
-                    <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'hsl(var(--muted-foreground))', strokeWidth: 1, strokeDasharray: '3 3' }} />
+                    <Tooltip content={(props) => <CustomTooltip {...props} t={t} />} cursor={{ stroke: 'hsl(var(--muted-foreground))', strokeWidth: 1, strokeDasharray: '3 3' }} />
                     <Legend iconType="circle" wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
                     <Line
                         type="monotone"
                         dataKey="income"
-                        name="Income"
+                        name={t('dashboard.income')}
                         stroke="#10b981" // emerald-500
                         strokeWidth={2}
                         dot={{ r: 3, fill: '#10b981', strokeWidth: 0 }}
@@ -86,7 +96,7 @@ export function FinanceChart({ data }: FinanceChartProps) {
                     <Line
                         type="monotone"
                         dataKey="expense"
-                        name="Expense"
+                        name={t('dashboard.spending')}
                         stroke="#f43f5e" // rose-500
                         strokeWidth={2}
                         dot={{ r: 3, fill: '#f43f5e', strokeWidth: 0 }}
@@ -95,7 +105,7 @@ export function FinanceChart({ data }: FinanceChartProps) {
                     <Line
                         type="monotone"
                         dataKey="net"
-                        name="Net"
+                        name={t('common.net')}
                         stroke="#2563eb" // blue-600
                         strokeWidth={2}
                         strokeDasharray="5 5"

@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
-import { format } from 'date-fns'
+import { useState, useEffect } from "react"
+import { useFinanceStore } from "@/stores/useFinanceStore"
+import { Button } from "@/components/ui/button"
 import {
     Dialog,
     DialogContent,
@@ -9,18 +10,12 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
-import { useFinanceStore } from "@/stores/useFinanceStore"
-import type { Frequency, Income } from '@/types'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import type { Frequency, Income } from "@/types"
+import { format } from "date-fns"
+import { useTranslation } from "react-i18next"
 
 interface Props {
     initialData?: Income
@@ -29,6 +24,7 @@ interface Props {
 }
 
 export function IncomeModal({ initialData, trigger, defaultDate }: Props) {
+    const { t } = useTranslation()
     const [open, setOpen] = useState(false)
     const { addIncome, updateIncome } = useFinanceStore()
     const isEdit = !!initialData
@@ -40,8 +36,17 @@ export function IncomeModal({ initialData, trigger, defaultDate }: Props) {
     // Default to today YYYY-MM-DD
     const [date, setDate] = useState(new Date().toISOString().split('T')[0])
 
+    const resetForm = () => {
+        setName('')
+        setAmount('')
+        setFrequency('monthly')
+        setCategory('Salary')
+        setDate(new Date().toISOString().split('T')[0])
+    }
+
     useEffect(() => {
         if (open && initialData) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setName(initialData.name)
             setAmount(initialData.amount.toString())
             setFrequency(initialData.frequency)
@@ -82,34 +87,27 @@ export function IncomeModal({ initialData, trigger, defaultDate }: Props) {
         if (!isEdit) resetForm()
     }
 
-    const resetForm = () => {
-        setName('')
-        setAmount('')
-        setFrequency('monthly')
-        setCategory('Salary')
-        setDate(new Date().toISOString().split('T')[0])
-    }
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 {trigger || (
                     <Button size="sm" variant="default" className="bg-emerald-600 hover:bg-emerald-700 text-white">
-                        + Add Income
+                        + {t('income.add_btn')}
                     </Button>
                 )}
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>{isEdit ? 'Edit Income' : 'Add Income'}</DialogTitle>
+                    <DialogTitle>{isEdit ? t('income.edit') : t('income.add')}</DialogTitle>
                     <DialogDescription>
-                        {isEdit ? 'Update income details.' : 'Add a new source of income.'}
+                        {isEdit ? t('income.desc_edit') : t('income.desc_add')}
                     </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSubmit}>
                     <div className="grid gap-4 py-4">
                         <div className="space-y-2">
-                            <Label htmlFor="date">Date</Label>
+                            <Label htmlFor="date">{t('income.date')}</Label>
                             <Input
                                 id="date"
                                 type="date"
@@ -119,17 +117,17 @@ export function IncomeModal({ initialData, trigger, defaultDate }: Props) {
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="name">Name</Label>
+                            <Label htmlFor="name">{t('income.name')}</Label>
                             <Input
                                 id="name"
-                                placeholder="e.g. Salary, Freelance"
+                                placeholder={t('income.placeholder_name')}
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 required
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="amount">Amount (Monthly)</Label>
+                            <Label htmlFor="amount">{t('income.amount')}</Label>
                             <Input
                                 id="amount"
                                 type="number"
@@ -140,38 +138,38 @@ export function IncomeModal({ initialData, trigger, defaultDate }: Props) {
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="frequency">Frequency</Label>
+                            <Label htmlFor="frequency">{t('income.frequency')}</Label>
                             <Select value={frequency} onValueChange={(val) => setFrequency(val as Frequency)}>
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Select frequency" />
+                                    <SelectValue placeholder={t('common.loading')} />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="monthly">Monthly</SelectItem>
-                                    <SelectItem value="yearly">Yearly</SelectItem>
-                                    <SelectItem value="one-time">One-time</SelectItem>
-                                    <SelectItem value="irregular">Irregular</SelectItem>
+                                    <SelectItem value="monthly">{t('frequencies.monthly')}</SelectItem>
+                                    <SelectItem value="yearly">{t('frequencies.yearly')}</SelectItem>
+                                    <SelectItem value="one-time">{t('frequencies.one-time')}</SelectItem>
+                                    <SelectItem value="irregular">{t('frequencies.irregular')}</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="category">Category</Label>
+                            <Label htmlFor="category">{t('income.category')}</Label>
                             <Select value={category} onValueChange={setCategory}>
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Select category" />
+                                    <SelectValue placeholder={t('common.loading')} />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="Salary">Salary</SelectItem>
-                                    <SelectItem value="Freelance">Freelance</SelectItem>
-                                    <SelectItem value="Business">Business</SelectItem>
-                                    <SelectItem value="Investment">Investment</SelectItem>
-                                    <SelectItem value="Gift">Gift</SelectItem>
-                                    <SelectItem value="Other">Other</SelectItem>
+                                    <SelectItem value="Salary">{t('categories.Salary')}</SelectItem>
+                                    <SelectItem value="Freelance">{t('categories.Freelance')}</SelectItem>
+                                    <SelectItem value="Business">{t('categories.Business')}</SelectItem>
+                                    <SelectItem value="Investment">{t('categories.Investment')}</SelectItem>
+                                    <SelectItem value="Gift">{t('categories.Gift')}</SelectItem>
+                                    <SelectItem value="Other">{t('categories.Other')}</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
                     </div>
                     <DialogFooter>
-                        <Button type="submit">Save</Button>
+                        <Button type="submit">{t('common.save')}</Button>
                     </DialogFooter>
                 </form>
             </DialogContent>

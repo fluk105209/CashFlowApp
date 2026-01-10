@@ -1,13 +1,14 @@
 import { useState } from "react"
 import { useFinanceStore } from "@/stores/useFinanceStore"
 import { Button } from "@/components/ui/button"
-import { Trash2, Edit, ChevronUp, ExternalLink, Calendar } from "lucide-react"
-import { SpendingModal } from "./AddSpendingModal"
 import { Badge } from "@/components/ui/badge"
+import { Calendar, Edit, Trash2, ExternalLink, ChevronUp } from "lucide-react"
+import { SpendingModal } from "./AddSpendingModal"
+import { format, parseISO } from "date-fns"
 import type { Spending } from "@/types"
 import { motion, AnimatePresence } from "framer-motion"
 import { Link } from "react-router-dom"
-import { format, parseISO } from "date-fns"
+import { useTranslation } from "react-i18next"
 
 interface Props {
     limit?: number
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export function SpendingList({ limit, items }: Props) {
+    const { t, i18n } = useTranslation()
     const { spendings: storeSpendings, deleteSpending } = useFinanceStore()
     const [isExpanded, setIsExpanded] = useState(false)
 
@@ -24,7 +26,7 @@ export function SpendingList({ limit, items }: Props) {
     if (dataSource.length === 0) {
         return (
             <div className="text-center text-sm text-muted-foreground py-8 border-2 border-dashed rounded-lg">
-                No expenses found.
+                {t('spending.no_expenses', { defaultValue: t('common.no_items_found') })}
             </div>
         )
     }
@@ -49,16 +51,18 @@ export function SpendingList({ limit, items }: Props) {
                                 <div className="font-medium">{spending.name}</div>
                                 {spending.kind === 'obligation-payment' && (
                                     <Badge variant="secondary" className="text-[10px] h-5 px-1.5">
-                                        Obligation
+                                        {t('spending.obligation_badge')}
                                     </Badge>
                                 )}
                             </div>
                             <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
-                                <span className="capitalize">{spending.category}</span>
+                                <span className="capitalize">{t(`categories.${spending.category}`, { defaultValue: spending.category })}</span>
                                 <span>•</span>
                                 <div className="flex items-center gap-1">
                                     <Calendar className="h-2.5 w-2.5" />
-                                    {format(parseISO(spending.date), 'MMM d, yyyy')}
+                                    {i18n.language.startsWith('th')
+                                        ? `${format(parseISO(spending.date), 'd')} ${t(`months.${parseISO(spending.date).getMonth()}`).substring(0, 3)} ${parseISO(spending.date).getFullYear() + 543}`
+                                        : format(parseISO(spending.date), 'MMM d, yyyy')}
                                 </div>
                             </div>
                         </div>
@@ -93,7 +97,7 @@ export function SpendingList({ limit, items }: Props) {
                         variant="ghost"
                         className="w-full text-muted-foreground hover:text-primary text-xs flex items-center gap-1"
                     >
-                        View All ({dataSource.length}) <ExternalLink className="h-3 w-3" />
+                        {t('common.view_all_with_count', { count: dataSource.length })} <ExternalLink className="h-3 w-3" />
                     </Button>
                 </Link>
             )}
@@ -104,7 +108,7 @@ export function SpendingList({ limit, items }: Props) {
                     className="w-full text-muted-foreground hover:text-primary text-xs"
                     onClick={() => setIsExpanded(false)}
                 >
-                    <div className="flex items-center gap-1">Show Less <ChevronUp className="h-3 w-3" /></div>
+                    <div className="flex items-center gap-1">{t('common.show_less')} <ChevronUp className="h-3 w-3" /></div>
                 </Button>
             )}
         </div>

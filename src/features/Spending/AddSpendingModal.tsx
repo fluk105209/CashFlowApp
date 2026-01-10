@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select"
 import { useFinanceStore } from "@/stores/useFinanceStore"
 import type { Spending } from '@/types'
+import { useTranslation } from 'react-i18next'
 
 interface Props {
     initialData?: Spending
@@ -29,6 +30,7 @@ interface Props {
 }
 
 export function SpendingModal({ initialData, trigger, defaultDate }: Props) {
+    const { t } = useTranslation()
     const [open, setOpen] = useState(false)
     const store = useFinanceStore()
     const { addSpending, updateSpending, obligations } = store
@@ -45,8 +47,18 @@ export function SpendingModal({ initialData, trigger, defaultDate }: Props) {
 
     const activeObligations = obligations.filter(o => o.status !== 'closed')
 
+    const resetForm = () => {
+        setName('')
+        setAmount('')
+        setCategory('Food')
+        setKind('normal')
+        setLinkedObligationId('')
+        setDate(new Date().toISOString().split('T')[0])
+    }
+
     useEffect(() => {
         if (open && initialData) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setName(initialData.name)
             setAmount(initialData.amount.toString())
             setCategory(initialData.category)
@@ -88,14 +100,6 @@ export function SpendingModal({ initialData, trigger, defaultDate }: Props) {
         if (!isEdit) resetForm()
     }
 
-    const resetForm = () => {
-        setName('')
-        setAmount('')
-        setCategory('Food')
-        setKind('normal')
-        setLinkedObligationId('')
-        setDate(new Date().toISOString().split('T')[0])
-    }
 
     // Auto-fill details when linking
     const handleObligationSelect = (id: string) => {
@@ -103,7 +107,8 @@ export function SpendingModal({ initialData, trigger, defaultDate }: Props) {
         const ob = obligations.find(o => o.id === id)
         if (ob) {
             if (!isEdit) { // Only auto-fill name/amount if not editing existing
-                setName(`Pay ${ob.name}`)
+                // Try to translate "Pay" prefix or similar if needed, but usually we just use the name
+                setName(`${t('spending.pay_obligation')}: ${ob.name}`)
                 setAmount(ob.amount.toString()) // Use the monthly/min payment amount
                 setCategory('Obligation Payment')
             }
@@ -115,43 +120,43 @@ export function SpendingModal({ initialData, trigger, defaultDate }: Props) {
             <DialogTrigger asChild>
                 {trigger || (
                     <Button size="sm" variant="outline">
-                        + Add Expense
+                        + {t('spending.add_btn')}
                     </Button>
                 )}
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>{isEdit ? 'Edit Expense' : 'Add Expense'}</DialogTitle>
+                    <DialogTitle>{isEdit ? t('spending.edit') : t('spending.add')}</DialogTitle>
                     <DialogDescription>
-                        {isEdit ? 'Update expense details.' : 'Record a new expense or payment.'}
+                        {isEdit ? t('spending.desc_edit') : t('spending.desc_add')}
                     </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSubmit}>
                     <div className="grid gap-4 py-4">
                         <div className="space-y-2">
-                            <Label>Expense Type</Label>
-                            <Select value={kind} onValueChange={(val: any) => setKind(val)}>
+                            <Label>{t('spending.type')}</Label>
+                            <Select value={kind} onValueChange={(val: 'normal' | 'obligation-payment') => setKind(val)}>
                                 <SelectTrigger>
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="normal">Normal Expense</SelectItem>
-                                    <SelectItem value="obligation-payment">Pay Obligation</SelectItem>
+                                    <SelectItem value="normal">{t('spending.normal')}</SelectItem>
+                                    <SelectItem value="obligation-payment">{t('spending.pay_obligation')}</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
 
                         {kind === 'obligation-payment' && (
                             <div className="space-y-2">
-                                <Label>Select Obligation</Label>
+                                <Label>{t('spending.select_obligation')}</Label>
                                 <Select value={linkedObligationId} onValueChange={handleObligationSelect}>
                                     <SelectTrigger>
-                                        <SelectValue placeholder="Select active obligation" />
+                                        <SelectValue placeholder={t('spending.select_obligation')} />
                                     </SelectTrigger>
                                     <SelectContent>
                                         {activeObligations.map(ob => (
                                             <SelectItem key={ob.id} value={ob.id}>
-                                                {ob.name} ({ob.type})
+                                                {ob.name} ({t(`obligation_types.${ob.type}`)})
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
@@ -160,7 +165,7 @@ export function SpendingModal({ initialData, trigger, defaultDate }: Props) {
                         )}
 
                         <div className="space-y-2">
-                            <Label htmlFor="date">Date</Label>
+                            <Label htmlFor="date">{t('spending.date')}</Label>
                             <Input
                                 id="date"
                                 type="date"
@@ -171,17 +176,17 @@ export function SpendingModal({ initialData, trigger, defaultDate }: Props) {
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="name">Name</Label>
+                            <Label htmlFor="name">{t('spending.name')}</Label>
                             <Input
                                 id="name"
-                                placeholder="e.g. Lunch"
+                                placeholder={t('spending.placeholder_name')}
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 required
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="amount">Amount</Label>
+                            <Label htmlFor="amount">{t('spending.amount')}</Label>
                             <Input
                                 id="amount"
                                 type="number"
@@ -192,26 +197,26 @@ export function SpendingModal({ initialData, trigger, defaultDate }: Props) {
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="category">Category</Label>
+                            <Label htmlFor="category">{t('spending.category')}</Label>
                             <Select value={category} onValueChange={setCategory}>
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Select category" />
+                                    <SelectValue placeholder={t('spending.category')} />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="Food">Food</SelectItem>
-                                    <SelectItem value="Transport">Transport</SelectItem>
-                                    <SelectItem value="Housing">Housing</SelectItem>
-                                    <SelectItem value="Entertainment">Entertainment</SelectItem>
-                                    <SelectItem value="Health">Health</SelectItem>
-                                    <SelectItem value="Shopping">Shopping</SelectItem>
-                                    <SelectItem value="Obligation Payment">Obligation Payment</SelectItem>
-                                    <SelectItem value="Other">Other</SelectItem>
+                                    <SelectItem value="Food">{t('categories.Food')}</SelectItem>
+                                    <SelectItem value="Transport">{t('categories.Transport')}</SelectItem>
+                                    <SelectItem value="Housing">{t('categories.Housing')}</SelectItem>
+                                    <SelectItem value="Entertainment">{t('categories.Entertainment')}</SelectItem>
+                                    <SelectItem value="Health">{t('categories.Health')}</SelectItem>
+                                    <SelectItem value="Shopping">{t('categories.Shopping')}</SelectItem>
+                                    <SelectItem value="Obligation Payment">{t('categories.Obligation Payment')}</SelectItem>
+                                    <SelectItem value="Other">{t('categories.Other')}</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
                     </div>
                     <DialogFooter>
-                        <Button type="submit">Save</Button>
+                        <Button type="submit">{t('common.save')}</Button>
                     </DialogFooter>
                 </form>
             </DialogContent>

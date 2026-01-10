@@ -37,6 +37,14 @@ export interface Obligation {
     status: 'active' | 'closed';
 }
 
+export interface Profile {
+    id: string;
+    user_id_text: string;
+    pin_hash: string;
+    language: string;
+    created_at: string;
+}
+
 export interface FinanceState {
     incomes: Income[];
     spendings: Spending[];
@@ -44,12 +52,15 @@ export interface FinanceState {
     pin: string | null;
     isLocked: boolean;
     isLoading: boolean;
+    isSyncing: boolean;
+    lastSyncedAt: string | null;
     error: string | null;
-    profile: any | null;
+    profile: Profile | null;
 
     login: (userId: string, pin: string) => Promise<{ success: boolean; error?: string }>;
     logout: () => void;
     initialize: () => Promise<void>;
+    syncToCloud: () => Promise<void>;
     addIncome: (income: Omit<Income, 'id'>) => Promise<void>;
     updateIncome: (id: string, income: Partial<Income>) => Promise<void>;
     deleteIncome: (id: string) => Promise<void>;
@@ -63,6 +74,7 @@ export interface FinanceState {
     deleteObligation: (id: string) => Promise<void>;
     setStoreData: (data: { incomes: Income[], spendings: Spending[], obligations: Obligation[] }) => void;
     setPin: (pin: string) => Promise<void>;
+    setLanguage: (lang: string) => Promise<void>;
     unlock: (enteredPin: string) => boolean;
     lock: () => void;
     resetData: () => Promise<void>;

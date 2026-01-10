@@ -11,8 +11,10 @@ import { Button } from "@/components/ui/button"
 import { ChevronLeft, Search, FilterX, Calendar } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { parseISO, getMonth, getYear } from "date-fns"
+import { useTranslation } from "react-i18next"
 
 export function TransactionsPage() {
+    const { t, i18n } = useTranslation()
     const [searchParams, setSearchParams] = useSearchParams()
     const navigate = useNavigate()
     const activeTab = searchParams.get('tab') || 'income'
@@ -25,19 +27,11 @@ export function TransactionsPage() {
     const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString())
 
     const months = [
-        { value: "all", label: "All Months" },
-        { value: "0", label: "January" },
-        { value: "1", label: "February" },
-        { value: "2", label: "March" },
-        { value: "3", label: "April" },
-        { value: "4", label: "May" },
-        { value: "5", label: "June" },
-        { value: "6", label: "July" },
-        { value: "7", label: "August" },
-        { value: "8", label: "September" },
-        { value: "9", label: "October" },
-        { value: "10", label: "November" },
-        { value: "11", label: "December" },
+        { value: "all", label: t('transactions.all_months') },
+        ...Array.from({ length: 12 }, (_, i) => ({
+            value: i.toString(),
+            label: t(`months.${i}`)
+        }))
     ]
 
     const years = useMemo(() => {
@@ -113,8 +107,8 @@ export function TransactionsPage() {
                     <ChevronLeft className="h-5 w-5" />
                 </Button>
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight">Transactions</h1>
-                    <p className="text-sm text-muted-foreground">Search and filter your records</p>
+                    <h1 className="text-2xl font-bold tracking-tight">{t('transactions.title')}</h1>
+                    <p className="text-sm text-muted-foreground">{t('transactions.subtitle')}</p>
                 </div>
             </header>
 
@@ -124,7 +118,7 @@ export function TransactionsPage() {
                         <div className="relative flex-1">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                             <Input
-                                placeholder="Search by name..."
+                                placeholder={t('transactions.search_placeholder')}
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                                 className="pl-9"
@@ -133,17 +127,17 @@ export function TransactionsPage() {
                         <div className="flex gap-2">
                             <Select value={category} onValueChange={setCategory}>
                                 <SelectTrigger className="w-[140px] capitalize">
-                                    <SelectValue placeholder="Category" />
+                                    <SelectValue placeholder={t('transactions.filter_category')} />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {activeTab === 'income' && incomeCategories.map(cat => (
-                                        <SelectItem key={cat} value={cat} className="capitalize">{cat}</SelectItem>
+                                        <SelectItem key={cat} value={cat} className="capitalize">{cat === 'all' ? t('common.all') : t(`categories.${cat}`, { defaultValue: cat })}</SelectItem>
                                     ))}
                                     {activeTab === 'expense' && spendingCategories.map(cat => (
-                                        <SelectItem key={cat} value={cat} className="capitalize">{cat}</SelectItem>
+                                        <SelectItem key={cat} value={cat} className="capitalize">{cat === 'all' ? t('common.all') : t(`categories.${cat}`, { defaultValue: cat })}</SelectItem>
                                     ))}
                                     {activeTab === 'obligation' && obligationTypes.map(cat => (
-                                        <SelectItem key={cat} value={cat.replace('-', ' ')} className="capitalize">{cat.replace('-', ' ')}</SelectItem>
+                                        <SelectItem key={cat} value={cat} className="capitalize">{cat === 'all' ? t('common.all') : t(`obligation_types.${cat}`, { defaultValue: cat.replace('-', ' ') })}</SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
@@ -159,7 +153,7 @@ export function TransactionsPage() {
                         <Calendar className="h-4 w-4 text-muted-foreground ml-1" />
                         <Select value={selectedMonth} onValueChange={setSelectedMonth}>
                             <SelectTrigger className="w-[130px] h-8 text-xs">
-                                <SelectValue placeholder="Month" />
+                                <SelectValue placeholder={t('transactions.filter_month')} />
                             </SelectTrigger>
                             <SelectContent>
                                 {months.map(m => (
@@ -169,11 +163,13 @@ export function TransactionsPage() {
                         </Select>
                         <Select value={selectedYear} onValueChange={setSelectedYear}>
                             <SelectTrigger className="w-[90px] h-8 text-xs">
-                                <SelectValue placeholder="Year" />
+                                <SelectValue placeholder={t('transactions.filter_year')} />
                             </SelectTrigger>
                             <SelectContent>
                                 {years.map(y => (
-                                    <SelectItem key={y} value={y} className="text-xs">{y}</SelectItem>
+                                    <SelectItem key={y} value={y} className="text-xs">
+                                        {i18n.language.startsWith('th') ? parseInt(y) + 543 : y}
+                                    </SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
@@ -183,7 +179,7 @@ export function TransactionsPage() {
                 <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
                     <TabsList className="grid w-full grid-cols-3">
                         <TabsTrigger value="income" className="relative">
-                            Income
+                            {t('transactions.tab_income')}
                             {activeTab === 'income' && (
                                 <motion.div
                                     layoutId="activeTab"
@@ -193,7 +189,7 @@ export function TransactionsPage() {
                             )}
                         </TabsTrigger>
                         <TabsTrigger value="expense" className="relative">
-                            Expense
+                            {t('transactions.tab_expense')}
                             {activeTab === 'expense' && (
                                 <motion.div
                                     layoutId="activeTab"
@@ -203,7 +199,7 @@ export function TransactionsPage() {
                             )}
                         </TabsTrigger>
                         <TabsTrigger value="obligation" className="relative">
-                            Obligation
+                            {t('transactions.tab_obligation')}
                             {activeTab === 'obligation' && (
                                 <motion.div
                                     layoutId="activeTab"

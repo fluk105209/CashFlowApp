@@ -1,9 +1,10 @@
 import { useNavigate, useLocation, Routes, Route, Link } from "react-router-dom"
-import { LayoutDashboard, Calendar as CalendarIcon, List, Loader2, Settings } from "lucide-react"
+import { LayoutDashboard, Calendar as CalendarIcon, List, Loader2, Settings, Cloud, CloudOff, CheckCircle2 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { lazy, Suspense } from "react"
 import { useFinanceStore } from "@/stores/useFinanceStore"
 import { useTranslation } from "react-i18next"
+import { format } from "date-fns"
 
 // Lazy load feature components for performance
 const DashboardPage = lazy(() => import("@/features/Dashboard/DashboardPage").then(module => ({ default: module.DashboardPage })))
@@ -12,6 +13,35 @@ const TransactionsPage = lazy(() => import("@/features/Transactions/Transactions
 const SettingsPage = lazy(() => import("@/features/Settings/SettingsPage").then(module => ({ default: module.SettingsPage })))
 const PinLock = lazy(() => import("@/components/PinLock").then(module => ({ default: module.PinLock })))
 const LoginPage = lazy(() => import("@/features/Auth/LoginPage").then(module => ({ default: module.LoginPage })))
+
+function SyncIndicator() {
+  const { isSyncing, lastSyncedAt, error } = useFinanceStore()
+  const { t } = useTranslation()
+
+  return (
+    <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-muted/50 text-[10px] font-medium text-muted-foreground transition-all">
+      {isSyncing ? (
+        <>
+          <Cloud className="h-3 w-3 animate-pulse text-primary" />
+          <span>{t('auth.syncing')}</span>
+        </>
+      ) : error === 'auth.cloud_sync_error' ? (
+        <>
+          <CloudOff className="h-3 w-3 text-destructive" />
+          <span>{t('auth.sync_error')}</span>
+        </>
+      ) : (
+        <>
+          <CheckCircle2 className="h-3 w-3 text-green-500" />
+          <span>
+            {t('auth.sync_success')}
+            {lastSyncedAt && ` ${format(new Date(lastSyncedAt), 'HH:mm')}`}
+          </span>
+        </>
+      )}
+    </div>
+  )
+}
 
 function App() {
   const { t } = useTranslation()
@@ -35,16 +65,17 @@ function App() {
   return (
     <div className="min-h-screen bg-background text-foreground font-sans antialiased p-4 md:p-8">
       <div className="max-w-md mx-auto space-y-6 pb-20">
-        <header className="flex justify-between items-center mb-0">
+        <header className="flex justify-between items-start mb-0">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5 }}
+            className="flex flex-col gap-1"
           >
             <Link to="/">
               <h1 className="text-2xl font-bold tracking-tight">{t('dashboard.title')}</h1>
-              <p className="text-sm text-muted-foreground">{t('dashboard.subtitle')}</p>
             </Link>
+            <SyncIndicator />
           </motion.div>
 
           <motion.div
@@ -56,6 +87,7 @@ function App() {
             <div className="flex bg-muted rounded-lg p-1">
               <button
                 onClick={() => navigate('/')}
+                title={t('nav.dashboard')}
                 className={`p-2 rounded-md transition-all relative ${isDashboard ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
               >
                 {isDashboard && (
@@ -116,7 +148,7 @@ function App() {
         <Suspense fallback={
           <div className="flex flex-col items-center justify-center py-20 animate-in fade-in duration-500">
             <Loader2 className="h-8 w-8 text-primary animate-spin mb-4" />
-            <p className="text-sm text-muted-foreground">Loading your financial view...</p>
+            <p className="text-sm text-muted-foreground">{t('common.loading_app')}</p>
           </div>
         }>
           <AnimatePresence mode="wait">

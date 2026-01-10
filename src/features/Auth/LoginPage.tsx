@@ -42,7 +42,7 @@ export function LoginPage() {
                         <CardContent className="space-y-4 pt-4">
                             {error && (
                                 <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-lg border border-destructive/20 animate-pulse">
-                                    {error}
+                                    {t(error)}
                                 </div>
                             )}
                             <div className="space-y-2">

@@ -74,7 +74,7 @@ export const generateDemoData = () => {
 
         // --- Recurring Expenses ---
         addExp('Rent', 15000, new Date(currentYear, month, 1), 'Housing');
-        addExp('Internet & Utility', 3500, new Date(currentYear, month, 5), 'Utilities' as any);
+        addExp('Internet & Utility', 3500, new Date(currentYear, month, 5), 'Utilities');
         addExp('Gym', 1800, new Date(currentYear, month, 2), 'Health');
         addExp('Netflix / Spotify', 590, new Date(currentYear, month, 3), 'Entertainment');
 

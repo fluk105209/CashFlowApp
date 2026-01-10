@@ -1,13 +1,8 @@
 import { supabase } from '../lib/supabase';
-
-export interface UserProfile {
-    id: string;
-    user_id_text: string;
-    created_at: string;
-}
+import type { Profile } from '@/types';
 
 export const authService = {
-    async loginOrRegister(userId: string, pin: string): Promise<{ profile: UserProfile | null; error: string | null }> {
+    async loginOrRegister(userId: string, pin: string): Promise<{ profile: Profile | null; error: string | null }> {
         const normalizedId = userId.toLowerCase().trim();
         try {
             // 1. Check if user exists
@@ -26,7 +21,7 @@ export const authService = {
                 if (existingUser.pin_hash === pin) {
                     return { profile: existingUser, error: null };
                 } else {
-                    return { profile: null, error: 'Incorrect PIN' };
+                    return { profile: null, error: 'auth.incorrect_pin' };
                 }
             } else {
                 // 3. Register new user
@@ -42,8 +37,8 @@ export const authService = {
 
                 return { profile: newUser, error: null };
             }
-        } catch (err: any) {
-            return { profile: null, error: err.message };
+        } catch (err) {
+            return { profile: null, error: err instanceof Error ? err.message : 'Unknown error' };
         }
     },
 
@@ -55,8 +50,21 @@ export const authService = {
                 .eq('id', profileId);
 
             return { error: error ? error.message : null };
-        } catch (err: any) {
-            return { error: err.message };
+        } catch (err) {
+            return { error: err instanceof Error ? err.message : 'Unknown error' };
+        }
+    },
+
+    async updateLanguage(profileId: string, lang: string): Promise<{ error: string | null }> {
+        try {
+            const { error } = await supabase
+                .from('profiles')
+                .update({ language: lang })
+                .eq('id', profileId);
+
+            return { error: error ? error.message : null };
+        } catch (err) {
+            return { error: err instanceof Error ? err.message : 'Unknown error' };
         }
     }
 };

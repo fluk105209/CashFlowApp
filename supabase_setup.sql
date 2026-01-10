@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS profiles (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id_text TEXT UNIQUE NOT NULL,
     pin_hash TEXT NOT NULL,
+    language TEXT NOT NULL DEFAULT 'en',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
