@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useFinanceStore } from '@/stores/useFinanceStore';
-import { Shield, Trash2, ArrowLeft, Key, AlertTriangle } from 'lucide-react';
+import { Shield, Trash2, ArrowLeft, Key, AlertTriangle, Moon, LogOut } from 'lucide-react';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useNavigate } from 'react-router-dom';
 
 export const SettingsPage: React.FC = () => {
-    const { pin, setPin, resetData } = useFinanceStore();
+    const { pin, setPin, resetData, logout } = useFinanceStore();
     const [newPin, setNewPin] = useState('');
     const [confirmPin, setConfirmPin] = useState('');
     const [error, setError] = useState('');
@@ -68,6 +69,21 @@ export const SettingsPage: React.FC = () => {
 
             <section className="space-y-4">
                 <div className="flex items-center gap-2 mb-2">
+                    <Moon className="h-5 w-5 text-primary" />
+                    <h3 className="text-lg font-semibold">Appearance</h3>
+                </div>
+
+                <div className="bg-card rounded-2xl p-6 border shadow-sm flex items-center justify-between">
+                    <div className="space-y-0.5">
+                        <h4 className="font-medium">Dark Mode</h4>
+                        <p className="text-sm text-muted-foreground">Adjust the application theme</p>
+                    </div>
+                    <ThemeToggle />
+                </div>
+            </section>
+
+            <section className="space-y-4">
+                <div className="flex items-center gap-2 mb-2">
                     <Shield className="h-5 w-5 text-primary" />
                     <h3 className="text-lg font-semibold">Security</h3>
                 </div>
@@ -116,6 +132,28 @@ export const SettingsPage: React.FC = () => {
                             {isUpdating ? 'Updating...' : (pin ? 'Update PIN' : 'Set PIN')}
                         </Button>
                     </form>
+                </div>
+            </section>
+
+            <section className="space-y-4">
+                <div className="flex items-center gap-2 mb-2">
+                    <LogOut className="h-5 w-5 text-muted-foreground" />
+                    <h3 className="text-lg font-semibold">Account</h3>
+                </div>
+
+                <div className="bg-card rounded-2xl p-6 border shadow-sm space-y-4">
+                    <div className="space-y-1">
+                        <h4 className="font-medium">Logout</h4>
+                        <p className="text-sm text-muted-foreground">Sign out of your account on this device</p>
+                    </div>
+                    <Button
+                        variant="outline"
+                        onClick={() => logout()}
+                        className="w-full rounded-xl flex items-center gap-2 hover:bg-destructive hover:text-destructive-foreground hover:border-destructive transition-all"
+                    >
+                        <LogOut className="h-4 w-4" />
+                        Log Out
+                    </Button>
                 </div>
             </section>
 

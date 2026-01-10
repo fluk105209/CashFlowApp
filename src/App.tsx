@@ -1,6 +1,5 @@
 import { useNavigate, useLocation, Routes, Route, Link } from "react-router-dom"
-import { LayoutDashboard, Calendar as CalendarIcon, List, Loader2, Settings, LogOut } from "lucide-react"
-import { ThemeToggle } from "@/components/ThemeToggle"
+import { LayoutDashboard, Calendar as CalendarIcon, List, Loader2, Settings } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { lazy, Suspense } from "react"
 import { useFinanceStore } from "@/stores/useFinanceStore"
@@ -16,7 +15,7 @@ const LoginPage = lazy(() => import("@/features/Auth/LoginPage").then(module => 
 function App() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { profile, logout } = useFinanceStore()
+  const { profile } = useFinanceStore()
 
   const isDashboard = location.pathname === '/'
   const isCalendar = location.pathname === '/calendar'
@@ -52,14 +51,6 @@ function App() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <ThemeToggle />
-            <button
-              onClick={() => logout()}
-              className="p-2 rounded-md hover:bg-muted transition-colors text-muted-foreground hover:text-destructive"
-              title="Logout"
-            >
-              <LogOut className="h-4 w-4" />
-            </button>
             <div className="flex bg-muted rounded-lg p-1">
               <button
                 onClick={() => navigate('/')}
