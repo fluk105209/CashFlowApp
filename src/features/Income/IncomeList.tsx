@@ -48,8 +48,6 @@ export function IncomeList({ limit, items }: Props) {
                             <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
                                 <span className="capitalize">{income.category}</span>
                                 <span>•</span>
-                                <span className="capitalize">{income.frequency}</span>
-                                <span>•</span>
                                 <div className="flex items-center gap-1">
                                     <Calendar className="h-2.5 w-2.5" />
                                     {format(parseISO(income.date), 'MMM d, yyyy')}
