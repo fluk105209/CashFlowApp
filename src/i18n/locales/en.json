@@ -169,7 +169,12 @@
         "closed": "Closed",
         "step_1_desc": "Select the type of obligation you want to track.",
         "amount_min": "Min Payment",
-        "total_months": "Total Months"
+        "total_months": "Total Months",
+        "total_debt_balance": "Total Debt Balance",
+        "payment_mode": "Payment Mode",
+        "payment_mode_fixed": "Fixed Amount (฿)",
+        "payment_mode_percent": "Percentage (%)",
+        "calculated_amount": "Amount to pay: ฿{{amount}}"
     },
     "categories": {
         "Salary": "Salary",

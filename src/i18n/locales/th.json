@@ -169,7 +169,12 @@
         "closed": "ปิดแล้ว",
         "step_1_desc": "เลือกประเภทหนี้สินที่คุณต้องการติดตาม",
         "amount_min": "ยอดชำระขั้นต่ำ",
-        "total_months": "จำนวนงวดทั้งหมด"
+        "total_months": "จำนวนงวดทั้งหมด",
+        "total_debt_balance": "ยอดหนี้คงเหลือ",
+        "payment_mode": "รูปแบบการชำระ",
+        "payment_mode_fixed": "จำนวนเงิน (฿)",
+        "payment_mode_percent": "เปอร์เซ็นต์ (%)",
+        "calculated_amount": "ยอดที่ต้องชำระ: ฿{{amount}}"
     },
     "categories": {
         "Salary": "เงินเดือน",

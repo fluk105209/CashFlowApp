@@ -40,6 +40,7 @@ export const syncService = {
                 interestRate: Number(o.interest_rate),
                 status: o.status,
                 startDate: o.start_date,
+                creditLimit: o.credit_limit ? Number(o.credit_limit) : 0,
                 created_at: o.created_at
             })) as Obligation[]
         };
@@ -118,6 +119,7 @@ export const syncService = {
             interest_rate: o.interestRate,
             status: o.status,
             start_date: o.startDate,
+            credit_limit: o.creditLimit,
             created_at: o.created_at
         }));
 

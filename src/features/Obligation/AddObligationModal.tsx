@@ -31,6 +31,10 @@ export function ObligationModal({ initialData, trigger }: Props) {
     const [step, setStep] = useState<1 | 2>(1)
     const [type, setType] = useState<ObligationType>('installment')
 
+    // Payment Mode: 'fixed' or 'percent' (Only for Credit Card)
+    const [paymentMode, setPaymentMode] = useState<'fixed' | 'percent'>('fixed')
+    const [percentValue, setPercentValue] = useState('')
+
     // Form Fields
     const [name, setName] = useState('')
     const [amount, setAmount] = useState('') // Monthly / Min Payment
@@ -45,6 +49,8 @@ export function ObligationModal({ initialData, trigger }: Props) {
     const resetForm = () => {
         setStep(1)
         setType('installment')
+        setPaymentMode('fixed')
+        setPercentValue('')
         setName('')
         setAmount('')
         setBalance('')
@@ -62,6 +68,8 @@ export function ObligationModal({ initialData, trigger }: Props) {
             setType(initialData.type)
             setName(initialData.name)
             setAmount(initialData.amount.toString())
+            setPaymentMode('fixed') // Default to fixed when editing for now
+            setPercentValue('')
             setBalance(initialData.balance?.toString() || '')
             setInterestRate(initialData.interestRate?.toString() || '')
             setTotalMonths(initialData.totalMonths?.toString() || '')
@@ -90,6 +98,18 @@ export function ObligationModal({ initialData, trigger }: Props) {
         }
     }, [amount, totalMonths, paidMonths, type])
 
+    // Auto-calculate Amount when in Percent mode
+    useEffect(() => {
+        if (type === 'credit-card' && paymentMode === 'percent' && percentValue && balance) {
+            const pct = parseFloat(percentValue)
+            const bal = parseFloat(balance)
+            if (!isNaN(pct) && !isNaN(bal)) {
+                const calc = (pct / 100) * bal
+                // eslint-disable-next-line react-hooks/set-state-in-effect
+                setAmount(calc.toFixed(2))
+            }
+        }
+    }, [paymentMode, percentValue, balance, type])
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
@@ -170,8 +190,10 @@ export function ObligationModal({ initialData, trigger }: Props) {
                                             type="button"
                                             onClick={() => setType(item.id as ObligationType)}
                                             className={cn(
-                                                "p-4 rounded-xl border-2 text-left transition-all hover:bg-muted/50 flex flex-col gap-2",
-                                                type === item.id ? "border-primary bg-primary/5 shadow-sm" : "border-transparent bg-muted/30"
+                                                "p-4 rounded-xl border-2 text-left transition-all flex flex-col gap-2 relative overflow-hidden",
+                                                type === item.id
+                                                    ? "border-primary bg-primary/10 shadow-[0_0_0_1px_rgba(var(--primary),0.2)]"
+                                                    : "border-muted bg-muted/40 hover:bg-muted/60 hover:border-muted-foreground/20"
                                             )}
                                         >
                                             <item.icon className={cn("h-5 w-5", type === item.id ? "text-primary" : "text-muted-foreground")} />
@@ -198,17 +220,70 @@ export function ObligationModal({ initialData, trigger }: Props) {
                                         <Label htmlFor="amount">
                                             {type === 'credit-card' ? t('obligations.amount_min') : t('obligations.amount')}
                                         </Label>
-                                        <Input
-                                            id="amount"
-                                            type="number"
-                                            placeholder="0.00"
-                                            value={amount}
-                                            onChange={(e) => setAmount(e.target.value)}
-                                            required
-                                        />
+
+                                        {/* Toggle for Credit Card */}
+                                        {type === 'credit-card' && (
+                                            <div className="flex items-center gap-2 mb-2 p-1 bg-muted rounded-lg">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setPaymentMode('fixed')}
+                                                    className={cn(
+                                                        "flex-1 text-[10px] font-medium py-1 px-2 rounded-md transition-all",
+                                                        paymentMode === 'fixed' ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
+                                                    )}
+                                                >
+                                                    {t('obligations.payment_mode_fixed')}
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setPaymentMode('percent')
+                                                        setAmount('') // Clear manual amount when switching
+                                                    }}
+                                                    className={cn(
+                                                        "flex-1 text-[10px] font-medium py-1 px-2 rounded-md transition-all",
+                                                        paymentMode === 'percent' ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
+                                                    )}
+                                                >
+                                                    {t('obligations.payment_mode_percent')}
+                                                </button>
+                                            </div>
+                                        )}
+
+                                        {type === 'credit-card' && paymentMode === 'percent' ? (
+                                            <div className="space-y-1">
+                                                <div className="relative">
+                                                    <Input
+                                                        type="number"
+                                                        placeholder="10"
+                                                        value={percentValue}
+                                                        onChange={(e) => setPercentValue(e.target.value)}
+                                                        className="pr-8"
+                                                    />
+                                                    <span className="absolute right-3 top-2.5 text-sm text-muted-foreground">%</span>
+                                                </div>
+                                                {amount && (
+                                                    <p className="text-[10px] text-emerald-600 font-medium text-right">
+                                                        {t('obligations.calculated_amount', { amount: parseFloat(amount).toLocaleString() })}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <Input
+                                                id="amount"
+                                                type="number"
+                                                placeholder="0.00"
+                                                value={amount}
+                                                onChange={(e) => setAmount(e.target.value)}
+                                                readOnly={type === 'credit-card' && paymentMode === 'percent'} // Should be manual input if fixed
+                                                required
+                                            />
+                                        )}
                                     </div>
                                     <div className="space-y-2">
-                                        <Label htmlFor="balance">{t('obligations.balance')}</Label>
+                                        <Label htmlFor="balance">
+                                            {type === 'credit-card' ? t('obligations.total_debt_balance') : t('obligations.balance')}
+                                        </Label>
                                         <Input
                                             id="balance"
                                             type="number"

@@ -110,14 +110,32 @@ export function ObligationList({ limit, items }: Props) {
                                         />
                                     </div>
                                 )}
-                                {ob.type === 'credit-card' && ob.creditLimit && ob.balance !== undefined && (
-                                    <div className="mt-1 w-24 h-1 bg-secondary rounded-full overflow-hidden">
-                                        <div
-                                            className="h-full bg-purple-500"
-                                            style={{ width: `${Math.min(100, (ob.balance / ob.creditLimit) * 100)}%` }}
-                                        />
-                                    </div>
-                                )}
+                                {ob.type === 'credit-card' && (ob.creditLimit || 0) > 0 && ob.balance !== undefined && (() => {
+                                    // Calculate Available Credit %
+                                    const limit = ob.creditLimit || 0;
+                                    if (limit <= 0) return null;
+                                    const balance = Number(ob.balance || 0);
+                                    if (isNaN(balance)) return null;
+
+                                    const available = Math.max(0, limit - balance);
+                                    const percent = Math.min(100, Math.max(0, (available / limit) * 100));
+
+                                    if (isNaN(percent)) return null;
+
+                                    let colorClass = 'bg-emerald-600'; // Default > 75%
+                                    if (percent < 10) colorClass = 'bg-red-500';
+                                    else if (percent <= 40) colorClass = 'bg-yellow-500';
+                                    else if (percent <= 74) colorClass = 'bg-lime-400';
+
+                                    return (
+                                        <div className="mt-1 w-24 h-1.5 bg-secondary rounded-full overflow-hidden">
+                                            <div
+                                                className={`h-full transition-all duration-500 ${colorClass}`}
+                                                style={{ width: `${percent}%` }}
+                                            />
+                                        </div>
+                                    );
+                                })()}
                             </div>
                         </div>
 
@@ -136,9 +154,9 @@ export function ObligationList({ limit, items }: Props) {
                                         {ob.paidMonths || 0}/{ob.totalMonths} {t('obligations.paid_months').toLowerCase()}
                                     </div>
                                 )}
-                                {ob.type === 'credit-card' && ob.creditLimit && (
+                                {ob.type === 'credit-card' && (ob.creditLimit || 0) > 0 && (
                                     <div className="text-[9px] text-muted-foreground text-right mt-0.5">
-                                        {t('obligations.limit')}: ฿{ob.creditLimit.toLocaleString()}
+                                        {t('obligations.limit')}: ฿{(ob.creditLimit || 0).toLocaleString()}
                                     </div>
                                 )}
                             </div>

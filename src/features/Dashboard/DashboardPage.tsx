@@ -7,9 +7,10 @@ import { ObligationModal } from "@/features/Obligation/AddObligationModal"
 import { ObligationList } from "@/features/Obligation/ObligationList"
 import { useFinanceStore } from "@/stores/useFinanceStore"
 import { motion } from "framer-motion"
-import { useEffect } from "react"
+import { useEffect, useMemo } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useTranslation } from "react-i18next"
+import { isSameMonth } from "date-fns"
 
 export function DashboardPage() {
     const { t } = useTranslation()
@@ -19,8 +20,27 @@ export function DashboardPage() {
         initialize()
     }, [initialize])
 
-    const totalIncome = incomes.reduce((sum, item) => sum + item.amount, 0)
-    const totalSpending = spendings.reduce((sum, item) => sum + item.amount, 0)
+    // Filter for Current Month
+    const { monthlyIncome, monthlySpending } = useMemo(() => {
+        const now = new Date()
+
+        const mIncomes = incomes.filter(i => isSameMonth(new Date(i.date), now))
+        const mSpendings = spendings.filter(s => isSameMonth(new Date(s.date), now))
+
+        const mIncomeSum = mIncomes.reduce((sum, i) => sum + i.amount, 0)
+        const mSpendingSum = mSpendings.reduce((sum, s) => sum + s.amount, 0)
+
+        const tIncomeSum = incomes.reduce((sum, i) => sum + i.amount, 0)
+        const tSpendingSum = spendings.reduce((sum, s) => sum + s.amount, 0)
+
+        return {
+            monthlyIncome: mIncomeSum,
+            monthlySpending: mSpendingSum,
+            totalIncome: tIncomeSum,
+            totalSpending: tSpendingSum
+        }
+    }, [incomes, spendings])
+
     const totalObligationsPlanned = obligations.reduce((sum, item) => sum + item.amount, 0)
 
     const installmentObligations = obligations.filter(o => o.type === 'installment')
@@ -36,7 +56,10 @@ export function DashboardPage() {
         return sum
     }, 0)
 
-    const netCashFlow = totalIncome - totalSpending
+    const netCashFlow = monthlyIncome - monthlySpending
+    const totalVolume = monthlyIncome + monthlySpending
+    const incomePercent = totalVolume > 0 ? (monthlyIncome / totalVolume) * 100 : 0
+    const spendingPercent = totalVolume > 0 ? (monthlySpending / totalVolume) * 100 : 0
 
     if (isLoading) {
         return (
@@ -78,14 +101,26 @@ export function DashboardPage() {
                         <CardTitle className="text-4xl font-bold">฿ {netCashFlow.toLocaleString()}</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="flex justify-between text-sm opacity-90 mt-2">
+                        {/* Simple Stacked Bar */}
+                        <div className="mt-2 mb-4 h-3 w-full bg-black/20 rounded-full flex overflow-hidden">
+                            <div
+                                className="h-full bg-emerald-400 transition-all duration-500"
+                                style={{ width: `${incomePercent}%` }}
+                            />
+                            <div
+                                className="h-full bg-rose-400 transition-all duration-500"
+                                style={{ width: `${spendingPercent}%` }}
+                            />
+                        </div>
+
+                        <div className="flex justify-between text-sm opacity-90">
                             <div>
                                 <span className="block text-xs opacity-70">{t('dashboard.income')}</span>
-                                <span className="text-emerald-300">+฿ {totalIncome.toLocaleString()}</span>
+                                <span className="text-emerald-300 font-medium">+฿ {monthlyIncome.toLocaleString()}</span>
                             </div>
                             <div className="text-right">
                                 <span className="block text-xs opacity-70">{t('dashboard.actual_expenses')}</span>
-                                <span className="text-rose-300">-฿ {totalSpending.toLocaleString()}</span>
+                                <span className="text-rose-300 font-medium">-฿ {monthlySpending.toLocaleString()}</span>
                             </div>
                         </div>
                     </CardContent>
@@ -156,6 +191,6 @@ export function DashboardPage() {
                     <ObligationList limit={3} />
                 </section>
             </div>
-        </motion.main>
+        </motion.main >
     )
 }

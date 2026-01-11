@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS obligations (
     paid_months INTEGER,
     balance NUMERIC NOT NULL,
     interest_rate NUMERIC,
+    credit_limit NUMERIC,
     status TEXT NOT NULL,
     start_date DATE NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
