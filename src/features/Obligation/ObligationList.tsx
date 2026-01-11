@@ -33,7 +33,12 @@ export function ObligationList({ limit, items }: Props) {
     const [isExpanded, setIsExpanded] = useState(false)
 
     // Use items prop if provided (for filtering), otherwise use store
-    const dataSource = items || storeObligations
+    const dataSource = [...(items || storeObligations)].sort((a, b) => {
+        if (a.created_at && b.created_at) {
+            return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        }
+        return 0;
+    });
 
     if (dataSource.length === 0) {
         return (

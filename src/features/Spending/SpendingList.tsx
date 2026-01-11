@@ -21,7 +21,15 @@ export function SpendingList({ limit, items }: Props) {
     const [isExpanded, setIsExpanded] = useState(false)
 
     // Use items prop if provided (for filtering), otherwise use store
-    const dataSource = items || storeSpendings
+    const dataSource = [...(items || storeSpendings)].sort((a, b) => {
+        const dateComparison = new Date(b.date).getTime() - new Date(a.date).getTime();
+        if (dateComparison !== 0) return dateComparison;
+        // If dates are equal, sort by created_at desc (newest created first)
+        if (a.created_at && b.created_at) {
+            return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        }
+        return 0;
+    });
 
     if (dataSource.length === 0) {
         return (

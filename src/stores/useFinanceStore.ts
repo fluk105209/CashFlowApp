@@ -20,20 +20,27 @@ export const useFinanceStore = create<FinanceState>()(
             error: null,
             profile: null,
 
-            syncToCloud: async () => {
+            syncToCloud: async (category?: 'incomes' | 'spendings' | 'obligations') => {
                 const { profile, incomes, spendings, obligations } = get();
                 if (!profile) return;
 
                 set({ isSyncing: true });
                 try {
-                    await Promise.all([
-                        syncService.syncIncome(profile.id, incomes),
-                        syncService.syncSpending(profile.id, spendings),
-                        syncService.syncObligations(profile.id, obligations)
-                    ]);
+                    if (category === 'incomes') {
+                        await syncService.syncIncomes(profile.id, incomes);
+                    } else if (category === 'spendings') {
+                        await syncService.syncSpendings(profile.id, spendings);
+                    } else if (category === 'obligations') {
+                        await syncService.syncObligations(profile.id, obligations);
+                    } else {
+                        await Promise.all([
+                            syncService.syncIncomes(profile.id, incomes),
+                            syncService.syncSpendings(profile.id, spendings),
+                            syncService.syncObligations(profile.id, obligations)
+                        ]);
+                    }
                     set({ isSyncing: false, lastSyncedAt: new Date().toISOString() });
-                } catch (err) {
-                    console.error('Cloud sync failed:', err);
+                } catch {
                     set({ isSyncing: false, error: 'auth.cloud_sync_error' });
                 }
             },
@@ -97,27 +104,27 @@ export const useFinanceStore = create<FinanceState>()(
             addIncome: async (income) => {
                 const id = uuidv4();
                 set((state) => ({
-                    incomes: [...state.incomes, { ...income, id }],
+                    incomes: [...state.incomes, { ...income, id, created_at: new Date().toISOString() }],
                 }));
-                await get().syncToCloud();
+                await get().syncToCloud('incomes');
             },
             updateIncome: async (id, income) => {
                 set((state) => ({
                     incomes: state.incomes.map((i) => (i.id === id ? { ...i, ...income } : i)),
                 }));
-                await get().syncToCloud();
+                await get().syncToCloud('incomes');
             },
             deleteIncome: async (id) => {
                 set((state) => ({
                     incomes: state.incomes.filter((i) => i.id !== id),
                 }));
-                await get().syncToCloud();
+                await get().syncToCloud('incomes');
             },
 
             addSpending: async (spending) => {
                 const id = uuidv4();
                 set((state) => {
-                    const newSpendings = [...state.spendings, { ...spending, id }];
+                    const newSpendings = [...state.spendings, { ...spending, id, created_at: new Date().toISOString() }];
                     let newObligations = state.obligations;
                     if (spending.kind === 'obligation-payment' && spending.linkedObligationId) {
                         newObligations = state.obligations.map((ob) => {
@@ -134,13 +141,16 @@ export const useFinanceStore = create<FinanceState>()(
                     }
                     return { spendings: newSpendings, obligations: newObligations };
                 });
-                await get().syncToCloud();
+                await Promise.all([
+                    get().syncToCloud('spendings'),
+                    get().syncToCloud('obligations')
+                ]);
             },
             updateSpending: async (id, spending) => {
                 set((state) => ({
                     spendings: state.spendings.map((s) => (s.id === id ? { ...s, ...spending } : s)),
                 }));
-                await get().syncToCloud();
+                await get().syncToCloud('spendings');
             },
             deleteSpending: async (id) => {
                 const currentSpendings = get().spendings;
@@ -167,27 +177,30 @@ export const useFinanceStore = create<FinanceState>()(
                         obligations: newObligations,
                     };
                 });
-                await get().syncToCloud();
+                await Promise.all([
+                    get().syncToCloud('spendings'),
+                    get().syncToCloud('obligations')
+                ]);
             },
 
             addObligation: async (obligation) => {
                 const id = uuidv4();
                 set((state) => ({
-                    obligations: [...state.obligations, { ...obligation, id }],
+                    obligations: [...state.obligations, { ...obligation, id, created_at: new Date().toISOString() }],
                 }));
-                await get().syncToCloud();
+                await get().syncToCloud('obligations');
             },
             updateObligation: async (id, obligation) => {
                 set((state) => ({
                     obligations: state.obligations.map((o) => (o.id === id ? { ...o, ...obligation } : o)),
                 }));
-                await get().syncToCloud();
+                await get().syncToCloud('obligations');
             },
             deleteObligation: async (id) => {
                 set((state) => ({
                     obligations: state.obligations.filter((o) => o.id !== id),
                 }));
-                await get().syncToCloud();
+                await get().syncToCloud('obligations');
             },
 
             setStoreData: (data) => set(() => data),
@@ -221,7 +234,7 @@ export const useFinanceStore = create<FinanceState>()(
             lock: () => set({ isLocked: true }),
             resetData: async () => {
                 set({ incomes: [], spendings: [], obligations: [], isLocked: false });
-                await get().syncToCloud();
+                await get().syncToCloud(); // Full sync to clear everything
             },
         }),
         {

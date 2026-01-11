@@ -7,6 +7,7 @@ export interface Income {
     category: string;
     frequency: Frequency;
     date: string; // ISO date string
+    created_at?: string;
 }
 
 
@@ -19,6 +20,7 @@ export interface Spending {
     date: string; // ISO date string
     kind: 'normal' | 'obligation-payment';
     linkedObligationId?: string;
+    created_at?: string;
 }
 
 export type ObligationType = 'installment' | 'credit-card' | 'personal-loan' | 'car-loan' | 'home-loan' | 'other';
@@ -35,6 +37,7 @@ export interface Obligation {
     paidMonths?: number; // For fixed installments (Optional)
     startDate?: string; // Optional
     status: 'active' | 'closed';
+    created_at?: string;
 }
 
 export interface Profile {
@@ -60,7 +63,7 @@ export interface FinanceState {
     login: (userId: string, pin: string) => Promise<{ success: boolean; error?: string }>;
     logout: () => void;
     initialize: () => Promise<void>;
-    syncToCloud: () => Promise<void>;
+    syncToCloud: (category?: 'incomes' | 'spendings' | 'obligations') => Promise<void>;
     addIncome: (income: Omit<Income, 'id'>) => Promise<void>;
     updateIncome: (id: string, income: Partial<Income>) => Promise<void>;
     deleteIncome: (id: string) => Promise<void>;

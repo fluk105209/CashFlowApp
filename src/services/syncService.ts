@@ -16,7 +16,8 @@ export const syncService = {
                 amount: Number(inc.amount),
                 category: inc.category,
                 date: inc.date,
-                frequency: inc.frequency
+                frequency: inc.frequency,
+                created_at: inc.created_at
             })) as Income[],
             spendings: (spendings.data || []).map(s => ({
                 id: s.id,
@@ -25,7 +26,8 @@ export const syncService = {
                 category: s.category,
                 date: s.date,
                 kind: s.kind,
-                linkedObligationId: s.linked_obligation_id
+                linkedObligationId: s.linked_obligation_id,
+                created_at: s.created_at
             })) as Spending[],
             obligations: (obligations.data || []).map(o => ({
                 id: o.id,
@@ -37,61 +39,94 @@ export const syncService = {
                 balance: Number(o.balance),
                 interestRate: Number(o.interest_rate),
                 status: o.status,
-                startDate: o.start_date
+                startDate: o.start_date,
+                created_at: o.created_at
             })) as Obligation[]
         };
     },
 
-    async syncIncome(profileId: string, incomes: Income[]) {
-        await supabase.from('incomes').delete().eq('profile_id', profileId);
-        if (incomes.length > 0) {
-            const dataToInsert = incomes.map(inc => ({
-                id: inc.id,
-                profile_id: profileId,
-                name: inc.name,
-                amount: inc.amount,
-                category: inc.category,
-                date: inc.date,
-                frequency: inc.frequency
-            }));
-            await supabase.from('incomes').insert(dataToInsert);
+    async syncIncomes(profileId: string, incomes: Income[]) {
+        if (incomes.length === 0) {
+            await supabase.from('incomes').delete().eq('profile_id', profileId);
+            return;
         }
+
+        const dataToUpsert = incomes.map(inc => ({
+            id: inc.id,
+            profile_id: profileId,
+            name: inc.name,
+            amount: inc.amount,
+            category: inc.category,
+            date: inc.date,
+            frequency: inc.frequency,
+            created_at: inc.created_at
+        }));
+
+        // Upsert all current items
+        await supabase.from('incomes').upsert(dataToUpsert);
+
+        // Delete items no longer in local state
+        const currentIds = incomes.map(i => i.id);
+        await supabase.from('incomes')
+            .delete()
+            .eq('profile_id', profileId)
+            .not('id', 'in', `(${currentIds.join(',')})`);
     },
 
-    async syncSpending(profileId: string, spendings: Spending[]) {
-        await supabase.from('spendings').delete().eq('profile_id', profileId);
-        if (spendings.length > 0) {
-            const dataToInsert = spendings.map(s => ({
-                id: s.id,
-                profile_id: profileId,
-                name: s.name,
-                amount: s.amount,
-                category: s.category,
-                date: s.date,
-                kind: s.kind,
-                linked_obligation_id: s.linkedObligationId
-            }));
-            await supabase.from('spendings').insert(dataToInsert);
+    async syncSpendings(profileId: string, spendings: Spending[]) {
+        if (spendings.length === 0) {
+            await supabase.from('spendings').delete().eq('profile_id', profileId);
+            return;
         }
+
+        const dataToUpsert = spendings.map(s => ({
+            id: s.id,
+            profile_id: profileId,
+            name: s.name,
+            amount: s.amount,
+            category: s.category,
+            date: s.date,
+            kind: s.kind,
+            linked_obligation_id: s.linkedObligationId,
+            created_at: s.created_at
+        }));
+
+        await supabase.from('spendings').upsert(dataToUpsert);
+
+        const currentIds = spendings.map(s => s.id);
+        await supabase.from('spendings')
+            .delete()
+            .eq('profile_id', profileId)
+            .not('id', 'in', `(${currentIds.join(',')})`);
     },
 
     async syncObligations(profileId: string, obligations: Obligation[]) {
-        await supabase.from('obligations').delete().eq('profile_id', profileId);
-        if (obligations.length > 0) {
-            const dataToInsert = obligations.map(o => ({
-                id: o.id,
-                profile_id: profileId,
-                name: o.name,
-                type: o.type,
-                amount: o.amount,
-                total_months: o.totalMonths,
-                paid_months: o.paidMonths,
-                balance: o.balance,
-                interest_rate: o.interestRate,
-                status: o.status,
-                start_date: o.startDate
-            }));
-            await supabase.from('obligations').insert(dataToInsert);
+        if (obligations.length === 0) {
+            await supabase.from('obligations').delete().eq('profile_id', profileId);
+            return;
         }
+
+        const dataToUpsert = obligations.map(o => ({
+            id: o.id,
+            profile_id: profileId,
+            name: o.name,
+            type: o.type,
+            amount: o.amount,
+            total_months: o.totalMonths,
+            paid_months: o.paidMonths,
+            balance: o.balance,
+            interest_rate: o.interestRate,
+            status: o.status,
+            start_date: o.startDate,
+            created_at: o.created_at
+        }));
+
+        await supabase.from('obligations').upsert(dataToUpsert);
+
+        const currentIds = obligations.map(o => o.id);
+        await supabase.from('obligations')
+            .delete()
+            .eq('profile_id', profileId)
+            .not('id', 'in', `(${currentIds.join(',')})`);
     }
 };

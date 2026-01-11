@@ -1,7 +1,7 @@
 import { useNavigate, useLocation, Routes, Route, Link } from "react-router-dom"
 import { LayoutDashboard, Calendar as CalendarIcon, List, Loader2, Settings, Cloud, CloudOff, CheckCircle2 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
-import { lazy, Suspense } from "react"
+import { lazy, Suspense, useEffect } from "react"
 import { useFinanceStore } from "@/stores/useFinanceStore"
 import { useTranslation } from "react-i18next"
 import { format } from "date-fns"
@@ -48,6 +48,17 @@ function App() {
   const navigate = useNavigate()
   const location = useLocation()
   const { profile } = useFinanceStore()
+
+  useEffect(() => {
+    // Initialize theme
+    const savedTheme = localStorage.getItem('theme')
+    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+    const theme = savedTheme || systemTheme
+
+    const root = window.document.documentElement
+    root.classList.remove('light', 'dark')
+    root.classList.add(theme)
+  }, [])
 
   const isDashboard = location.pathname === '/'
   const isCalendar = location.pathname === '/calendar'
