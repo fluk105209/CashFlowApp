@@ -91,9 +91,10 @@
         "subtitle": "จัดการโปรไฟล์และความปลอดภัย",
         "appearance": "รูปลักษณ์",
         "dark_mode": "โหมดมืด",
-        "dark_mode_desc": "ปรับเปลี่ยนธีมของแอปพลิเคชัน",
+        "dark_mode_desc": "เปลี่ยนธีมแสดงผลให้สบายตา",
         "language": "ภาษา",
-        "language_desc": "สลับระหว่างภาษาไทยและอังกฤษ",
+        "language_desc": "เลือกภาษาที่ต้องการใช้งาน",
+        "general": "ทั่วไป",
         "security": "ความปลอดภัย",
         "profile_pin": "รหัส PIN ของโปรไฟล์",
         "pin_desc_change": "เปลี่ยนรหัส PIN 6 หลักปัจจุบัน",
@@ -123,9 +124,9 @@
         "pin_update_error": "ไม่สามารถเปลี่ยนรหัส PIN ได้ กรุณาลองใหม่",
         "reset_confirm": "คุณแน่ใจหรือไม่? การดำเนินการนี้จะลบข้อมูลทั้งหมดของคุณ",
         "category_colors": "สีสำหรับหมวดหมู่",
-        "category_colors_desc": "เลือกสีสำหรับแต่ละหมวดหมู่",
-        "income_categories": "แหล่งที่มาของรายได้",
-        "expense_categories": "หมวดหมู่ค่าใช้จ่าย"
+        "category_colors_desc": "ปรับแต่งสีสำหรับแต่ละหมวดหมู่ของคุณ",
+        "income_categories": "หมวดหมู่รายได้",
+        "expense_categories": "หมวดหมู่รายจ่าย"
     },
     "income": {
         "title": "รายได้",

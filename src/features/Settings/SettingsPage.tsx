@@ -124,8 +124,10 @@ export const SettingsPage: React.FC = () => {
             </section>
 
             <section className="space-y-4">
-                <div className="flex items-center gap-2 mb-2">
-                    <Moon className="h-5 w-5 text-primary" />
+                <div className="flex items-center gap-3 mb-2">
+                    <div className="w-10 h-10 rounded-2xl bg-amber-500/10 flex items-center justify-center">
+                        <Moon className="h-5 w-5 text-amber-500" />
+                    </div>
                     <h3 className="text-lg font-semibold">{t('settings.appearance')}</h3>
                 </div>
 
@@ -139,8 +141,10 @@ export const SettingsPage: React.FC = () => {
             </section>
 
             <section className="space-y-4">
-                <div className="flex items-center gap-2 mb-2">
-                    <Shield className="h-5 w-5 text-primary" />
+                <div className="flex items-center gap-3 mb-2">
+                    <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 flex items-center justify-center">
+                        <Shield className="h-5 w-5 text-indigo-500" />
+                    </div>
                     <h3 className="text-lg font-semibold">{t('settings.category_colors')}</h3>
                 </div>
 
@@ -157,8 +161,10 @@ export const SettingsPage: React.FC = () => {
             </section>
 
             <section className="space-y-4">
-                <div className="flex items-center gap-2 mb-2">
-                    <Languages className="h-5 w-5 text-primary" />
+                <div className="flex items-center gap-3 mb-2">
+                    <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 flex items-center justify-center">
+                        <Languages className="h-5 w-5 text-emerald-500" />
+                    </div>
                     <h3 className="text-lg font-semibold">{t('settings.language')}</h3>
                 </div>
 
@@ -189,8 +195,10 @@ export const SettingsPage: React.FC = () => {
             </section>
 
             <section className="space-y-4">
-                <div className="flex items-center gap-2 mb-2">
-                    <LogOut className="h-5 w-5 text-primary" />
+                <div className="flex items-center gap-3 mb-2">
+                    <div className="w-10 h-10 rounded-2xl bg-blue-500/10 flex items-center justify-center">
+                        <LogOut className="h-5 w-5 text-blue-500" />
+                    </div>
                     <h3 className="text-lg font-semibold">{t('settings.account')}</h3>
                 </div>
 
@@ -210,16 +218,18 @@ export const SettingsPage: React.FC = () => {
                 </div>
             </section>
 
-            <section className="space-y-4">
-                <div className="flex items-center gap-2 mb-2">
-                    <Shield className="h-5 w-5 text-destructive" />
-                    <h3 className="text-lg font-semibold text-destructive">{t('settings.danger_zone')}</h3>
+            <section className="space-y-4 pt-4 border-t border-destructive/10">
+                <div className="flex items-center gap-3 mb-2">
+                    <div className="w-10 h-10 rounded-2xl bg-destructive/10 flex items-center justify-center">
+                        <Shield className="h-5 w-5 text-destructive" />
+                    </div>
+                    <h3 className="text-lg font-bold text-destructive">{t('settings.danger_zone')}</h3>
                 </div>
 
-                <div className="bg-destructive/5 rounded-2xl p-6 border border-destructive/20 space-y-4">
-                    <div className="space-y-0.5">
-                        <h4 className="font-medium text-destructive">{t('settings.reset_data')}</h4>
-                        <p className="text-sm text-destructive/70">
+                <div className="bg-destructive/[0.03] dark:bg-destructive/[0.05] rounded-3xl p-6 border border-destructive/20 space-y-4">
+                    <div className="space-y-1">
+                        <h4 className="font-bold text-destructive">{t('settings.reset_data')}</h4>
+                        <p className="text-sm text-muted-foreground/80 leading-relaxed">
                             {t('settings.reset_desc')}
                         </p>
                     </div>
@@ -227,9 +237,9 @@ export const SettingsPage: React.FC = () => {
                     <Button
                         variant="destructive"
                         onClick={handleReset}
-                        className="w-full rounded-xl"
+                        className="w-full h-12 rounded-2xl font-bold shadow-lg shadow-destructive/20 active:scale-[0.98] transition-all"
                     >
-                        <Trash2 className="h-4 w-4 mr-2" />
+                        <Trash2 className="h-5 w-5 mr-2" />
                         {t('settings.reset_data')}
                     </Button>
                 </div>

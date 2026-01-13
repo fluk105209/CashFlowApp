@@ -196,9 +196,9 @@ export function ObligationModal({ initialData, trigger }: Props) {
                                             type="button"
                                             onClick={() => setType(item.id as ObligationType)}
                                             className={cn(
-                                                "p-4 rounded-2xl border-2 text-left transition-all flex flex-col gap-3 relative overflow-hidden group",
+                                                "p-4 rounded-3xl border-2 text-left transition-all flex flex-col gap-3 relative overflow-hidden group mb-1",
                                                 type === item.id
-                                                    ? "border-primary bg-primary/5 shadow-sm"
+                                                    ? "border-primary bg-primary/10 dark:bg-primary/20 shadow-md ring-2 ring-primary/20"
                                                     : "border-muted bg-muted/20 hover:bg-muted/40 hover:border-muted-foreground/10"
                                             )}
                                         >
@@ -216,7 +216,7 @@ export function ObligationModal({ initialData, trigger }: Props) {
                                             </div>
                                             <span className={cn(
                                                 "text-xs font-bold transition-colors",
-                                                type === item.id ? "text-primary" : "text-muted-foreground"
+                                                type === item.id ? "text-primary dark:text-primary-foreground" : "text-muted-foreground"
                                             )}>
                                                 {item.label}
                                             </span>
@@ -389,7 +389,7 @@ export function ObligationModal({ initialData, trigger }: Props) {
                             {step === 1 ? (
                                 <>
                                     <div />
-                                    <Button type="button" onClick={() => setStep(2)}>
+                                    <Button type="button" onClick={() => setStep(2)} className="h-10 px-8 rounded-xl font-bold active:scale-[0.98] transition-all">
                                         {t('common.next')}
                                     </Button>
                                 </>
@@ -398,7 +398,7 @@ export function ObligationModal({ initialData, trigger }: Props) {
                                     <Button type="button" variant="ghost" onClick={() => setStep(1)}>
                                         {t('common.back')}
                                     </Button>
-                                    <Button type="submit">
+                                    <Button type="submit" className="h-10 px-8 rounded-xl font-bold active:scale-[0.98] transition-all">
                                         {t('common.save')}
                                     </Button>
                                 </>

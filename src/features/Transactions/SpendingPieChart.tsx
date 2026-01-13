@@ -3,7 +3,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recha
 import { useFinanceStore } from '@/stores/useFinanceStore'
 import { useTranslation } from 'react-i18next'
 import { parseISO, getMonth, getYear } from 'date-fns'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardDescription } from '@/components/ui/card'
 import { HelpCircle, Banknote } from 'lucide-react'
 import { getCategoryMetadata } from '@/constants/categories'
 
@@ -29,7 +29,7 @@ export function SpendingPieChart({ selectedMonth, selectedYear, showIncome = fal
         let total = 0
 
         filteredSpendings.forEach(s => {
-            const categoryKey = s.category // Keeping original case for matching
+            const categoryKey = s.category
             const categoryLabel = t(`categories.${s.category}`, { defaultValue: s.category })
             if (!categoryTotals[categoryLabel]) {
                 categoryTotals[categoryLabel] = { amount: 0, type: s.kind === 'obligation-payment' ? 'obligation' : 'spending', key: categoryKey }
@@ -77,10 +77,14 @@ export function SpendingPieChart({ selectedMonth, selectedYear, showIncome = fal
         <Card className="shadow-sm border-none bg-muted/20">
             <CardHeader className="pb-2">
                 <div className="space-y-1">
-                    <CardTitle className="text-sm font-bold flex items-center gap-2">
-                        <Banknote className="h-4 w-4 text-primary" />
-                        {t('dashboard.spending_by_category')}
-                    </CardTitle>
+                    <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-xl bg-primary/20 flex items-center justify-center">
+                            <Banknote className="h-4 w-4 text-primary" />
+                        </div>
+                        <h3 className="text-sm font-bold text-primary dark:text-primary">
+                            {t('dashboard.spending_by_category')}
+                        </h3>
+                    </div>
                     <CardDescription className="text-xs">
                         {selectedMonth === 'all'
                             ? t('transactions.all_months') + ` ${selectedYear}`
@@ -103,18 +107,17 @@ export function SpendingPieChart({ selectedMonth, selectedYear, showIncome = fal
                                     cy="40%"
                                     innerRadius={60}
                                     outerRadius={85}
-                                    paddingAngle={4}
+                                    paddingAngle={0}
                                     dataKey="value"
                                     animationBegin={0}
                                     animationDuration={1000}
                                     label={false}
                                 >
-                                    {chartData.map((entry, index) => (
+                                    {chartData.map((_entry, index) => (
                                         <Cell
                                             key={`cell-${index}`}
-                                            fill={entry.color}
-                                            stroke="hsl(var(--background))"
-                                            strokeWidth={2}
+                                            fill={chartData[index].color}
+                                            strokeWidth={0}
                                         />
                                     ))}
                                 </Pie>
@@ -155,10 +158,14 @@ export function SpendingPieChart({ selectedMonth, selectedYear, showIncome = fal
                                                     return (
                                                         <li key={`item-${index}`} className="flex items-center gap-1.5 min-w-[100px]">
                                                             <div
-                                                                className="w-2.5 h-2.5 rounded-full"
-                                                                style={{ backgroundColor: entry.color }}
-                                                            />
-                                                            <Icon className="h-3 w-3 text-muted-foreground" />
+                                                                className="w-5 h-5 rounded-full flex items-center justify-center"
+                                                                style={{
+                                                                    backgroundColor: entry.color + '25',
+                                                                    color: entry.color
+                                                                }}
+                                                            >
+                                                                <Icon className="h-3 w-3 stroke-[2.5]" />
+                                                            </div>
                                                             <span className="text-[10px] text-muted-foreground truncate max-w-[80px]">
                                                                 {entry.value}
                                                             </span>

@@ -22,13 +22,13 @@ const CategoryColorRow: React.FC<{ category: CategoryMetadata }> = ({ category }
             >
                 <div className="flex items-center gap-4">
                     <div
-                        className="w-12 h-12 rounded-2xl flex items-center justify-center transition-colors shadow-inner"
+                        className="w-12 h-12 rounded-2xl flex items-center justify-center transition-all shadow-inner border border-white/5"
                         style={{
-                            backgroundColor: color + '15',
+                            backgroundColor: color + '25',
                             color: color
                         }}
                     >
-                        <category.icon className="h-6 w-6" />
+                        <category.icon className="h-6 w-6 stroke-[2.5]" />
                     </div>
                     <div className="text-left">
                         <span className="font-bold text-sm block">{t(`categories.${category.key}`)}</span>
@@ -75,7 +75,7 @@ export const CategoryColorsPage: React.FC = () => {
                 <section className="space-y-4">
                     <div className="flex items-center gap-2 px-1">
                         <Palette className="h-4 w-4 text-primary" />
-                        <h3 className="text-sm font-bold text-primary/70">
+                        <h3 className="text-sm font-bold text-primary dark:text-primary/90">
                             {t('settings.income_categories')}
                         </h3>
                     </div>
@@ -90,7 +90,7 @@ export const CategoryColorsPage: React.FC = () => {
                 <section className="space-y-4">
                     <div className="flex items-center gap-2 px-1">
                         <Palette className="h-4 w-4 text-rose-500" />
-                        <h3 className="text-sm font-bold text-rose-500/70">
+                        <h3 className="text-sm font-bold text-rose-500 dark:text-rose-400">
                             {t('settings.expense_categories')}
                         </h3>
                     </div>
