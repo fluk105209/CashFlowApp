@@ -59,6 +59,8 @@ export interface FinanceState {
     lastSyncedAt: string | null;
     error: string | null;
     profile: Profile | null;
+    categoryColors: Record<string, string>;
+    userCustomColors: string[];
 
     login: (userId: string, pin: string) => Promise<{ success: boolean; error?: string }>;
     logout: () => void;
@@ -78,6 +80,8 @@ export interface FinanceState {
     setStoreData: (data: { incomes: Income[], spendings: Spending[], obligations: Obligation[] }) => void;
     setPin: (pin: string) => Promise<void>;
     setLanguage: (lang: string) => Promise<void>;
+    setCategoryColor: (category: string, color: string) => void;
+    addUserCustomColor: (color: string) => void;
     unlock: (enteredPin: string) => boolean;
     lock: () => void;
     resetData: () => Promise<void>;

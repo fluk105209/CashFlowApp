@@ -23,6 +23,8 @@ import { useFinanceStore } from "@/stores/useFinanceStore"
 import type { Spending } from '@/types'
 import { useTranslation } from 'react-i18next'
 
+import { SPENDING_CATEGORIES } from '@/constants/categories'
+
 interface Props {
     initialData?: Spending
     trigger?: React.ReactNode
@@ -58,19 +60,21 @@ export function SpendingModal({ initialData, trigger, defaultDate }: Props) {
 
     useEffect(() => {
         if (open && initialData) {
-            // eslint-disable-next-line react-hooks/set-state-in-effect
-            setName(initialData.name)
-            setAmount(initialData.amount.toString())
-            setCategory(initialData.category)
-            setKind(initialData.kind)
-            setLinkedObligationId(initialData.linkedObligationId || '')
-            setDate(new Date(initialData.date).toISOString().split('T')[0])
+            requestAnimationFrame(() => {
+                setName(initialData.name)
+                setAmount(initialData.amount.toString())
+                setCategory(initialData.category)
+                setKind(initialData.kind)
+                setLinkedObligationId(initialData.linkedObligationId || '')
+                setDate(new Date(initialData.date).toISOString().split('T')[0])
+            })
         } else if (open && !initialData) {
-            resetForm()
-            // Fix: Use local format for defaultDate
-            if (defaultDate) {
-                setDate(format(defaultDate, 'yyyy-MM-dd'))
-            }
+            requestAnimationFrame(() => {
+                resetForm()
+                if (defaultDate) {
+                    setDate(format(defaultDate, 'yyyy-MM-dd'))
+                }
+            })
         }
     }, [open, initialData, defaultDate])
 
@@ -203,14 +207,14 @@ export function SpendingModal({ initialData, trigger, defaultDate }: Props) {
                                     <SelectValue placeholder={t('spending.category')} />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="Food">{t('categories.Food')}</SelectItem>
-                                    <SelectItem value="Transport">{t('categories.Transport')}</SelectItem>
-                                    <SelectItem value="Housing">{t('categories.Housing')}</SelectItem>
-                                    <SelectItem value="Entertainment">{t('categories.Entertainment')}</SelectItem>
-                                    <SelectItem value="Health">{t('categories.Health')}</SelectItem>
-                                    <SelectItem value="Shopping">{t('categories.Shopping')}</SelectItem>
-                                    <SelectItem value="Obligation Payment">{t('categories.Obligation Payment')}</SelectItem>
-                                    <SelectItem value="Other">{t('categories.Other')}</SelectItem>
+                                    {SPENDING_CATEGORIES.map((cat) => (
+                                        <SelectItem key={cat.key} value={cat.key}>
+                                            <div className="flex items-center gap-2">
+                                                <cat.icon className="h-4 w-4 text-muted-foreground" />
+                                                <span>{t(`categories.${cat.key}`)}</span>
+                                            </div>
+                                        </SelectItem>
+                                    ))}
                                 </SelectContent>
                             </Select>
                         </div>

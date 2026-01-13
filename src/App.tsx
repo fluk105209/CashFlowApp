@@ -11,6 +11,7 @@ const DashboardPage = lazy(() => import("@/features/Dashboard/DashboardPage").th
 const CalendarView = lazy(() => import("@/features/Calendar/CalendarView").then(module => ({ default: module.CalendarView })))
 const TransactionsPage = lazy(() => import("@/features/Transactions/TransactionsPage").then(module => ({ default: module.TransactionsPage })))
 const SettingsPage = lazy(() => import("@/features/Settings/SettingsPage").then(module => ({ default: module.SettingsPage })))
+const CategoryColorsPage = lazy(() => import("@/features/Settings/CategoryColorsPage").then(module => ({ default: module.CategoryColorsPage })))
 const PinLock = lazy(() => import("@/components/PinLock").then(module => ({ default: module.PinLock })))
 const LoginPage = lazy(() => import("@/features/Auth/LoginPage").then(module => ({ default: module.LoginPage })))
 
@@ -168,6 +169,7 @@ function App() {
               <Route path="/calendar" element={<CalendarView />} />
               <Route path="/transactions" element={<TransactionsPage />} />
               <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/settings/category-colors" element={<CategoryColorsPage />} />
             </Routes>
           </AnimatePresence>
         </Suspense>

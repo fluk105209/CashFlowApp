@@ -17,7 +17,8 @@
         "net": "Net",
         "next": "Next",
         "apr": "APR",
-        "per_month": "/mo"
+        "per_month": "/mo",
+        "done": "Done"
     },
     "nav": {
         "dashboard": "Dashboard",
@@ -54,6 +55,8 @@
         "consumer_debt": "Consumer Debt",
         "est_interest": "Est. Monthly Interest",
         "recent_transactions": "Recent Transactions",
+        "spending_by_category": "Spending Proportion",
+        "spending_proportion_desc": "Monthly expenses by category",
         "view_all": "View All"
     },
     "calendar": {
@@ -80,7 +83,8 @@
         "all_months": "All Months",
         "tab_income": "Income",
         "tab_expense": "Expense",
-        "tab_obligation": "Obligation"
+        "tab_obligation": "Obligation",
+        "show_income_chart": "Show Income in Chart"
     },
     "settings": {
         "title": "Settings",
@@ -104,6 +108,8 @@
         "account": "Account",
         "logout": "Logout",
         "logout_desc": "Sign out of your account on this device",
+        "danger_zone_desc": "Irreversible action",
+        "user_guide": "User Guidance",
         "danger_zone": "Danger Zone",
         "reset_data": "Reset All Data",
         "reset_desc": "This will permanently delete all your incomes, expenses, and obligations. This action cannot be undone.",
@@ -114,7 +120,11 @@
         "pin_length_error": "PIN must be 6 digits and contain only numbers.",
         "pin_match_error": "PINs do not match.",
         "pin_update_success": "PIN changed successfully!",
-        "pin_update_error": "Failed to update PIN. Please try again."
+        "pin_update_error": "Failed to update PIN. Please try again.",
+        "category_colors": "Category Colors",
+        "category_colors_desc": "Choose a color for each category",
+        "income_categories": "Income Sources",
+        "expense_categories": "Spending Categories"
     },
     "income": {
         "title": "Incomes",
@@ -220,5 +230,25 @@
         "9": "October",
         "10": "November",
         "11": "December"
+    },
+    "guide": {
+        "title": "User Guidance",
+        "welcome_message": "Welcome to Cash Flow Manager! This guide will help you understand how to effectively track your income, expenses, and manage your debt obligations.",
+        "dashboard_title": "1. Dashboard Overview",
+        "dashboard_desc": "Your financial health center. Get an instant view of your monthly performance.",
+        "dashboard_net_desc": "Shows your 'Actual' remaining cash for the CURRENT month (Income - Expense). Green bar represents Income, Red bar represents Expense.",
+        "dashboard_obligation_desc": "Breakdown of debt payments you must make this month versus your total debt balance.",
+        "transaction_title": "2. Managing Transactions",
+        "transaction_desc": "Easily record Income and Spending. Tap the '+' button to add new entries. The system automatically updates your dashboard.",
+        "obligation_title": "3. Obligations & Debt",
+        "ob_installment": "Fixed Installments",
+        "ob_installment_desc": "For loans with fixed monthly payments (e.g., Car, Personal Loan).",
+        "ob_credit_card": "Credit Cards",
+        "ob_credit_card_desc": "Track credit limits and usage. The system calculates minimum payments automatically.",
+        "note": "Note",
+        "credit_limit_warning": "If the credit card progress bar turns RED, it means you are nearing your credit limit!",
+        "calendar_title": "4. Calendar View",
+        "calendar_desc": "Visualizes your spending habits over the month. Click any date to see detailed transactions.",
+        "settings_desc": "Customize your experience: toggle Dark Mode, switch Languages, or reset data if needed."
     }
 }

@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useTranslation } from "react-i18next"
 import { isSameMonth } from "date-fns"
 
+
 export function DashboardPage() {
     const { t } = useTranslation()
     const { incomes, spendings, obligations, isLoading, initialize } = useFinanceStore()
@@ -165,6 +166,7 @@ export function DashboardPage() {
                     </CardContent>
                 </Card>
             </motion.div>
+
 
             <div className="space-y-6">
                 <section>

@@ -5,6 +5,12 @@ import type { FinanceState } from '@/types';
 import { authService } from '@/services/authService';
 import { syncService } from '@/services/syncService';
 import i18n from '@/i18n';
+import { ALL_CATEGORIES } from '@/constants/categories';
+
+const defaultCategoryColors = ALL_CATEGORIES.reduce((acc, cat) => {
+    acc[cat.key] = cat.defaultColor;
+    return acc;
+}, {} as Record<string, string>);
 
 export const useFinanceStore = create<FinanceState>()(
     persist(
@@ -19,6 +25,8 @@ export const useFinanceStore = create<FinanceState>()(
             lastSyncedAt: null,
             error: null,
             profile: null,
+            categoryColors: defaultCategoryColors,
+            userCustomColors: [],
 
             syncToCloud: async (category?: 'incomes' | 'spendings' | 'obligations') => {
                 const { profile, incomes, spendings, obligations } = get();
@@ -221,6 +229,20 @@ export const useFinanceStore = create<FinanceState>()(
                     await authService.updateLanguage(profile.id, lang);
                     set({ profile: { ...profile, language: lang } });
                 }
+            },
+
+            setCategoryColor: (category: string, color: string) => {
+                set((state) => ({
+                    categoryColors: { ...state.categoryColors, [category]: color }
+                }));
+            },
+
+            addUserCustomColor: (color: string) => {
+                set((state) => ({
+                    userCustomColors: state.userCustomColors.includes(color)
+                        ? state.userCustomColors
+                        : [...state.userCustomColors, color]
+                }));
             },
 
             unlock: (enteredPin) => {

@@ -17,6 +17,8 @@ import type { Frequency, Income } from "@/types"
 import { format } from "date-fns"
 import { useTranslation } from "react-i18next"
 
+import { INCOME_CATEGORIES } from "@/constants/categories"
+
 interface Props {
     initialData?: Income
     trigger?: React.ReactNode
@@ -46,21 +48,21 @@ export function IncomeModal({ initialData, trigger, defaultDate }: Props) {
 
     useEffect(() => {
         if (open && initialData) {
-            // eslint-disable-next-line react-hooks/set-state-in-effect
-            setName(initialData.name)
-            setAmount(initialData.amount.toString())
-            setFrequency(initialData.frequency)
-            setCategory(initialData.category)
-            // Fix: ensure we don't shift timezone if possible, but for editing, we assume stored date is correct.
-            // Using split('T')[0] on ISO string is risky if stored as UTC midnight.
-            // But let's keep consistent with original logic for edit for now, as user didn't complain about Edit.
-            setDate(new Date(initialData.date).toISOString().split('T')[0])
+            // Use requestAnimationFrame to avoid synchronous setState in effect warning
+            requestAnimationFrame(() => {
+                setName(initialData.name)
+                setAmount(initialData.amount.toString())
+                setFrequency(initialData.frequency)
+                setCategory(initialData.category)
+                setDate(new Date(initialData.date).toISOString().split('T')[0])
+            })
         } else if (open && !initialData) {
-            resetForm()
-            // Fix: Use local format for defaultDate
-            if (defaultDate) {
-                setDate(format(defaultDate, 'yyyy-MM-dd'))
-            }
+            requestAnimationFrame(() => {
+                resetForm()
+                if (defaultDate) {
+                    setDate(format(defaultDate, 'yyyy-MM-dd'))
+                }
+            })
         }
     }, [open, initialData, defaultDate])
 
@@ -158,12 +160,14 @@ export function IncomeModal({ initialData, trigger, defaultDate }: Props) {
                                     <SelectValue placeholder={t('common.loading')} />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="Salary">{t('categories.Salary')}</SelectItem>
-                                    <SelectItem value="Freelance">{t('categories.Freelance')}</SelectItem>
-                                    <SelectItem value="Business">{t('categories.Business')}</SelectItem>
-                                    <SelectItem value="Investment">{t('categories.Investment')}</SelectItem>
-                                    <SelectItem value="Gift">{t('categories.Gift')}</SelectItem>
-                                    <SelectItem value="Other">{t('categories.Other')}</SelectItem>
+                                    {INCOME_CATEGORIES.map((cat) => (
+                                        <SelectItem key={cat.key} value={cat.key}>
+                                            <div className="flex items-center gap-2">
+                                                <cat.icon className="h-4 w-4 text-muted-foreground" />
+                                                <span>{t(`categories.${cat.key}`)}</span>
+                                            </div>
+                                        </SelectItem>
+                                    ))}
                                 </SelectContent>
                             </Select>
                         </div>

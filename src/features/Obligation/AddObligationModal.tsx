@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
 import {
     Dialog,
     DialogContent,
@@ -63,21 +64,24 @@ export function ObligationModal({ initialData, trigger }: Props) {
 
     useEffect(() => {
         if (open && initialData) {
-            // eslint-disable-next-line react-hooks/set-state-in-effect
-            setStep(2)
-            setType(initialData.type)
-            setName(initialData.name)
-            setAmount(initialData.amount.toString())
-            setPaymentMode('fixed') // Default to fixed when editing for now
-            setPercentValue('')
-            setBalance(initialData.balance?.toString() || '')
-            setInterestRate(initialData.interestRate?.toString() || '')
-            setTotalMonths(initialData.totalMonths?.toString() || '')
-            setPaidMonths(initialData.paidMonths?.toString() || '0')
-            setCreditLimit(initialData.creditLimit?.toString() || '')
-            setStartDate(initialData.startDate ? new Date(initialData.startDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0])
+            requestAnimationFrame(() => {
+                setStep(2)
+                setType(initialData.type)
+                setName(initialData.name)
+                setAmount(initialData.amount.toString())
+                setPaymentMode('fixed')
+                setPercentValue('')
+                setBalance(initialData.balance?.toString() || '')
+                setInterestRate(initialData.interestRate?.toString() || '')
+                setTotalMonths(initialData.totalMonths?.toString() || '')
+                setPaidMonths(initialData.paidMonths?.toString() || '0')
+                setCreditLimit(initialData.creditLimit?.toString() || '')
+                setStartDate(initialData.startDate ? new Date(initialData.startDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0])
+            })
         } else if (open && !initialData) {
-            resetForm()
+            requestAnimationFrame(() => {
+                resetForm()
+            })
         }
     }, [open, initialData])
 
@@ -92,8 +96,9 @@ export function ObligationModal({ initialData, trigger }: Props) {
             if (mParams.monthly > 0 && mParams.total > 0) {
                 const remainingMonths = Math.max(0, mParams.total - mParams.paid)
                 const calculatedRemaining = remainingMonths * mParams.monthly
-                // eslint-disable-next-line react-hooks/set-state-in-effect
-                setBalance(calculatedRemaining.toString())
+                requestAnimationFrame(() => {
+                    setBalance(calculatedRemaining.toString())
+                })
             }
         }
     }, [amount, totalMonths, paidMonths, type])
@@ -105,8 +110,9 @@ export function ObligationModal({ initialData, trigger }: Props) {
             const bal = parseFloat(balance)
             if (!isNaN(pct) && !isNaN(bal)) {
                 const calc = (pct / 100) * bal
-                // eslint-disable-next-line react-hooks/set-state-in-effect
-                setAmount(calc.toFixed(2))
+                requestAnimationFrame(() => {
+                    setAmount(calc.toFixed(2))
+                })
             }
         }
     }, [paymentMode, percentValue, balance, type])
@@ -178,26 +184,48 @@ export function ObligationModal({ initialData, trigger }: Props) {
                                 <p className="text-sm text-muted-foreground">{t('obligations.step_1_desc')}</p>
                                 <div className="grid grid-cols-2 gap-3">
                                     {[
-                                        { id: 'installment', icon: Smartphone, label: t('obligation_types.installment') },
-                                        { id: 'credit-card', icon: CreditCard, label: t('obligation_types.credit-card') },
-                                        { id: 'personal-loan', icon: Banknote, label: t('obligation_types.personal-loan') },
-                                        { id: 'car-loan', icon: Car, label: t('obligation_types.car-loan') },
-                                        { id: 'home-loan', icon: Home, label: t('obligation_types.home-loan') },
-                                        { id: 'other', icon: HelpCircle, label: t('obligation_types.other') },
+                                        { id: 'installment', icon: Smartphone, label: t('obligation_types.installment'), color: '#3b82f6' },
+                                        { id: 'credit-card', icon: CreditCard, label: t('obligation_types.credit-card'), color: '#ec4899' },
+                                        { id: 'personal-loan', icon: Banknote, label: t('obligation_types.personal-loan'), color: '#f59e0b' },
+                                        { id: 'car-loan', icon: Car, label: t('obligation_types.car-loan'), color: '#6366f1' },
+                                        { id: 'home-loan', icon: Home, label: t('obligation_types.home-loan'), color: '#10b981' },
+                                        { id: 'other', icon: HelpCircle, label: t('obligation_types.other'), color: '#94a3b8' },
                                     ].map((item) => (
                                         <button
                                             key={item.id}
                                             type="button"
                                             onClick={() => setType(item.id as ObligationType)}
                                             className={cn(
-                                                "p-4 rounded-xl border-2 text-left transition-all flex flex-col gap-2 relative overflow-hidden",
+                                                "p-4 rounded-2xl border-2 text-left transition-all flex flex-col gap-3 relative overflow-hidden group",
                                                 type === item.id
-                                                    ? "border-primary bg-primary/10 shadow-[0_0_0_1px_rgba(var(--primary),0.2)]"
-                                                    : "border-muted bg-muted/40 hover:bg-muted/60 hover:border-muted-foreground/20"
+                                                    ? "border-primary bg-primary/5 shadow-sm"
+                                                    : "border-muted bg-muted/20 hover:bg-muted/40 hover:border-muted-foreground/10"
                                             )}
                                         >
-                                            <item.icon className={cn("h-5 w-5", type === item.id ? "text-primary" : "text-muted-foreground")} />
-                                            <span className="text-xs font-bold">{item.label}</span>
+                                            <div
+                                                className={cn(
+                                                    "w-10 h-10 rounded-xl flex items-center justify-center transition-all",
+                                                    type === item.id ? "scale-110" : "opacity-70 group-hover:opacity-100"
+                                                )}
+                                                style={{
+                                                    backgroundColor: item.color + '20',
+                                                    color: item.color
+                                                }}
+                                            >
+                                                <item.icon className="h-5 w-5" />
+                                            </div>
+                                            <span className={cn(
+                                                "text-xs font-bold transition-colors",
+                                                type === item.id ? "text-primary" : "text-muted-foreground"
+                                            )}>
+                                                {item.label}
+                                            </span>
+                                            {type === item.id && (
+                                                <motion.div
+                                                    layoutId="selectedType"
+                                                    className="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary"
+                                                />
+                                            )}
                                         </button>
                                     ))}
                                 </div>
