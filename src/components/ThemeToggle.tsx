@@ -1,6 +1,8 @@
 import { Moon, Sun } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useEffect, useState } from "react"
+import { StatusBar, Style } from '@capacitor/status-bar'
+import { Capacitor } from '@capacitor/core'
 
 export function ThemeToggle() {
     const [theme, setTheme] = useState<'light' | 'dark'>(() => {
@@ -19,6 +21,13 @@ export function ThemeToggle() {
         root.classList.remove('light', 'dark')
         root.classList.add(theme)
         localStorage.setItem('theme', theme)
+
+        // Sync Native Status Bar
+        if (Capacitor.isNativePlatform()) {
+            StatusBar.setStyle({
+                style: theme === 'dark' ? Style.Dark : Style.Light
+            }).catch(err => console.error('StatusBar error:', err))
+        }
     }, [theme])
 
     const toggleTheme = () => {

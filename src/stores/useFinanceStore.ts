@@ -63,21 +63,32 @@ export const useFinanceStore = create<FinanceState>()(
                 }
 
                 if (profile) {
-                    const cloudData = await syncService.fetchAll(profile.id);
                     if (profile.language) {
                         i18n.changeLanguage(profile.language);
                     }
 
+                    // Set profile immediately to unlock UI
                     set({
                         profile,
                         pin: profile.pin_hash,
                         isLoading: false,
                         isLocked: false,
-                        incomes: cloudData.incomes,
-                        spendings: cloudData.spendings,
-                        obligations: cloudData.obligations,
-                        lastSyncedAt: new Date().toISOString()
                     });
+
+                    // Fetch data in background
+                    set({ isSyncing: true });
+                    syncService.fetchAll(profile.id).then(cloudData => {
+                        set({
+                            incomes: cloudData.incomes,
+                            spendings: cloudData.spendings,
+                            obligations: cloudData.obligations,
+                            isSyncing: false,
+                            lastSyncedAt: new Date().toISOString()
+                        });
+                    }).catch(() => {
+                        set({ isSyncing: false, error: 'auth.cloud_load_error' });
+                    });
+
                     return { success: true };
                 }
 
@@ -90,10 +101,17 @@ export const useFinanceStore = create<FinanceState>()(
             },
 
             initialize: async () => {
-                const { profile } = get();
+                const { profile, incomes, spendings, obligations } = get();
                 if (!profile) return;
 
-                set({ isLoading: true, error: null });
+                // Only show loading state if we have absolutely no data
+                const hasNoData = incomes.length === 0 && spendings.length === 0 && obligations.length === 0;
+                if (hasNoData) {
+                    set({ isLoading: true, error: null });
+                } else {
+                    set({ isSyncing: true, error: null });
+                }
+
                 try {
                     const data = await syncService.fetchAll(profile.id);
                     if (profile.language) {
@@ -102,10 +120,11 @@ export const useFinanceStore = create<FinanceState>()(
                     set({
                         ...data,
                         isLoading: false,
+                        isSyncing: false,
                         lastSyncedAt: new Date().toISOString()
                     });
                 } catch {
-                    set({ isLoading: false, error: 'auth.cloud_load_error' });
+                    set({ isLoading: false, isSyncing: false, error: 'auth.cloud_load_error' });
                 }
             },
 

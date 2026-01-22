@@ -2,6 +2,8 @@ import { useNavigate, useLocation, Routes, Route, Link } from "react-router-dom"
 import { LayoutDashboard, Calendar as CalendarIcon, List, Loader2, Settings, Cloud, CloudOff, CheckCircle2 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { lazy, Suspense, useEffect } from "react"
+import { StatusBar, Style } from '@capacitor/status-bar'
+import { Capacitor } from '@capacitor/core'
 import { useFinanceStore } from "@/stores/useFinanceStore"
 import { useTranslation } from "react-i18next"
 import { format } from "date-fns"
@@ -59,6 +61,17 @@ function App() {
     const root = window.document.documentElement
     root.classList.remove('light', 'dark')
     root.classList.add(theme)
+
+    // Sync Native Status Bar
+    if (Capacitor.isNativePlatform()) {
+      try {
+        StatusBar.setStyle({
+          style: theme === 'dark' ? Style.Dark : Style.Light
+        }).catch(err => console.error('StatusBar error:', err))
+      } catch (err) {
+        console.error('StatusBar not available:', err)
+      }
+    }
   }, [])
 
   const isDashboard = location.pathname === '/'
@@ -75,7 +88,7 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground font-sans antialiased p-4 md:p-8">
+    <div className="min-h-screen bg-background text-foreground font-sans antialiased p-4 md:p-8 pt-[calc(1rem+env(safe-area-inset-top,0px))]">
       <div className="max-w-md mx-auto space-y-6 pb-20">
         <header className="flex justify-between items-start mb-0">
           <motion.div

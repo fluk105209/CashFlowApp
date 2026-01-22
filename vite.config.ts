@@ -10,4 +10,16 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-charts': ['recharts'],
+          'vendor-ui': ['framer-motion', 'lucide-react', '@radix-ui/react-dialog'],
+          'vendor-core': ['react', 'react-dom', 'react-router-dom', 'zustand', 'i18next'],
+        }
+      }
+    },
+    chunkSizeWarningLimit: 1000,
+  }
 })

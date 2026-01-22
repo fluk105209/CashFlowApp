@@ -2,6 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Fix for yellow focus outline on Recharts segments in mobile */
+.recharts-pie-sector:focus,
+.recharts-curve:focus,
+.recharts-rectangle:focus,
+.recharts-surface:focus,
+.recharts-sector:focus {
+  outline: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+.recharts-responsive-container {
+  -webkit-tap-highlight-color: transparent !important;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

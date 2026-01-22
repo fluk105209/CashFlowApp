@@ -57,16 +57,38 @@ export function SpendingPieChart({ selectedMonth, selectedYear, showIncome = fal
             })
         }
 
-        const data = Object.entries(categoryTotals)
-            .map(([name, data]) => ({
-                name,
-                value: data.amount,
-                type: data.type,
-                key: data.key,
-                color: categoryColors[data.key] || '#94a3b8',
-                percentage: total > 0 ? ((data.amount / total) * 100).toFixed(1) : "0"
-            }))
-            .sort((a, b) => b.value - a.value)
+        const threshold = total * 0.02 // 2% threshold
+
+        const mainData: any[] = []
+        let othersValue = 0
+
+        Object.entries(categoryTotals).forEach(([name, data]) => {
+            if (data.amount < threshold && Object.keys(categoryTotals).length > 4) {
+                othersValue += data.amount
+            } else {
+                mainData.push({
+                    name,
+                    value: data.amount,
+                    type: data.type,
+                    key: data.key,
+                    color: categoryColors[data.key] || '#94a3b8',
+                    percentage: total > 0 ? ((data.amount / total) * 100).toFixed(1) : "0"
+                })
+            }
+        })
+
+        if (othersValue > 0) {
+            mainData.push({
+                name: t('categories.others', { defaultValue: 'Others' }),
+                value: othersValue,
+                type: 'spending',
+                key: 'others',
+                color: '#94a3b8',
+                percentage: ((othersValue / total) * 100).toFixed(1)
+            })
+        }
+
+        const data = mainData.sort((a, b) => b.value - a.value)
 
         return { chartData: data }
     }, [spendings, incomes, selectedMonth, selectedYear, showIncome, t, categoryColors])
@@ -105,9 +127,9 @@ export function SpendingPieChart({ selectedMonth, selectedYear, showIncome = fal
                                     data={chartData}
                                     cx="50%"
                                     cy="40%"
-                                    innerRadius={60}
-                                    outerRadius={85}
-                                    paddingAngle={0}
+                                    innerRadius={55}
+                                    outerRadius={80}
+                                    paddingAngle={2}
                                     dataKey="value"
                                     animationBegin={0}
                                     animationDuration={1000}
