@@ -1,5 +1,7 @@
-import { useNavigate, useLocation, Routes, Route, Link } from "react-router-dom"
-import { LayoutDashboard, Calendar as CalendarIcon, List, Loader2, Settings, Cloud, CloudOff, CheckCircle2 } from "lucide-react"
+import { useNavigate, useLocation, Routes, Route } from "react-router-dom"
+import { Home, Calendar as CalendarIcon, List, Settings, Cloud, CloudOff, CheckCircle2, User, Loader2, Plus } from "lucide-react"
+import { UnifiedAddModal } from "@/components/UnifiedAddModal"
+import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { lazy, Suspense, useEffect } from "react"
 import { StatusBar, Style } from '@capacitor/status-bar'
@@ -51,6 +53,17 @@ function App() {
   const navigate = useNavigate()
   const location = useLocation()
   const { profile } = useFinanceStore()
+  const [addModalOpen, setAddModalOpen] = useState(false)
+  const [prefillData, setPrefillData] = useState<any>(null)
+
+  useEffect(() => {
+    const handleOpenAdd = (e: any) => {
+      setPrefillData(e.detail || null)
+      setAddModalOpen(true)
+    }
+    window.addEventListener('open-unified-add', handleOpenAdd)
+    return () => window.removeEventListener('open-unified-add', handleOpenAdd)
+  }, [])
 
   useEffect(() => {
     // Initialize theme
@@ -90,84 +103,22 @@ function App() {
   return (
     <div className="min-h-screen bg-background text-foreground font-sans antialiased p-4 md:p-8 pt-[calc(1rem+env(safe-area-inset-top,0px))]">
       <div className="max-w-md mx-auto space-y-6 pb-20">
-        <header className="flex justify-between items-start mb-0">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
-            className="flex flex-col gap-1"
-          >
-            <Link to="/">
-              <h1 className="text-2xl font-bold tracking-tight">{t('dashboard.title')}</h1>
-            </Link>
-            <SyncIndicator />
-          </motion.div>
-
-          <motion.div
-            className="flex items-center gap-2"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <div className="flex bg-muted rounded-lg p-1">
-              <button
-                onClick={() => navigate('/')}
-                title={t('nav.dashboard')}
-                className={`p-2 rounded-md transition-all relative ${isDashboard ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-              >
-                {isDashboard && (
-                  <motion.div
-                    layoutId="activeTab"
-                    className="absolute inset-0 bg-background shadow-sm rounded-md"
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                  />
-                )}
-                <LayoutDashboard className="h-4 w-4 relative z-10" />
-              </button>
-              <button
-                onClick={() => navigate('/calendar')}
-                title={t('nav.calendar')}
-                className={`p-2 rounded-md transition-all relative ${isCalendar ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-              >
-                {isCalendar && (
-                  <motion.div
-                    layoutId="activeTab"
-                    className="absolute inset-0 bg-background shadow-sm rounded-md"
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                  />
-                )}
-                <CalendarIcon className="h-4 w-4 relative z-10" />
-              </button>
-              <button
-                onClick={() => navigate('/transactions')}
-                title={t('nav.transactions')}
-                className={`p-2 rounded-md transition-all relative ${isTransactions ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-              >
-                {isTransactions && (
-                  <motion.div
-                    layoutId="activeTab"
-                    className="absolute inset-0 bg-background shadow-sm rounded-md"
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                  />
-                )}
-                <List className="h-4 w-4 relative z-10" />
-              </button>
-              <button
-                onClick={() => navigate('/settings')}
-                title={t('nav.settings')}
-                className={`p-2 rounded-md transition-all relative ${isSettings ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-              >
-                {isSettings && (
-                  <motion.div
-                    layoutId="activeTab"
-                    className="absolute inset-0 bg-background shadow-sm rounded-md"
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                  />
-                )}
-                <Settings className="h-4 w-4 relative z-10" />
-              </button>
+        <header className="flex justify-between items-center mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center border-2 border-background shadow-sm overflow-hidden text-primary">
+              <User className="w-5 h-5" />
             </div>
-          </motion.div>
+            <div className="flex flex-col">
+              <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">{t('common.welcome', { defaultValue: 'Welcome' })}</span>
+              <h1 className="text-lg font-bold tracking-tight text-primary leading-tight">
+                {profile?.user_id_text || 'User'}
+              </h1>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <SyncIndicator />
+          </div>
         </header>
 
         <Suspense fallback={
@@ -186,9 +137,73 @@ function App() {
             </Routes>
           </AnimatePresence>
         </Suspense>
+
         <PinLock />
+
+        <UnifiedAddModal
+          open={addModalOpen}
+          onOpenChange={setAddModalOpen}
+          prefillData={prefillData}
+        />
+
+        {/* Bottom Navigation Bar */}
+        <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[95%] max-w-md bg-card/80 backdrop-blur-xl border border-border/50 shadow-2xl rounded-[2rem] px-4 py-3 z-50 flex justify-between items-center">
+          <NavButton
+            active={isDashboard}
+            onClick={() => navigate('/')}
+            icon={<Home className="h-5 w-5" />}
+          />
+          <NavButton
+            active={isTransactions}
+            onClick={() => navigate('/transactions')}
+            icon={<List className="h-5 w-5" />}
+          />
+
+          <div className="flex-shrink-0 -mt-8">
+            <div className="bg-background rounded-full p-2 shadow-lg">
+              <button
+                onClick={() => {
+                  // This will need a way to open the modal
+                  window.dispatchEvent(new CustomEvent('open-unified-add'));
+                }}
+                className="w-14 h-14 rounded-full bg-primary text-white shadow-xl shadow-primary/30 flex items-center justify-center hover:scale-110 active:scale-95 transition-all"
+              >
+                <Plus className="w-7 h-7 stroke-[3]" />
+              </button>
+            </div>
+          </div>
+
+          <NavButton
+            active={isCalendar}
+            onClick={() => navigate('/calendar')}
+            icon={<CalendarIcon className="h-5 w-5" />}
+          />
+          <NavButton
+            active={isSettings}
+            onClick={() => navigate('/settings')}
+            icon={<Settings className="h-5 w-5" />}
+          />
+        </nav>
       </div>
     </div>
+  )
+}
+
+function NavButton({ active, onClick, icon }: { active: boolean, onClick: () => void, icon: React.ReactNode }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`relative p-2 transition-all duration-300 ${active ? 'text-primary scale-110' : 'text-muted-foreground hover:text-primary active:scale-95'}`}
+    >
+      {active && (
+        <motion.div
+          layoutId="navActive"
+          className="absolute inset-0 bg-primary/10 rounded-full"
+          transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+        />
+      )}
+      <div className="relative z-10">{icon}</div>
+    </button>
   )
 }
 

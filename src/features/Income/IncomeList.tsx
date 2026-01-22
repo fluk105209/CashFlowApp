@@ -1,13 +1,13 @@
-import { useState } from "react"
 import { useFinanceStore } from "@/stores/useFinanceStore"
 import { Button } from "@/components/ui/button"
-import { Trash2, ChevronUp, Edit, ExternalLink, Calendar } from "lucide-react"
+import { Trash2, Edit, ExternalLink, HelpCircle } from "lucide-react"
 import { IncomeModal } from "./AddIncomeModal"
 import type { Income } from "@/types"
 import { motion, AnimatePresence } from "framer-motion"
 import { Link } from "react-router-dom"
 import { format, parseISO } from "date-fns"
 import { useTranslation } from "react-i18next"
+import { getCategoryMetadata } from "@/constants/categories"
 
 interface Props {
     limit?: number
@@ -16,14 +16,11 @@ interface Props {
 
 export function IncomeList({ limit, items }: Props) {
     const { t, i18n } = useTranslation()
-    const { incomes: storeIncomes, deleteIncome } = useFinanceStore()
-    const [isExpanded, setIsExpanded] = useState(false)
+    const { incomes: storeIncomes, deleteIncome, categoryColors } = useFinanceStore()
 
-    // Use items prop if provided (for filtering), otherwise use store
     const dataSource = [...(items || storeIncomes)].sort((a, b) => {
         const dateComparison = new Date(b.date).getTime() - new Date(a.date).getTime();
         if (dateComparison !== 0) return dateComparison;
-        // If dates are equal, sort by created_at desc (newest created first)
         if (a.created_at && b.created_at) {
             return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
         }
@@ -32,85 +29,93 @@ export function IncomeList({ limit, items }: Props) {
 
     if (dataSource.length === 0) {
         return (
-            <div className="text-center text-sm text-muted-foreground py-8 border-2 border-dashed rounded-lg">
+            <div className="text-center text-sm text-muted-foreground py-10 border-2 border-dashed rounded-[2rem] bg-muted/20">
                 {t('common.no_items_found')}
             </div>
         )
     }
 
-    const displayedIncomes = (limit && !isExpanded) ? dataSource.slice(0, limit) : dataSource
+    const displayedIncomes = limit ? dataSource.slice(0, limit) : dataSource
 
     return (
-        <div className="space-y-3">
+        <div className="space-y-4">
             <AnimatePresence mode="popLayout" initial={false}>
-                {displayedIncomes.map((income, index) => (
-                    <motion.div
-                        key={income.id}
-                        layout
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        transition={{ duration: 0.2, delay: index * 0.05 }}
-                        className="flex items-center justify-between p-4 bg-card border rounded-lg shadow-sm"
-                    >
-                        <div className="flex flex-col gap-1">
-                            <div className="font-medium">{income.name}</div>
-                            <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
-                                <span className="capitalize">{t(`categories.${income.category}`, { defaultValue: income.category })}</span>
-                                <span>•</span>
-                                <div className="flex items-center gap-1">
-                                    <Calendar className="h-2.5 w-2.5" />
-                                    {i18n.language.startsWith('th')
-                                        ? `${format(parseISO(income.date), 'd')} ${t(`months.${parseISO(income.date).getMonth()}`).substring(0, 3)} ${parseISO(income.date).getFullYear() + 543}`
-                                        : format(parseISO(income.date), 'MMM d, yyyy')}
+                {displayedIncomes.map((income, index) => {
+                    const metadata = getCategoryMetadata(income.category);
+                    const Icon = metadata?.icon || HelpCircle;
+                    const color = categoryColors[income.category] || '#10b981';
+
+                    return (
+                        <motion.div
+                            key={income.id}
+                            layout
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            transition={{ duration: 0.3, delay: index * 0.05 }}
+                            className="flex items-center justify-between p-4 bg-card rounded-[1.5rem] shadow-sm border border-border/40"
+                        >
+                            <div className="flex items-center gap-4 flex-1 min-w-0">
+                                <div
+                                    className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
+                                    style={{ backgroundColor: color + '15', color: color }}
+                                >
+                                    <Icon className="h-6 w-6" />
+                                </div>
+                                <div className="flex flex-col min-w-0">
+                                    <div className="font-bold text-sm truncate">{income.name}</div>
+                                    <div className="text-[10px] text-muted-foreground flex items-center gap-1.5">
+                                        <span className="font-medium whitespace-nowrap">{t(`categories.${income.category}`, { defaultValue: income.category })}</span>
+                                        <span className="opacity-30">•</span>
+                                        <span className="whitespace-nowrap">
+                                            {i18n.language.startsWith('th')
+                                                ? `${format(parseISO(income.date), 'd')} ${t(`months.${parseISO(income.date).getMonth()}`).substring(0, 3)}`
+                                                : format(parseISO(income.date), 'MMM d')}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <div className="font-bold text-emerald-600 dark:text-emerald-400">
-                                +฿{income.amount.toLocaleString()}
-                            </div>
-                            <IncomeModal
-                                initialData={income}
-                                trigger={
-                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" title={t('common.edit')}>
-                                        <Edit className="h-4 w-4" />
+
+                            <div className="flex items-center gap-1 ml-2">
+                                <div className="text-right mr-2">
+                                    <div className="font-black text-emerald-500 text-sm whitespace-nowrap">
+                                        +฿{income.amount.toLocaleString()}
+                                    </div>
+                                </div>
+                                <div className="flex items-center">
+                                    <IncomeModal
+                                        initialData={income}
+                                        trigger={
+                                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-muted-foreground/50 hover:text-primary hover:bg-primary/5" title={t('common.edit')}>
+                                                <Edit className="h-3.5 w-3.5" />
+                                            </Button>
+                                        }
+                                    />
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-8 w-8 rounded-full text-muted-foreground/50 hover:text-destructive hover:bg-destructive/5"
+                                        onClick={() => deleteIncome(income.id)}
+                                        title={t('common.delete')}
+                                    >
+                                        <Trash2 className="h-3.5 w-3.5" />
                                     </Button>
-                                }
-                            />
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                                onClick={() => deleteIncome(income.id)}
-                                title={t('common.delete')}
-                            >
-                                <Trash2 className="h-4 w-4" />
-                            </Button>
-                        </div>
-                    </motion.div>
-                ))}
+                                </div>
+                            </div>
+                        </motion.div>
+                    )
+                })}
             </AnimatePresence>
 
-            {limit && dataSource.length > limit && !isExpanded && (
-                <Link to="/transactions?tab=income" className="block">
+            {limit && dataSource.length > limit && (
+                <Link to="/transactions?tab=income" className="block px-2">
                     <Button
                         variant="ghost"
-                        className="w-full text-muted-foreground hover:text-primary text-xs flex items-center gap-1"
+                        className="w-full text-muted-foreground hover:text-primary text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 h-10 rounded-2xl bg-muted/30"
                     >
                         {t('common.view_all_with_count', { count: dataSource.length })} <ExternalLink className="h-3 w-3" />
                     </Button>
                 </Link>
-            )}
-
-            {limit && isExpanded && (
-                <Button
-                    variant="ghost"
-                    className="w-full text-muted-foreground hover:text-primary text-xs"
-                    onClick={() => setIsExpanded(false)}
-                >
-                    <div className="flex items-center gap-1">{t('common.show_less')} <ChevronUp className="h-3 w-3" /></div>
-                </Button>
             )}
         </div>
     )

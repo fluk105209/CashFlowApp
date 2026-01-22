@@ -13,10 +13,11 @@ import {
     endOfWeek,
     isToday
 } from "date-fns"
-import { ChevronLeft, ChevronRight, BarChart3, Calendar as CalendarIcon, LineChart } from "lucide-react"
+import { ChevronLeft, ChevronRight, BarChart3, Calendar as CalendarIcon, LineChart, PieChart as PieChartIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { DayDetailModal } from "./DayDetailModal"
 import { FinanceChart } from "./FinanceChart"
+import { SpendingPieChart } from "../Transactions/SpendingPieChart"
 import { cn } from "@/lib/utils"
 import { useTranslation } from "react-i18next"
 
@@ -25,7 +26,9 @@ export function CalendarView() {
     const { incomes, spendings } = useFinanceStore()
     const [currentDate, setCurrentDate] = useState(new Date())
     const [selectedDate, setSelectedDate] = useState<Date | null>(null)
-    const [viewMode, setViewMode] = useState<'grid' | 'graph-month' | 'graph-year'>('grid')
+    const [viewMode, setViewMode] = useState<'grid' | 'pie' | 'graph-month' | 'graph-year'>('grid')
+
+    // ... (rest of useMemo hooks remain unchanged)
 
     // Compute Calendar Grid
     const monthStart = startOfMonth(currentDate)
@@ -199,44 +202,49 @@ export function CalendarView() {
                     </div>
                 </div>
 
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center px-1">
                     {/* View Switcher */}
-                    <div className="flex bg-muted rounded-lg p-1 text-xs">
+                    <div className="grid grid-cols-4 bg-muted rounded-xl p-1 text-[10px] w-full gap-1">
                         <button
                             onClick={() => setViewMode('grid')}
-                            className={cn("px-3 py-1.5 rounded-md transition-all flex items-center gap-1", viewMode === 'grid' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground')}
+                            className={cn("py-2 px-1 rounded-lg transition-all flex flex-col items-center justify-center gap-1 font-bold", viewMode === 'grid' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground')}
                         >
-                            <CalendarIcon className="h-3 w-3" /> {t('calendar.grid')}
+                            <CalendarIcon className="h-3.5 w-3.5" /> <span>{t('calendar.grid')}</span>
+                        </button>
+                        <button
+                            onClick={() => setViewMode('pie')}
+                            className={cn("py-2 px-1 rounded-lg transition-all flex flex-col items-center justify-center gap-1 font-bold", viewMode === 'pie' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground')}
+                        >
+                            <PieChartIcon className="h-3.5 w-3.5" /> <span>{t('common.proportion', { defaultValue: 'Ratio' })}</span>
                         </button>
                         <button
                             onClick={() => setViewMode('graph-month')}
-                            className={cn("px-3 py-1.5 rounded-md transition-all flex items-center gap-1", viewMode === 'graph-month' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground')}
+                            className={cn("py-2 px-1 rounded-lg transition-all flex flex-col items-center justify-center gap-1 font-bold", viewMode === 'graph-month' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground')}
                         >
-                            <BarChart3 className="h-3 w-3" /> {t('calendar.month')}
+                            <BarChart3 className="h-3.5 w-3.5" /> <span>{t('calendar.month')}</span>
                         </button>
                         <button
                             onClick={() => setViewMode('graph-year')}
-                            className={cn("px-3 py-1.5 rounded-md transition-all flex items-center gap-1", viewMode === 'graph-year' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground')}
+                            className={cn("py-2 px-1 rounded-lg transition-all flex flex-col items-center justify-center gap-1 font-bold", viewMode === 'graph-year' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground')}
                         >
-                            <LineChart className="h-3 w-3" /> {t('calendar.year')}
+                            <LineChart className="h-3.5 w-3.5" /> <span>{t('calendar.year')}</span>
                         </button>
                     </div>
-
                 </div>
             </div>
 
             {/* Monthly Summary Bar (Show only in Grid or Month Graph) */}
-            {viewMode !== 'graph-year' && (
-                <div className="grid grid-cols-3 gap-2 text-center text-xs">
-                    <div className="bg-card border p-2 rounded-lg shadow-sm">
+            {(viewMode === 'grid' || viewMode === 'graph-month') && (
+                <div className="grid grid-cols-3 gap-2 text-center text-[10px] px-1">
+                    <div className="bg-card border p-2 rounded-2xl shadow-sm">
                         <div className="text-muted-foreground mb-1">{t('dashboard.income')}</div>
                         <div className="font-bold text-emerald-600">+{monthlySummary.income.toLocaleString()}</div>
                     </div>
-                    <div className="bg-card border p-2 rounded-lg shadow-sm">
+                    <div className="bg-card border p-2 rounded-2xl shadow-sm">
                         <div className="text-muted-foreground mb-1">{t('dashboard.spending')}</div>
                         <div className="font-bold text-rose-600">-{monthlySummary.expense.toLocaleString()}</div>
                     </div>
-                    <div className="bg-card border p-2 rounded-lg shadow-sm">
+                    <div className="bg-card border p-2 rounded-2xl shadow-sm">
                         <div className="text-muted-foreground mb-1">{t('common.net')}</div>
                         <div className={cn("font-bold", monthlySummary.net >= 0 ? "text-blue-600" : "text-orange-600")}>
                             {monthlySummary.net.toLocaleString()}
@@ -247,9 +255,9 @@ export function CalendarView() {
 
             {/* Content Area */}
             {viewMode === 'grid' ? (
-                <>
+                <div className="px-1">
                     {/* Calendar Grid Header */}
-                    <div className="grid grid-cols-7 gap-1 text-center text-xs mb-1">
+                    <div className="grid grid-cols-7 gap-1 text-center text-[10px] mb-1">
                         {[
                             t('calendar.sun'),
                             t('calendar.mon'),
@@ -259,11 +267,11 @@ export function CalendarView() {
                             t('calendar.fri'),
                             t('calendar.sat')
                         ].map(d => (
-                            <div key={d} className="text-muted-foreground font-medium py-1">{d}</div>
+                            <div key={d} className="text-muted-foreground font-bold py-1">{d}</div>
                         ))}
                     </div>
                     {/* Calendar Grid Body */}
-                    <div className="grid grid-cols-7 gap-1">
+                    <div className="grid grid-cols-7 gap-1.5">
                         {calendarDays.map((day, idx) => {
                             const dateKey = format(day, 'yyyy-MM-dd')
                             const data = dailyData.get(dateKey)
@@ -275,26 +283,26 @@ export function CalendarView() {
                                     key={idx}
                                     onClick={() => handleDayClick(day)}
                                     className={cn(
-                                        "min-h-[60px] p-1 border rounded-md cursor-pointer transition-colors relative flex flex-col justify-between",
-                                        isCurrentMonth ? "bg-card" : "bg-muted/30 text-muted-foreground",
-                                        isTodayDay && "ring-2 ring-primary ring-offset-1",
-                                        "hover:border-primary/50"
+                                        "min-h-[70px] p-1.5 border-2 rounded-2xl cursor-pointer transition-all relative flex flex-col justify-between overflow-hidden",
+                                        isCurrentMonth ? "bg-card border-muted/50" : "bg-muted/10 text-muted-foreground border-transparent",
+                                        isTodayDay && "border-primary shadow-[0_0_12px_rgba(var(--primary),0.2)]",
+                                        "hover:border-primary/30"
                                     )}
                                 >
-                                    <div className="text-right text-[10px] font-medium">
+                                    <div className="text-right text-[11px] font-bold">
                                         {format(day, 'd')}
                                     </div>
 
                                     {/* Dots / Indicators */}
                                     {(data?.income || data?.expense) ? (
-                                        <div className="space-y-0.5">
+                                        <div className="space-y-1">
                                             {data.income > 0 && (
-                                                <div className="text-[9px] bg-emerald-100 text-emerald-700 px-0.5 rounded-sm truncate">
+                                                <div className="text-[8px] font-bold bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-1 py-0.5 rounded-lg truncate text-center">
                                                     +{data.income >= 1000 ? (data.income / 1000).toFixed(1) + 'k' : data.income}
                                                 </div>
                                             )}
                                             {data.expense > 0 && (
-                                                <div className="text-[9px] bg-rose-100 text-rose-700 px-0.5 rounded-sm truncate">
+                                                <div className="text-[8px] font-bold bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 px-1 py-0.5 rounded-lg truncate text-center">
                                                     -{data.expense >= 1000 ? (data.expense / 1000).toFixed(1) + 'k' : data.expense}
                                                 </div>
                                             )}
@@ -304,9 +312,16 @@ export function CalendarView() {
                             )
                         })}
                     </div>
-                </>
+                </div>
+            ) : viewMode === 'pie' ? (
+                <div className="px-1 animate-in fade-in zoom-in-95 duration-300">
+                    <SpendingPieChart
+                        selectedMonth={currentDate.getMonth().toString()}
+                        selectedYear={currentDate.getFullYear().toString()}
+                    />
+                </div>
             ) : (
-                <div className="bg-card border rounded-lg p-2 min-h-[300px]">
+                <div className="bg-card border-none bg-muted/20 rounded-3xl p-2 min-h-[340px] px-1">
                     <FinanceChart
                         data={chartData}
                     />

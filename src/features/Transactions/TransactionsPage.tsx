@@ -12,7 +12,6 @@ import { ChevronLeft, Search, FilterX, Calendar } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { parseISO, getMonth, getYear } from "date-fns"
 import { useTranslation } from "react-i18next"
-import { SpendingPieChart } from "./SpendingPieChart"
 
 export function TransactionsPage() {
     const { t, i18n } = useTranslation()
@@ -26,7 +25,6 @@ export function TransactionsPage() {
     const [category, setCategory] = useState("all")
     const [selectedMonth, setSelectedMonth] = useState<string>("all")
     const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString())
-    const [showIncomeInChart, setShowIncomeInChart] = useState(false)
 
     const months = [
         { value: "all", label: t('transactions.all_months') },
@@ -175,32 +173,8 @@ export function TransactionsPage() {
                                 ))}
                             </SelectContent>
                         </Select>
-
-                        <div className="ml-auto flex items-center gap-2 px-2 py-1 bg-background/50 rounded-md border border-border/50">
-                            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">{t('transactions.show_income_chart')}</span>
-                            <Button
-                                variant={showIncomeInChart ? "default" : "outline"}
-                                size="sm"
-                                className="h-5 px-2 text-[9px] rounded-full uppercase"
-                                onClick={() => setShowIncomeInChart(!showIncomeInChart)}
-                            >
-                                {showIncomeInChart ? t('common.status') + ": ON" : t('common.status') + ": OFF"}
-                            </Button>
-                        </div>
                     </div>
                 </div>
-
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.3 }}
-                >
-                    <SpendingPieChart
-                        selectedMonth={selectedMonth}
-                        selectedYear={selectedYear}
-                        showIncome={showIncomeInChart}
-                    />
-                </motion.div>
 
                 <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
                     <TabsList className="grid w-full grid-cols-3">

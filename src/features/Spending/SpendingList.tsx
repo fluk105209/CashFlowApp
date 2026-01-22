@@ -1,14 +1,14 @@
-import { useState } from "react"
 import { useFinanceStore } from "@/stores/useFinanceStore"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Calendar, Edit, Trash2, ExternalLink, ChevronUp } from "lucide-react"
+import { Edit, Trash2, ExternalLink, HelpCircle } from "lucide-react"
 import { SpendingModal } from "./AddSpendingModal"
 import { format, parseISO } from "date-fns"
 import type { Spending } from "@/types"
 import { motion, AnimatePresence } from "framer-motion"
 import { Link } from "react-router-dom"
 import { useTranslation } from "react-i18next"
+import { getCategoryMetadata } from "@/constants/categories"
 
 interface Props {
     limit?: number
@@ -17,14 +17,11 @@ interface Props {
 
 export function SpendingList({ limit, items }: Props) {
     const { t, i18n } = useTranslation()
-    const { spendings: storeSpendings, deleteSpending } = useFinanceStore()
-    const [isExpanded, setIsExpanded] = useState(false)
+    const { spendings: storeSpendings, deleteSpending, categoryColors } = useFinanceStore()
 
-    // Use items prop if provided (for filtering), otherwise use store
     const dataSource = [...(items || storeSpendings)].sort((a, b) => {
         const dateComparison = new Date(b.date).getTime() - new Date(a.date).getTime();
         if (dateComparison !== 0) return dateComparison;
-        // If dates are equal, sort by created_at desc (newest created first)
         if (a.created_at && b.created_at) {
             return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
         }
@@ -33,91 +30,99 @@ export function SpendingList({ limit, items }: Props) {
 
     if (dataSource.length === 0) {
         return (
-            <div className="text-center text-sm text-muted-foreground py-8 border-2 border-dashed rounded-lg">
+            <div className="text-center text-sm text-muted-foreground py-10 border-2 border-dashed rounded-[2rem] bg-muted/20">
                 {t('spending.no_expenses', { defaultValue: t('common.no_items_found') })}
             </div>
         )
     }
 
-    const displayedSpendings = (limit && !isExpanded) ? dataSource.slice(0, limit) : dataSource
+    const displayedSpendings = limit ? dataSource.slice(0, limit) : dataSource
 
     return (
-        <div className="space-y-3">
+        <div className="space-y-4">
             <AnimatePresence mode="popLayout" initial={false}>
-                {displayedSpendings.map((spending, index) => (
-                    <motion.div
-                        key={spending.id}
-                        layout
-                        initial={{ opacity: 0, x: 10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        transition={{ duration: 0.2, delay: index * 0.05 }}
-                        className="flex items-center justify-between p-4 bg-card border rounded-lg shadow-sm"
-                    >
-                        <div className="flex flex-col gap-1">
-                            <div className="flex items-center gap-2">
-                                <div className="font-medium">{spending.name}</div>
-                                {spending.kind === 'obligation-payment' && (
-                                    <Badge variant="secondary" className="text-[10px] h-5 px-1.5">
-                                        {t('spending.obligation_badge')}
-                                    </Badge>
-                                )}
-                            </div>
-                            <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
-                                <span className="capitalize">{t(`categories.${spending.category}`, { defaultValue: spending.category })}</span>
-                                <span>•</span>
-                                <div className="flex items-center gap-1">
-                                    <Calendar className="h-2.5 w-2.5" />
-                                    {i18n.language.startsWith('th')
-                                        ? `${format(parseISO(spending.date), 'd')} ${t(`months.${parseISO(spending.date).getMonth()}`).substring(0, 3)} ${parseISO(spending.date).getFullYear() + 543}`
-                                        : format(parseISO(spending.date), 'MMM d, yyyy')}
+                {displayedSpendings.map((spending, index) => {
+                    const metadata = getCategoryMetadata(spending.category);
+                    const Icon = metadata?.icon || HelpCircle;
+                    const color = categoryColors[spending.category] || '#94a3b8';
+
+                    return (
+                        <motion.div
+                            key={spending.id}
+                            layout
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            transition={{ duration: 0.3, delay: index * 0.05 }}
+                            className="flex items-center justify-between p-4 bg-card rounded-[1.5rem] shadow-sm border border-border/40"
+                        >
+                            <div className="flex items-center gap-4 flex-1 min-w-0">
+                                <div
+                                    className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
+                                    style={{ backgroundColor: color + '15', color: color }}
+                                >
+                                    <Icon className="h-6 w-6" />
+                                </div>
+                                <div className="flex flex-col min-w-0">
+                                    <div className="flex items-center gap-2">
+                                        <div className="font-bold text-sm truncate">{spending.name}</div>
+                                        {spending.kind === 'obligation-payment' && (
+                                            <Badge variant="secondary" className="text-[8px] h-4 px-1 rounded-full bg-primary/5 text-primary border-none">
+                                                {t('spending.obligation_badge')}
+                                            </Badge>
+                                        )}
+                                    </div>
+                                    <div className="text-[10px] text-muted-foreground flex items-center gap-1.5">
+                                        <span className="font-medium whitespace-nowrap">{t(`categories.${spending.category}`, { defaultValue: spending.category })}</span>
+                                        <span className="opacity-30">•</span>
+                                        <span className="whitespace-nowrap">
+                                            {i18n.language.startsWith('th')
+                                                ? `${format(parseISO(spending.date), 'd')} ${t(`months.${parseISO(spending.date).getMonth()}`).substring(0, 3)}`
+                                                : format(parseISO(spending.date), 'MMM d')}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div className="font-bold text-rose-600 dark:text-rose-400 mr-2">
-                                -฿{spending.amount.toLocaleString()}
-                            </div>
-                            <SpendingModal
-                                initialData={spending}
-                                trigger={
-                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary">
-                                        <Edit className="h-4 w-4" />
+
+                            <div className="flex items-center gap-1 ml-2">
+                                <div className="text-right mr-2">
+                                    <div className="font-black text-rose-500 text-sm whitespace-nowrap">
+                                        -฿{spending.amount.toLocaleString()}
+                                    </div>
+                                </div>
+                                <div className="flex items-center">
+                                    <SpendingModal
+                                        initialData={spending}
+                                        trigger={
+                                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-muted-foreground/50 hover:text-primary hover:bg-primary/5">
+                                                <Edit className="h-3.5 w-3.5" />
+                                            </Button>
+                                        }
+                                    />
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-8 w-8 rounded-full text-muted-foreground/50 hover:text-destructive hover:bg-destructive/5"
+                                        onClick={() => deleteSpending(spending.id)}
+                                    >
+                                        <Trash2 className="h-3.5 w-3.5" />
                                     </Button>
-                                }
-                            />
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                                onClick={() => deleteSpending(spending.id)}
-                            >
-                                <Trash2 className="h-4 w-4" />
-                            </Button>
-                        </div>
-                    </motion.div>
-                ))}
+                                </div>
+                            </div>
+                        </motion.div>
+                    )
+                })}
             </AnimatePresence>
 
-            {limit && dataSource.length > limit && !isExpanded && (
-                <Link to="/transactions?tab=expense" className="block">
+            {limit && dataSource.length > limit && (
+                <Link to="/transactions?tab=expense" className="block px-2">
                     <Button
                         variant="ghost"
-                        className="w-full text-muted-foreground hover:text-primary text-xs flex items-center gap-1"
+                        className="w-full text-muted-foreground hover:text-primary text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 h-10 rounded-2xl bg-muted/30"
                     >
                         {t('common.view_all_with_count', { count: dataSource.length })} <ExternalLink className="h-3 w-3" />
                     </Button>
                 </Link>
-            )}
-
-            {limit && isExpanded && (
-                <Button
-                    variant="ghost"
-                    className="w-full text-muted-foreground hover:text-primary text-xs"
-                    onClick={() => setIsExpanded(false)}
-                >
-                    <div className="flex items-center gap-1">{t('common.show_less')} <ChevronUp className="h-3 w-3" /></div>
-                </Button>
             )}
         </div>
     )

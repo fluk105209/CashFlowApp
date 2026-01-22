@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts'
 import { useFinanceStore } from '@/stores/useFinanceStore'
 import { useTranslation } from 'react-i18next'
@@ -16,6 +16,7 @@ interface SpendingPieChartProps {
 export function SpendingPieChart({ selectedMonth, selectedYear, showIncome = false }: SpendingPieChartProps) {
     const { t } = useTranslation()
     const { spendings, incomes, categoryColors } = useFinanceStore()
+    const [isExpanded, setIsExpanded] = useState(false)
 
     const { chartData } = useMemo(() => {
         const filteredSpendings = spendings.filter(s => {
@@ -63,7 +64,8 @@ export function SpendingPieChart({ selectedMonth, selectedYear, showIncome = fal
         let othersValue = 0
 
         Object.entries(categoryTotals).forEach(([name, data]) => {
-            if (data.amount < threshold && Object.keys(categoryTotals).length > 4) {
+            // Group if data is below threshold AND not already expanded AND we have enough segments to bother grouping
+            if (!isExpanded && data.amount < threshold && Object.keys(categoryTotals).length > 4) {
                 othersValue += data.amount
             } else {
                 mainData.push({
@@ -82,16 +84,17 @@ export function SpendingPieChart({ selectedMonth, selectedYear, showIncome = fal
                 name: t('categories.others', { defaultValue: 'Others' }),
                 value: othersValue,
                 type: 'spending',
-                key: 'others',
+                key: 'others-grouped',
                 color: '#94a3b8',
-                percentage: ((othersValue / total) * 100).toFixed(1)
+                percentage: ((othersValue / total) * 100).toFixed(1),
+                isGrouped: true
             })
         }
 
         const data = mainData.sort((a, b) => b.value - a.value)
 
         return { chartData: data }
-    }, [spendings, incomes, selectedMonth, selectedYear, showIncome, t, categoryColors])
+    }, [spendings, incomes, selectedMonth, selectedYear, showIncome, t, categoryColors, isExpanded])
 
     const isEmpty = chartData.length === 0
 
@@ -99,13 +102,23 @@ export function SpendingPieChart({ selectedMonth, selectedYear, showIncome = fal
         <Card className="shadow-sm border-none bg-muted/20">
             <CardHeader className="pb-2">
                 <div className="space-y-1">
-                    <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-xl bg-primary/20 flex items-center justify-center">
-                            <Banknote className="h-4 w-4 text-primary" />
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-xl bg-primary/20 flex items-center justify-center">
+                                <Banknote className="h-4 w-4 text-primary" />
+                            </div>
+                            <h3 className="text-sm font-bold text-primary dark:text-primary">
+                                {t('dashboard.spending_by_category')}
+                            </h3>
                         </div>
-                        <h3 className="text-sm font-bold text-primary dark:text-primary">
-                            {t('dashboard.spending_by_category')}
-                        </h3>
+                        {isExpanded && (
+                            <button
+                                onClick={() => setIsExpanded(false)}
+                                className="text-[10px] bg-primary/10 hover:bg-primary/20 text-primary px-2 py-1 rounded-full font-bold transition-colors"
+                            >
+                                {t('common.back', { defaultValue: 'Back' })}
+                            </button>
+                        )}
                     </div>
                     <CardDescription className="text-xs">
                         {selectedMonth === 'all'
@@ -134,6 +147,11 @@ export function SpendingPieChart({ selectedMonth, selectedYear, showIncome = fal
                                     animationBegin={0}
                                     animationDuration={1000}
                                     label={false}
+                                    onClick={(data) => {
+                                        if (data && data.isGrouped) {
+                                            setIsExpanded(true);
+                                        }
+                                    }}
                                 >
                                     {chartData.map((_entry, index) => (
                                         <Cell

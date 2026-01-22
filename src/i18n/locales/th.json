@@ -18,7 +18,10 @@
         "next": "ถัดไป",
         "apr": "ดอกเบี้ยต่อปี",
         "per_month": "/เดือน",
-        "done": "เสร็จสิ้น"
+        "months": "งวด",
+        "left": "เหลือ",
+        "done": "เสร็จสิ้น",
+        "proportion": "สัดส่วน"
     },
     "nav": {
         "dashboard": "หน้าหลัก",
@@ -186,7 +189,9 @@
         "payment_mode": "รูปแบบการชำระ",
         "payment_mode_fixed": "จำนวนเงิน (฿)",
         "payment_mode_percent": "เปอร์เซ็นต์ (%)",
-        "calculated_amount": "ยอดที่ต้องชำระ: ฿{{amount}}"
+        "calculated_amount": "ยอดที่ต้องชำระ: ฿{{amount}}",
+        "progress": "ความคืบหน้า",
+        "limit_usage": "การใช้วงเงิน"
     },
     "categories": {
         "Salary": "เงินเดือน",

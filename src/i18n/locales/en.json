@@ -18,7 +18,10 @@
         "next": "Next",
         "apr": "APR",
         "per_month": "/mo",
-        "done": "Done"
+        "months": "Months",
+        "left": "Left",
+        "done": "Done",
+        "proportion": "Proportion"
     },
     "nav": {
         "dashboard": "Dashboard",
@@ -185,7 +188,9 @@
         "payment_mode": "Payment Mode",
         "payment_mode_fixed": "Fixed Amount (฿)",
         "payment_mode_percent": "Percentage (%)",
-        "calculated_amount": "Amount to pay: ฿{{amount}}"
+        "calculated_amount": "Amount to pay: ฿{{amount}}",
+        "progress": "Progress",
+        "limit_usage": "Limit Usage"
     },
     "categories": {
         "Salary": "Salary",
