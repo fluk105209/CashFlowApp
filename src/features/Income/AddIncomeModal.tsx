@@ -172,8 +172,27 @@ export function IncomeModal({ initialData, trigger, defaultDate }: Props) {
                             </Select>
                         </div>
                     </div>
-                    <DialogFooter>
-                        <Button type="submit">{t('common.save')}</Button>
+                    <DialogFooter className="flex flex-row gap-2 justify-between items-center sm:justify-between">
+                        {isEdit && (
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                className="text-destructive hover:bg-destructive/10 rounded-xl px-4"
+                                onClick={() => {
+                                    if (confirm(t('common.confirm_delete'))) {
+                                        useFinanceStore.getState().deleteIncome(initialData!.id)
+                                        setOpen(false)
+                                    }
+                                }}
+                            >
+                                {t('common.delete')}
+                            </Button>
+                        )}
+                        <div className={isEdit ? "" : "ml-auto"}>
+                            <Button type="submit" className="h-10 px-8 rounded-xl font-bold active:scale-[0.98] transition-all">
+                                {t('common.save')}
+                            </Button>
+                        </div>
                     </DialogFooter>
                 </form>
             </DialogContent>

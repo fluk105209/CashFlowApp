@@ -385,7 +385,7 @@ export function ObligationModal({ initialData, trigger }: Props) {
                             </div>
                         )}
 
-                        <DialogFooter className="mt-6 flex-row gap-2 sm:justify-between">
+                        <DialogFooter className="mt-6 flex flex-row gap-2 sm:justify-between items-center">
                             {step === 1 ? (
                                 <>
                                     <div />
@@ -395,9 +395,26 @@ export function ObligationModal({ initialData, trigger }: Props) {
                                 </>
                             ) : (
                                 <>
-                                    <Button type="button" variant="ghost" onClick={() => setStep(1)}>
-                                        {t('common.back')}
-                                    </Button>
+                                    <div className="flex gap-2">
+                                        <Button type="button" variant="ghost" onClick={() => setStep(1)} className="rounded-xl px-4">
+                                            {t('common.back')}
+                                        </Button>
+                                        {isEdit && (
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                className="text-destructive hover:bg-destructive/10 rounded-xl px-4"
+                                                onClick={() => {
+                                                    if (confirm(t('common.confirm_delete'))) {
+                                                        useFinanceStore.getState().deleteObligation(initialData!.id)
+                                                        setOpen(false)
+                                                    }
+                                                }}
+                                            >
+                                                {t('common.delete')}
+                                            </Button>
+                                        )}
+                                    </div>
                                     <Button type="submit" className="h-10 px-8 rounded-xl font-bold active:scale-[0.98] transition-all">
                                         {t('common.save')}
                                     </Button>

@@ -7,7 +7,6 @@ import {
     Car,
     Home,
     HelpCircle,
-    Trash2,
     Edit,
     ExternalLink
 } from "lucide-react"
@@ -25,7 +24,7 @@ interface Props {
 
 export function ObligationList({ limit, items }: Props) {
     const { t } = useTranslation()
-    const { obligations: storeObligations, deleteObligation } = useFinanceStore()
+    const { obligations: storeObligations } = useFinanceStore()
 
     const dataSource = [...(items || storeObligations)].sort((a, b) => {
         if (a.created_at && b.created_at) {
@@ -81,106 +80,79 @@ export function ObligationList({ limit, items }: Props) {
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.9 }}
                             transition={{ duration: 0.3, delay: index * 0.05 }}
-                            className="flex items-center justify-between p-4 bg-card rounded-[1.5rem] shadow-sm border border-border/40"
+                            className="relative flex flex-col p-4 bg-card rounded-[1.5rem] shadow-sm border border-border/40 gap-3"
                         >
-                            <div className="flex items-center gap-4 flex-1 min-w-0">
-                                <div
-                                    className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
-                                    style={{ backgroundColor: color + '15', color: color }}
-                                >
-                                    <Icon className="h-6 w-6" />
-                                </div>
-                                <div className="flex flex-col min-w-0">
-                                    <div className="flex items-center gap-2">
-                                        <div className="font-bold text-sm truncate">{ob.name}</div>
-                                        <Badge status={ob.status} label={t(`obligations.${ob.status}`)} />
+                            <div className="flex items-start justify-between">
+                                <div className="flex items-center gap-3 flex-1 min-w-0">
+                                    <div
+                                        className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                                        style={{ backgroundColor: color + '15', color: color }}
+                                    >
+                                        <Icon className="h-5 w-5" />
                                     </div>
-                                    <div className="text-[10px] text-muted-foreground flex flex-col gap-1">
-                                        <div className="flex items-center gap-1.5 overflow-hidden">
-                                            <span className="font-medium whitespace-nowrap capitalize">
-                                                {t(`obligation_types.${ob.type}`, { defaultValue: ob.type.replace('-', ' ') })}
-                                            </span>
-                                            {ob.interestRate !== undefined && (
-                                                <>
-                                                    <span className="opacity-30">•</span>
-                                                    <span className="whitespace-nowrap">{t('common.apr')} {ob.interestRate}%</span>
-                                                </>
-                                            )}
+                                    <div className="flex flex-col min-w-0 flex-1">
+                                        <div className="font-bold text-sm truncate mr-2">{ob.name}</div>
+                                        <div className="text-[10px] text-muted-foreground truncate uppercase font-medium">
+                                            {t(`obligation_types.${ob.type}`, { defaultValue: ob.type.replace('-', ' ') })}
                                         </div>
-
-                                        {/* Progress bars for specific types */}
-                                        <div className="w-[140px] sm:w-[180px] shrink-0">
-                                            {ob.type === 'installment' && ob.totalMonths && (
-                                                <div className="space-y-1 mt-1">
-                                                    <div className="flex justify-between text-[8px] font-bold uppercase tracking-tighter text-muted-foreground/70">
-                                                        <span>{t('obligations.progress')}:</span>
-                                                        <span className="whitespace-nowrap">{ob.paidMonths || 0} / {ob.totalMonths} {t('common.months')}</span>
-                                                    </div>
-                                                    <div className="w-full h-1.5 bg-muted/50 rounded-full overflow-hidden">
-                                                        <motion.div
-                                                            initial={{ width: 0 }}
-                                                            animate={{ width: `${Math.min(100, ((ob.paidMonths || 0) / ob.totalMonths) * 100)}%` }}
-                                                            className="h-full bg-primary shadow-[0_0_8px_rgba(var(--primary),0.4)]"
-                                                            style={{ backgroundColor: color }}
-                                                        />
-                                                    </div>
-                                                    {ob.balance !== undefined && (
-                                                        <div className="text-[7px] text-muted-foreground/50 font-medium text-right uppercase truncate">
-                                                            {t('obligations.total_amount', { defaultValue: 'Total' })}: ฿{(ob.amount * ob.totalMonths).toLocaleString()}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            )}
-
-                                            {ob.type === 'credit-card' && ob.creditLimit && ob.balance !== undefined && (
-                                                <div className="space-y-1 mt-1">
-                                                    <div className="flex justify-between text-[8px] font-bold uppercase tracking-tighter text-muted-foreground/70">
-                                                        <span>{t('obligations.limit_usage')}:</span>
-                                                        <span className="whitespace-nowrap">฿{(ob.creditLimit - ob.balance).toLocaleString()} {t('common.left')}</span>
-                                                    </div>
-                                                    <div className="w-full h-1.5 bg-muted/50 rounded-full overflow-hidden">
-                                                        <motion.div
-                                                            initial={{ width: 0 }}
-                                                            animate={{ width: `${Math.min(100, (ob.balance / ob.creditLimit) * 100)}%` }}
-                                                            className="h-full bg-rose-500 shadow-[0_0_8px_rgba(239,68,68,0.4)]"
-                                                        />
-                                                    </div>
-                                                    <div className="text-[7px] text-muted-foreground/50 font-medium text-right uppercase truncate">
-                                                        {t('obligations.limit')}: ฿{ob.creditLimit.toLocaleString()}
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
+                                    </div>
+                                </div>
+                                <div className="flex flex-col items-end gap-1 shrink-0">
+                                    <Badge status={ob.status} label={t(`obligations.${ob.status}`)} />
+                                    <div className="font-black text-rose-500 text-sm">
+                                        ฿{ob.amount.toLocaleString()}
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-1 ml-2">
-                                <div className="text-right mr-2">
-                                    <div className="font-black text-rose-500 text-sm whitespace-nowrap">
-                                        ฿{ob.amount.toLocaleString()}
-                                    </div>
-                                    <div className="text-[8px] text-muted-foreground uppercase font-bold tracking-tighter">
-                                        {t('common.per_month')}
+                            <div className="flex items-end justify-between gap-4">
+                                <div className="flex-1 min-w-0">
+                                    {/* Progress bars for specific types */}
+                                    <div className="w-full max-w-[200px]">
+                                        {ob.type === 'installment' && ob.totalMonths && (
+                                            <div className="space-y-1">
+                                                <div className="flex justify-between text-[8px] font-bold uppercase tracking-tighter text-muted-foreground/70">
+                                                    <span>{t('obligations.progress')}:</span>
+                                                    <span className="whitespace-nowrap">{ob.paidMonths || 0} / {ob.totalMonths} {t('common.months')}</span>
+                                                </div>
+                                                <div className="w-full h-1.5 bg-muted/50 rounded-full overflow-hidden">
+                                                    <motion.div
+                                                        initial={{ width: 0 }}
+                                                        animate={{ width: `${Math.min(100, ((ob.paidMonths || 0) / ob.totalMonths) * 100)}%` }}
+                                                        className="h-full bg-primary"
+                                                        style={{ backgroundColor: color }}
+                                                    />
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {ob.type === 'credit-card' && ob.creditLimit && ob.balance !== undefined && (
+                                            <div className="space-y-1">
+                                                <div className="flex justify-between text-[8px] font-bold uppercase tracking-tighter text-muted-foreground/70">
+                                                    <span>{t('obligations.limit_usage')}:</span>
+                                                    <span className="whitespace-nowrap">฿{(ob.creditLimit - ob.balance).toLocaleString()} {t('common.left')}</span>
+                                                </div>
+                                                <div className="w-full h-1.5 bg-muted/50 rounded-full overflow-hidden">
+                                                    <motion.div
+                                                        initial={{ width: 0 }}
+                                                        animate={{ width: `${Math.min(100, (ob.balance / ob.creditLimit) * 100)}%` }}
+                                                        className="h-full bg-rose-500"
+                                                    />
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
+
                                 <div className="flex items-center">
                                     <ObligationModal
                                         initialData={ob}
                                         trigger={
-                                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-muted-foreground/50 hover:text-primary hover:bg-primary/5">
-                                                <Edit className="h-3.5 w-3.5" />
+                                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-muted-foreground/50 hover:text-primary hover:bg-primary/5 bg-muted/20">
+                                                <Edit className="h-4 w-4" />
                                             </Button>
                                         }
                                     />
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-8 w-8 rounded-full text-muted-foreground/50 hover:text-destructive hover:bg-destructive/5"
-                                        onClick={() => deleteObligation(ob.id)}
-                                    >
-                                        <Trash2 className="h-3.5 w-3.5" />
-                                    </Button>
                                 </div>
                             </div>
                         </motion.div>

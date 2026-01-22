@@ -1,7 +1,7 @@
 import { useFinanceStore } from "@/stores/useFinanceStore"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Edit, Trash2, ExternalLink, HelpCircle } from "lucide-react"
+import { Edit, ExternalLink, HelpCircle } from "lucide-react"
 import { SpendingModal } from "./AddSpendingModal"
 import { format, parseISO } from "date-fns"
 import type { Spending } from "@/types"
@@ -17,7 +17,7 @@ interface Props {
 
 export function SpendingList({ limit, items }: Props) {
     const { t, i18n } = useTranslation()
-    const { spendings: storeSpendings, deleteSpending, categoryColors } = useFinanceStore()
+    const { spendings: storeSpendings, categoryColors } = useFinanceStore()
 
     const dataSource = [...(items || storeSpendings)].sort((a, b) => {
         const dateComparison = new Date(b.date).getTime() - new Date(a.date).getTime();
@@ -56,12 +56,12 @@ export function SpendingList({ limit, items }: Props) {
                             transition={{ duration: 0.3, delay: index * 0.05 }}
                             className="flex items-center justify-between p-4 bg-card rounded-[1.5rem] shadow-sm border border-border/40"
                         >
-                            <div className="flex items-center gap-4 flex-1 min-w-0">
+                            <div className="flex items-center gap-3 flex-1 min-w-0">
                                 <div
-                                    className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
+                                    className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
                                     style={{ backgroundColor: color + '15', color: color }}
                                 >
-                                    <Icon className="h-6 w-6" />
+                                    <Icon className="h-5 w-5" />
                                 </div>
                                 <div className="flex flex-col min-w-0">
                                     <div className="flex items-center gap-2">
@@ -94,19 +94,11 @@ export function SpendingList({ limit, items }: Props) {
                                     <SpendingModal
                                         initialData={spending}
                                         trigger={
-                                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-muted-foreground/50 hover:text-primary hover:bg-primary/5">
-                                                <Edit className="h-3.5 w-3.5" />
+                                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-muted-foreground/50 hover:text-primary hover:bg-primary/5 bg-muted/20">
+                                                <Edit className="h-4 w-4" />
                                             </Button>
                                         }
                                     />
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-8 w-8 rounded-full text-muted-foreground/50 hover:text-destructive hover:bg-destructive/5"
-                                        onClick={() => deleteSpending(spending.id)}
-                                    >
-                                        <Trash2 className="h-3.5 w-3.5" />
-                                    </Button>
                                 </div>
                             </div>
                         </motion.div>

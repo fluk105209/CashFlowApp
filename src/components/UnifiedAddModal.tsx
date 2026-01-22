@@ -141,7 +141,7 @@ export function UnifiedAddModal({
     return (
         <Dialog open={isOpen} onOpenChange={setOpen}>
             {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-            <DialogContent className="sm:max-w-[425px] rounded-[2rem]">
+            <DialogContent className="sm:max-w-[425px] w-[95%] max-h-[90vh] overflow-y-auto rounded-[2rem] pb-[env(safe-area-inset-bottom,1.5rem)]">
                 <DialogHeader>
                     <DialogTitle className="text-xl font-black text-center text-primary">
                         {t('common.add_transaction', { defaultValue: 'Add Transaction' })}

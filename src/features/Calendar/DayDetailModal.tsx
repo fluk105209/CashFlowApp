@@ -32,7 +32,7 @@ export function DayDetailModal({ date, isOpen, onClose, incomes, spendings }: Da
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
+            <DialogContent className="max-w-md w-[95%] max-h-[90vh] overflow-y-auto pb-[env(safe-area-inset-bottom,1.5rem)] rounded-[2rem]">
                 <DialogHeader>
                     <DialogTitle className="text-xl">
                         {i18n.language.startsWith('th')

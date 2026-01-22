@@ -101,8 +101,8 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground font-sans antialiased p-4 md:p-8 pt-[calc(1rem+env(safe-area-inset-top,0px))]">
-      <div className="max-w-md mx-auto space-y-6 pb-20">
+    <div className="min-h-screen bg-background text-foreground font-sans antialiased px-4 pt-[env(safe-area-inset-top,1rem)] pb-[calc(80px+env(safe-area-inset-bottom,1rem))]">
+      <div className="max-w-md mx-auto space-y-6">
         <header className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center border-2 border-background shadow-sm overflow-hidden text-primary">
@@ -147,7 +147,7 @@ function App() {
         />
 
         {/* Bottom Navigation Bar */}
-        <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[95%] max-w-md bg-card/80 backdrop-blur-xl border border-border/50 shadow-2xl rounded-[2rem] px-4 py-3 z-50 flex justify-between items-center">
+        <nav className="fixed bottom-[max(1.5rem,env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 w-[95%] max-w-md bg-card/90 backdrop-blur-2xl border border-border/50 shadow-2xl rounded-[2.5rem] px-5 py-3 z-50 flex justify-between items-center group">
           <NavButton
             active={isDashboard}
             onClick={() => navigate('/')}
