@@ -101,8 +101,11 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground font-sans antialiased px-4 pt-[env(safe-area-inset-top,1rem)] pb-[calc(80px+env(safe-area-inset-bottom,1rem))]">
+    <div className="min-h-screen bg-background text-foreground font-sans antialiased px-4 pt-[max(env(safe-area-inset-top),2rem)] pb-[calc(100px+env(safe-area-inset-bottom,1rem))]">
       <div className="max-w-md mx-auto space-y-6">
+        {/* Top Safe Area Spacer for Notches */}
+        <div className="h-2 sm:hidden" aria-hidden="true" />
+
         <header className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center border-2 border-background shadow-sm overflow-hidden text-primary">

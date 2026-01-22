@@ -18,15 +18,28 @@ export function DashboardPage() {
     const [pullDistance, setPullDistance] = useState(0)
     const [isRefreshing, setIsRefreshing] = useState(false)
 
-    const handleDrag = (_: any, info: any) => {
-        if (window.scrollY > 0) return
-        if (info.offset.y > 0 && !isRefreshing) {
-            setPullDistance(Math.min(info.offset.y, 80))
+    const [startY, setStartY] = useState(0)
+
+    const handleTouchStart = (e: React.TouchEvent) => {
+        if (window.scrollY === 0) {
+            setStartY(e.touches[0].clientY)
         }
     }
 
-    const handleDragEnd = (_: any, info: any) => {
-        if (info.offset.y > 60 && !isRefreshing) {
+    const handleTouchMove = (e: React.TouchEvent) => {
+        if (window.scrollY === 0 && startY > 0) {
+            const currentY = e.touches[0].clientY
+            const diff = currentY - startY
+            if (diff > 0 && !isRefreshing) {
+                // Apply tension/elasticity
+                const distance = Math.min(diff * 0.4, 80)
+                setPullDistance(distance)
+            }
+        }
+    }
+
+    const handleTouchEnd = () => {
+        if (pullDistance > 60 && !isRefreshing) {
             setIsRefreshing(true)
             setPullDistance(50)
             initialize().finally(() => {
@@ -38,6 +51,7 @@ export function DashboardPage() {
         } else {
             setPullDistance(0)
         }
+        setStartY(0)
     }
 
     useEffect(() => {
@@ -124,12 +138,10 @@ export function DashboardPage() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.3 }}
-                className="space-y-4 touch-pan-y"
-                drag="y"
-                dragConstraints={{ top: 0, bottom: 0 }}
-                dragElastic={0.4}
-                onDrag={handleDrag}
-                onDragEnd={handleDragEnd}
+                className="space-y-4"
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
             >
 
                 <motion.div

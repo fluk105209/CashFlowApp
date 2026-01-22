@@ -1,6 +1,6 @@
 import { useFinanceStore } from "@/stores/useFinanceStore"
 import { Button } from "@/components/ui/button"
-import { HelpCircle, ExternalLink, ArrowUpRight, ArrowDownLeft, Edit, Trash2 } from "lucide-react"
+import { HelpCircle, ExternalLink, ArrowUpRight, ArrowDownLeft, Edit } from "lucide-react"
 import { format, parseISO } from "date-fns"
 import type { Income, Spending } from "@/types"
 import { motion, AnimatePresence } from "framer-motion"
@@ -12,7 +12,7 @@ import { SpendingModal } from "@/features/Spending/AddSpendingModal"
 
 export function RecentActivityList({ limit = 8 }: { limit?: number }) {
     const { t, i18n } = useTranslation()
-    const { incomes, spendings, deleteIncome, deleteSpending, categoryColors } = useFinanceStore()
+    const { incomes, spendings, categoryColors } = useFinanceStore()
 
     const combinedActivities = [
         ...incomes.map(i => ({
@@ -114,8 +114,8 @@ export function RecentActivityList({ limit = 8 }: { limit?: number }) {
                                         <IncomeModal
                                             initialData={item.originalData as Income}
                                             trigger={
-                                                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-muted-foreground/50 hover:text-primary hover:bg-primary/5">
-                                                    <Edit className="h-3.5 w-3.5" />
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-muted-foreground/50 hover:text-primary hover:bg-primary/5 bg-muted/20">
+                                                    <Edit className="h-4 w-4" />
                                                 </Button>
                                             }
                                         />
@@ -123,20 +123,12 @@ export function RecentActivityList({ limit = 8 }: { limit?: number }) {
                                         <SpendingModal
                                             initialData={item.originalData as Spending}
                                             trigger={
-                                                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-muted-foreground/50 hover:text-primary hover:bg-primary/5">
-                                                    <Edit className="h-3.5 w-3.5" />
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-muted-foreground/50 hover:text-primary hover:bg-primary/5 bg-muted/20">
+                                                    <Edit className="h-4 w-4" />
                                                 </Button>
                                             }
                                         />
                                     )}
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-8 w-8 rounded-full text-muted-foreground/50 hover:text-destructive hover:bg-destructive/5"
-                                        onClick={() => item.type === 'income' ? deleteIncome(item.id) : deleteSpending(item.id)}
-                                    >
-                                        <Trash2 className="h-3.5 w-3.5" />
-                                    </Button>
                                 </div>
                             </div>
                         </motion.div>
