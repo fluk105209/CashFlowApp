@@ -4,16 +4,17 @@ import { RecentActivityList } from "@/components/RecentActivityList"
 import { ObligationModal } from "@/features/Obligation/AddObligationModal"
 import { ObligationList } from "@/features/Obligation/ObligationList"
 import { useFinanceStore } from "@/stores/useFinanceStore"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { useEffect, useMemo, useState } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useTranslation } from "react-i18next"
 import { isSameMonth } from "date-fns"
-import { Utensils, Car, Zap, Loader2 } from "lucide-react"
+import { Utensils, Car, Zap, Loader2, Eye, EyeOff } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 export function DashboardPage() {
     const { t } = useTranslation()
-    const { incomes, spendings, obligations, isLoading, initialize } = useFinanceStore()
+    const { incomes, spendings, obligations, isLoading, initialize, isAmountHidden, toggleAmountVisibility } = useFinanceStore()
 
     const [pullDistance, setPullDistance] = useState(0)
     const [isRefreshing, setIsRefreshing] = useState(false)
@@ -122,6 +123,11 @@ export function DashboardPage() {
         window.dispatchEvent(new CustomEvent('open-unified-add', { detail: prefill }));
     }
 
+    const formatAmount = (amount: number) => {
+        if (isAmountHidden) return "••••••"
+        return amount.toLocaleString()
+    }
+
     return (
         <div className="relative">
             {/* Pull to Refresh Indicator */}
@@ -149,22 +155,48 @@ export function DashboardPage() {
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.1, duration: 0.4 }}
                 >
-                    <Card className="bg-card border-none shadow-xl rounded-[2rem] overflow-hidden">
-                        <CardHeader className="pb-2 text-center pt-8">
-                            <CardDescription className="text-muted-foreground font-medium uppercase tracking-widest text-[10px]">{t('dashboard.net_monthly')}</CardDescription>
-                            <CardTitle className="text-5xl font-black text-primary tracking-tighter py-2">
-                                ฿ {netCashFlow.toLocaleString()}
-                            </CardTitle>
+                    <Card className="bg-card border-none shadow-xl rounded-[2rem] overflow-hidden group">
+                        <CardHeader className="pb-2 text-center pt-8 relative">
+                            <div className="flex flex-col items-center">
+                                <CardDescription className="text-muted-foreground font-medium uppercase tracking-widest text-[10px]">{t('dashboard.net_monthly')}</CardDescription>
+                                <div className="absolute top-4 right-4">
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="rounded-full w-10 h-10 hover:bg-muted/50"
+                                        onClick={toggleAmountVisibility}
+                                    >
+                                        {isAmountHidden ? <EyeOff className="h-5 w-5 opacity-40" /> : <Eye className="h-5 w-5 opacity-40" />}
+                                    </Button>
+                                </div>
+                                <CardTitle className="text-5xl font-black text-primary tracking-tighter py-2 min-h-[72px] flex items-center">
+                                    <AnimatePresence mode="wait">
+                                        <motion.span
+                                            key={isAmountHidden ? 'hidden' : 'visible'}
+                                            initial={{ opacity: 0, y: 5 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: -5 }}
+                                            transition={{ duration: 0.2 }}
+                                        >
+                                            ฿ {formatAmount(netCashFlow)}
+                                        </motion.span>
+                                    </AnimatePresence>
+                                </CardTitle>
+                            </div>
                         </CardHeader>
                         <CardContent className="px-6 pb-8">
                             <div className="grid grid-cols-2 gap-4 mt-4 bg-muted/30 p-4 rounded-3xl">
                                 <div className="flex flex-col items-center border-r border-border/50">
                                     <span className="text-[9px] text-muted-foreground uppercase font-bold mb-1">{t('dashboard.income')}</span>
-                                    <span className="text-emerald-500 font-black text-sm text-center">+฿ {monthlyIncome.toLocaleString()}</span>
+                                    <span className="text-emerald-500 font-black text-sm text-center">
+                                        +฿ {formatAmount(monthlyIncome)}
+                                    </span>
                                 </div>
                                 <div className="flex flex-col items-center">
                                     <span className="text-[9px] text-muted-foreground uppercase font-bold mb-1">{t('dashboard.actual_expenses')}</span>
-                                    <span className="text-rose-500 font-black text-sm text-center">-฿ {monthlySpending.toLocaleString()}</span>
+                                    <span className="text-rose-500 font-black text-sm text-center">
+                                        -฿ {formatAmount(monthlySpending)}
+                                    </span>
                                 </div>
                             </div>
 
@@ -219,28 +251,28 @@ export function DashboardPage() {
                         <CardContent className="space-y-2">
                             <div className="flex justify-between items-center">
                                 <span className="text-sm">{t('dashboard.total_planned')}</span>
-                                <span className="font-semibold text-rose-500">฿ {totalObligationsPlanned.toLocaleString()}</span>
+                                <span className="font-semibold text-rose-500">฿ {formatAmount(totalObligationsPlanned)}</span>
                             </div>
                             <div className="h-[1px] bg-border/50" />
 
                             <div className="flex justify-between items-center text-xs font-medium">
                                 <span>{t('dashboard.total_debt_balance')}</span>
-                                <span>฿ {(totalInstallmentBalance + totalDebtBalance).toLocaleString()}</span>
+                                <span>฿ {formatAmount(totalInstallmentBalance + totalDebtBalance)}</span>
                             </div>
 
                             <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground bg-muted/20 p-2 rounded-md">
                                 <div>
                                     <span className="block opacity-70 text-[10px]">{t('dashboard.installments')}</span>
-                                    <span className="font-medium">฿ {totalInstallmentBalance.toLocaleString()}</span>
+                                    <span className="font-medium">฿ {formatAmount(totalInstallmentBalance)}</span>
                                 </div>
                                 <div className="text-right">
                                     <span className="block opacity-70 text-[10px]">{t('dashboard.consumer_debt')}</span>
-                                    <span className="font-medium">฿ {totalDebtBalance.toLocaleString()}</span>
+                                    <span className="font-medium">฿ {formatAmount(totalDebtBalance)}</span>
                                 </div>
                             </div>
                             <div className="flex justify-between items-center text-xs text-muted-foreground pt-1 border-t border-border/50">
                                 <span>{t('dashboard.est_interest')}</span>
-                                <span>฿ {estMonthlyInterest.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                                <span>฿ {formatAmount(Math.round(estMonthlyInterest))}</span>
                             </div>
                         </CardContent>
                     </Card>

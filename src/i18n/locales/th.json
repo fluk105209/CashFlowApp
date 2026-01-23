@@ -27,7 +27,8 @@
         "dashboard": "หน้าหลัก",
         "calendar": "ปฏิทิน",
         "transactions": "รายการ",
-        "settings": "ตั้งค่า"
+        "settings": "ตั้งค่า",
+        "assets": "สินทรัพย์"
     },
     "auth": {
         "login_title": "เข้าสู่ระบบคลาวด์",
@@ -237,5 +238,25 @@
         "9": "ตุลาคม",
         "10": "พฤศจิกายน",
         "11": "ธันวาคม"
+    },
+    "assets": {
+        "title": "สินทรัพย์",
+        "add": "เพิ่มสินทรัพย์",
+        "edit": "แก้ไขสินทรัพย์",
+        "gold": "ทองคำ",
+        "bitcoin": "Bitcoin",
+        "other": "อื่นๆ",
+        "quantity": "จำนวนที่ถือครอง",
+        "unit": "หน่วย",
+        "current_price": "ราคาปัจจุบัน",
+        "total_value": "มูลค่ารวม",
+        "purchase_price": "ราคาที่ซื้อมา (เฉลี่ย)",
+        "realtime_desc": "ราคาอัปเดตแบบ Real-time",
+        "no_assets": "ยังไม่มีรายการสินทรัพย์",
+        "price_per_unit": "ราคาต่อหน่วย",
+        "unit_baht": "บาท",
+        "unit_salung": "สลึง",
+        "unit_satang": "สตางค์",
+        "unit_gram": "กรัม"
     }
 }

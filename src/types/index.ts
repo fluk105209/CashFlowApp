@@ -10,8 +10,6 @@ export interface Income {
     created_at?: string;
 }
 
-
-
 export interface Spending {
     id: string;
     name: string;
@@ -40,6 +38,18 @@ export interface Obligation {
     created_at?: string;
 }
 
+export type AssetType = 'gold' | 'bitcoin' | 'other';
+
+export interface Asset {
+    id: string;
+    name: string;
+    type: AssetType;
+    quantity: number; // For BTC (number), For Gold (number of 'baht' or 'grams')
+    unit: string; // 'baht', 'gram', 'btc', etc.
+    purchasePrice?: number; // Optional purchase price in THB
+    created_at?: string;
+}
+
 export interface Profile {
     id: string;
     user_id_text: string;
@@ -52,6 +62,7 @@ export interface FinanceState {
     incomes: Income[];
     spendings: Spending[];
     obligations: Obligation[];
+    assets: Asset[];
     pin: string | null;
     isLocked: boolean;
     isLoading: boolean;
@@ -61,11 +72,12 @@ export interface FinanceState {
     profile: Profile | null;
     categoryColors: Record<string, string>;
     userCustomColors: string[];
+    isAmountHidden: boolean;
 
     login: (userId: string, pin: string) => Promise<{ success: boolean; error?: string }>;
     logout: () => void;
     initialize: () => Promise<void>;
-    syncToCloud: (category?: 'incomes' | 'spendings' | 'obligations') => Promise<void>;
+    syncToCloud: (category?: 'incomes' | 'spendings' | 'obligations' | 'assets') => Promise<void>;
     addIncome: (income: Omit<Income, 'id'>) => Promise<void>;
     updateIncome: (id: string, income: Partial<Income>) => Promise<void>;
     deleteIncome: (id: string) => Promise<void>;
@@ -77,11 +89,17 @@ export interface FinanceState {
     addObligation: (obligation: Omit<Obligation, 'id'>) => Promise<void>;
     updateObligation: (id: string, obligation: Partial<Obligation>) => Promise<void>;
     deleteObligation: (id: string) => Promise<void>;
-    setStoreData: (data: { incomes: Income[], spendings: Spending[], obligations: Obligation[] }) => void;
+
+    addAsset: (asset: Omit<Asset, 'id'>) => Promise<void>;
+    updateAsset: (id: string, asset: Partial<Asset>) => Promise<void>;
+    deleteAsset: (id: string) => Promise<void>;
+
+    setStoreData: (data: { incomes: Income[], spendings: Spending[], obligations: Obligation[], assets?: Asset[] }) => void;
     setPin: (pin: string) => Promise<void>;
     setLanguage: (lang: string) => Promise<void>;
     setCategoryColor: (category: string, color: string) => void;
     addUserCustomColor: (color: string) => void;
+    toggleAmountVisibility: () => void;
     unlock: (enteredPin: string) => boolean;
     lock: () => void;
     resetData: () => Promise<void>;

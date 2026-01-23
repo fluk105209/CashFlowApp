@@ -18,6 +18,7 @@ export const useFinanceStore = create<FinanceState>()(
             incomes: [],
             spendings: [],
             obligations: [],
+            assets: [],
             pin: null,
             isLocked: true,
             isLoading: false,
@@ -27,9 +28,10 @@ export const useFinanceStore = create<FinanceState>()(
             profile: null,
             categoryColors: defaultCategoryColors,
             userCustomColors: [],
+            isAmountHidden: false,
 
-            syncToCloud: async (category?: 'incomes' | 'spendings' | 'obligations') => {
-                const { profile, incomes, spendings, obligations } = get();
+            syncToCloud: async (category?: 'incomes' | 'spendings' | 'obligations' | 'assets') => {
+                const { profile, incomes, spendings, obligations, assets } = get();
                 if (!profile) return;
 
                 set({ isSyncing: true });
@@ -40,11 +42,14 @@ export const useFinanceStore = create<FinanceState>()(
                         await syncService.syncSpendings(profile.id, spendings);
                     } else if (category === 'obligations') {
                         await syncService.syncObligations(profile.id, obligations);
+                    } else if (category === 'assets') {
+                        await syncService.syncAssets(profile.id, assets);
                     } else {
                         await Promise.all([
                             syncService.syncIncomes(profile.id, incomes),
                             syncService.syncSpendings(profile.id, spendings),
-                            syncService.syncObligations(profile.id, obligations)
+                            syncService.syncObligations(profile.id, obligations),
+                            syncService.syncAssets(profile.id, assets)
                         ]);
                     }
                     set({ isSyncing: false, lastSyncedAt: new Date().toISOString() });
@@ -82,6 +87,7 @@ export const useFinanceStore = create<FinanceState>()(
                             incomes: cloudData.incomes,
                             spendings: cloudData.spendings,
                             obligations: cloudData.obligations,
+                            assets: cloudData.assets || [],
                             isSyncing: false,
                             lastSyncedAt: new Date().toISOString()
                         });
@@ -97,15 +103,15 @@ export const useFinanceStore = create<FinanceState>()(
             },
 
             logout: () => {
-                set({ profile: null, isLocked: true, incomes: [], spendings: [], obligations: [] });
+                set({ profile: null, isLocked: true, incomes: [], spendings: [], obligations: [], assets: [] });
             },
 
             initialize: async () => {
-                const { profile, incomes, spendings, obligations } = get();
+                const { profile, incomes, spendings, obligations, assets } = get();
                 if (!profile) return;
 
                 // Only show loading state if we have absolutely no data
-                const hasNoData = incomes.length === 0 && spendings.length === 0 && obligations.length === 0;
+                const hasNoData = incomes.length === 0 && spendings.length === 0 && obligations.length === 0 && (assets || []).length === 0;
                 if (hasNoData) {
                     set({ isLoading: true, error: null });
                 } else {
@@ -113,16 +119,20 @@ export const useFinanceStore = create<FinanceState>()(
                 }
 
                 try {
-                    const data = await syncService.fetchAll(profile.id);
+                    const cloudData = await syncService.fetchAll(profile.id);
                     if (profile.language) {
                         i18n.changeLanguage(profile.language);
                     }
-                    set({
-                        ...data,
+
+                    set((state) => ({
+                        incomes: cloudData.incomes.length > 0 ? cloudData.incomes : state.incomes,
+                        spendings: cloudData.spendings.length > 0 ? cloudData.spendings : state.spendings,
+                        obligations: cloudData.obligations.length > 0 ? cloudData.obligations : state.obligations,
+                        assets: cloudData.assets.length > 0 ? cloudData.assets : (state.assets || []),
                         isLoading: false,
                         isSyncing: false,
                         lastSyncedAt: new Date().toISOString()
-                    });
+                    }));
                 } catch {
                     set({ isLoading: false, isSyncing: false, error: 'auth.cloud_load_error' });
                 }
@@ -230,6 +240,26 @@ export const useFinanceStore = create<FinanceState>()(
                 await get().syncToCloud('obligations');
             },
 
+            addAsset: async (asset) => {
+                const id = uuidv4();
+                set((state) => ({
+                    assets: [...(state.assets || []), { ...asset, id, created_at: new Date().toISOString() }],
+                }));
+                await get().syncToCloud('assets');
+            },
+            updateAsset: async (id, asset) => {
+                set((state) => ({
+                    assets: (state.assets || []).map((a) => (a.id === id ? { ...a, ...asset } : a)),
+                }));
+                await get().syncToCloud('assets');
+            },
+            deleteAsset: async (id) => {
+                set((state) => ({
+                    assets: (state.assets || []).filter((a) => a.id !== id),
+                }));
+                await get().syncToCloud('assets');
+            },
+
             setStoreData: (data) => set(() => data),
 
             setPin: async (pin) => {
@@ -264,6 +294,10 @@ export const useFinanceStore = create<FinanceState>()(
                 }));
             },
 
+            toggleAmountVisibility: () => {
+                set((state) => ({ isAmountHidden: !state.isAmountHidden }));
+            },
+
             unlock: (enteredPin) => {
                 const { pin } = get();
                 if (!pin || enteredPin === pin) {
@@ -274,7 +308,7 @@ export const useFinanceStore = create<FinanceState>()(
             },
             lock: () => set({ isLocked: true }),
             resetData: async () => {
-                set({ incomes: [], spendings: [], obligations: [], isLocked: false });
+                set({ incomes: [], spendings: [], obligations: [], assets: [], isLocked: false });
                 await get().syncToCloud(); // Full sync to clear everything
             },
         }),

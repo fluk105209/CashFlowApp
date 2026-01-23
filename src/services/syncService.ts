@@ -1,12 +1,13 @@
 import { supabase } from '../lib/supabase';
-import type { Income, Spending, Obligation } from '../types';
+import type { Income, Spending, Obligation, Asset } from '../types';
 
 export const syncService = {
     async fetchAll(profileId: string) {
-        const [incomes, spendings, obligations] = await Promise.all([
+        const [incomes, spendings, obligations, assets] = await Promise.all([
             supabase.from('incomes').select('*').eq('profile_id', profileId),
             supabase.from('spendings').select('*').eq('profile_id', profileId),
-            supabase.from('obligations').select('*').eq('profile_id', profileId)
+            supabase.from('obligations').select('*').eq('profile_id', profileId),
+            supabase.from('assets').select('*').eq('profile_id', profileId)
         ]);
 
         return {
@@ -42,7 +43,16 @@ export const syncService = {
                 startDate: o.start_date,
                 creditLimit: o.credit_limit ? Number(o.credit_limit) : 0,
                 created_at: o.created_at
-            })) as Obligation[]
+            })) as Obligation[],
+            assets: (assets.data || []).map(a => ({
+                id: a.id,
+                name: a.name,
+                type: a.type,
+                quantity: Number(a.quantity),
+                unit: a.unit,
+                purchasePrice: a.purchase_price ? Number(a.purchase_price) : undefined,
+                created_at: a.created_at
+            })) as Asset[]
         };
     },
 
@@ -127,6 +137,32 @@ export const syncService = {
 
         const currentIds = obligations.map(o => o.id);
         await supabase.from('obligations')
+            .delete()
+            .eq('profile_id', profileId)
+            .not('id', 'in', `(${currentIds.join(',')})`);
+    },
+
+    async syncAssets(profileId: string, assets: Asset[]) {
+        if (assets.length === 0) {
+            await supabase.from('assets').delete().eq('profile_id', profileId);
+            return;
+        }
+
+        const dataToUpsert = assets.map(a => ({
+            id: a.id,
+            profile_id: profileId,
+            name: a.name,
+            type: a.type,
+            quantity: a.quantity,
+            unit: a.unit,
+            purchase_price: a.purchasePrice,
+            created_at: a.created_at
+        }));
+
+        await supabase.from('assets').upsert(dataToUpsert);
+
+        const currentIds = assets.map(a => a.id);
+        await supabase.from('assets')
             .delete()
             .eq('profile_id', profileId)
             .not('id', 'in', `(${currentIds.join(',')})`);

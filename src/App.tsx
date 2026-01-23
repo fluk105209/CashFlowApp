@@ -1,5 +1,5 @@
 import { useNavigate, useLocation, Routes, Route } from "react-router-dom"
-import { Home, Calendar as CalendarIcon, List, Settings, Cloud, CloudOff, CheckCircle2, User, Loader2, Plus } from "lucide-react"
+import { Home, List, Settings, Plus, Coins, User, Loader2, Cloud, CloudOff, CheckCircle2, Calendar as CalendarIcon } from "lucide-react"
 import { UnifiedAddModal } from "@/components/UnifiedAddModal"
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
@@ -18,6 +18,7 @@ const SettingsPage = lazy(() => import("@/features/Settings/SettingsPage").then(
 const CategoryColorsPage = lazy(() => import("@/features/Settings/CategoryColorsPage").then(module => ({ default: module.CategoryColorsPage })))
 const PinLock = lazy(() => import("@/components/PinLock").then(module => ({ default: module.PinLock })))
 const LoginPage = lazy(() => import("@/features/Auth/LoginPage").then(module => ({ default: module.LoginPage })))
+const AssetsPage = lazy(() => import("@/features/Assets/AssetsPage").then(module => ({ default: module.AssetsPage })))
 
 function SyncIndicator() {
   const { isSyncing, lastSyncedAt, error } = useFinanceStore()
@@ -90,6 +91,7 @@ function App() {
   const isDashboard = location.pathname === '/'
   const isCalendar = location.pathname === '/calendar'
   const isTransactions = location.pathname.startsWith('/transactions')
+  const isAssets = location.pathname === '/assets'
   const isSettings = location.pathname === '/settings'
 
   if (!profile) {
@@ -121,6 +123,12 @@ function App() {
 
           <div className="flex items-center gap-2">
             <SyncIndicator />
+            <button
+              onClick={() => navigate('/settings')}
+              className={`p-2 rounded-full transition-all ${isSettings ? 'bg-primary/20 text-primary' : 'text-muted-foreground hover:bg-muted'}`}
+            >
+              <Settings className="w-5 h-5" />
+            </button>
           </div>
         </header>
 
@@ -135,6 +143,7 @@ function App() {
               <Route path="/" element={<DashboardPage />} />
               <Route path="/calendar" element={<CalendarView />} />
               <Route path="/transactions" element={<TransactionsPage />} />
+              <Route path="/assets" element={<AssetsPage />} />
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="/settings/category-colors" element={<CategoryColorsPage />} />
             </Routes>
@@ -157,16 +166,15 @@ function App() {
             icon={<Home className="h-5 w-5" />}
           />
           <NavButton
-            active={isTransactions}
-            onClick={() => navigate('/transactions')}
-            icon={<List className="h-5 w-5" />}
+            active={isCalendar}
+            onClick={() => navigate('/calendar')}
+            icon={<CalendarIcon className="h-5 w-5" />}
           />
 
           <div className="flex-shrink-0 -mt-8">
             <div className="bg-background rounded-full p-2 shadow-lg">
               <button
                 onClick={() => {
-                  // This will need a way to open the modal
                   window.dispatchEvent(new CustomEvent('open-unified-add'));
                 }}
                 className="w-14 h-14 rounded-full bg-primary text-white shadow-xl shadow-primary/30 flex items-center justify-center hover:scale-110 active:scale-95 transition-all"
@@ -177,14 +185,14 @@ function App() {
           </div>
 
           <NavButton
-            active={isCalendar}
-            onClick={() => navigate('/calendar')}
-            icon={<CalendarIcon className="h-5 w-5" />}
+            active={isAssets}
+            onClick={() => navigate('/assets')}
+            icon={<Coins className="h-5 w-5" />}
           />
           <NavButton
-            active={isSettings}
-            onClick={() => navigate('/settings')}
-            icon={<Settings className="h-5 w-5" />}
+            active={isTransactions}
+            onClick={() => navigate('/transactions')}
+            icon={<List className="h-5 w-5" />}
           />
         </nav>
       </div>

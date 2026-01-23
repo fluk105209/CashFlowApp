@@ -27,7 +27,8 @@
         "dashboard": "Dashboard",
         "calendar": "Calendar",
         "transactions": "Transactions",
-        "settings": "Settings"
+        "settings": "Settings",
+        "assets": "Assets"
     },
     "auth": {
         "login_title": "Cloud Sync Login",
@@ -256,5 +257,25 @@
         "calendar_title": "4. Calendar View",
         "calendar_desc": "Visualizes your spending habits over the month. Click any date to see detailed transactions.",
         "settings_desc": "Customize your experience: toggle Dark Mode, switch Languages, or reset data if needed."
+    },
+    "assets": {
+        "title": "Assets",
+        "add": "Add Asset",
+        "edit": "Edit Asset",
+        "gold": "Gold",
+        "bitcoin": "Bitcoin",
+        "other": "Other",
+        "quantity": "Quantity Held",
+        "unit": "Unit",
+        "current_price": "Current Price",
+        "total_value": "Total Value",
+        "purchase_price": "Avg. Purchase Price",
+        "realtime_desc": "Prices updated in real-time",
+        "no_assets": "No assets tracked yet.",
+        "price_per_unit": "Price per unit",
+        "unit_baht": "Baht",
+        "unit_salung": "Salung",
+        "unit_satang": "Satang",
+        "unit_gram": "Gram"
     }
 }
