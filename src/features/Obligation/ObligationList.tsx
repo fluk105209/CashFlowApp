@@ -175,10 +175,21 @@ export function ObligationList({ limit, items }: Props) {
 }
 
 function Badge({ status, label }: { status: string, label: string }) {
+    const getStatusStyles = (status: string) => {
+        switch (status) {
+            case 'active': return 'bg-emerald-500/10 text-emerald-600'
+            case 'locked': return 'bg-amber-500/10 text-amber-600'
+            case 'inactive': return 'bg-rose-500/10 text-rose-600'
+            case 'cancelled': return 'bg-destructive/10 text-destructive'
+            case 'closed': return 'bg-slate-500/10 text-slate-600'
+            default: return 'bg-muted text-muted-foreground'
+        }
+    }
+
     return (
         <span className={cn(
             "text-[8px] h-4 px-1.5 rounded-full flex items-center font-bold uppercase tracking-tighter border-none whitespace-nowrap",
-            status === 'active' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-muted text-muted-foreground'
+            getStatusStyles(status)
         )}>
             {label}
         </span>

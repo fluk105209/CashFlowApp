@@ -130,7 +130,12 @@
         "category_colors": "สีสำหรับหมวดหมู่",
         "category_colors_desc": "ปรับแต่งสีสำหรับแต่ละหมวดหมู่ของคุณ",
         "income_categories": "หมวดหมู่รายได้",
-        "expense_categories": "หมวดหมู่รายจ่าย"
+        "expense_categories": "หมวดหมู่รายจ่าย",
+        "data_management": "การจัดการข้อมูล",
+        "export": "ส่งออกข้อมูล",
+        "export_excel": "ส่งออกเป็น Excel",
+        "export_desc": "ดาวน์โหลดข้อมูลทั้งหมดเป็นไฟล์ Excel (XLSX)",
+        "export_success": "ส่งออกข้อมูลสำเร็จ!"
     },
     "income": {
         "title": "รายได้",
@@ -183,6 +188,9 @@
         "placeholder_name": "เช่น ผ่อนรถ, บัตรเครดิต",
         "active": "เปิดอยู่",
         "closed": "ปิดแล้ว",
+        "locked": "ล็อกไว้",
+        "inactive": "ระงับชั่วคราว",
+        "cancelled": "ยกเลิกแล้ว",
         "step_1_desc": "เลือกประเภทหนี้สินที่คุณต้องการติดตาม",
         "amount_min": "ยอดชำระขั้นต่ำ",
         "total_months": "จำนวนงวดทั้งหมด",

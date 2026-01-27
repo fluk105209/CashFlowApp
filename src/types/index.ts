@@ -34,7 +34,7 @@ export interface Obligation {
     totalMonths?: number; // For fixed installments/loans (Optional)
     paidMonths?: number; // For fixed installments (Optional)
     startDate?: string; // Optional
-    status: 'active' | 'closed';
+    status: 'active' | 'closed' | 'locked' | 'inactive' | 'cancelled';
     created_at?: string;
 }
 

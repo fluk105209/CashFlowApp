@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useFinanceStore } from '@/stores/useFinanceStore';
-import { Shield, ArrowLeft, Key, Moon, LogOut, Languages, Trash2, Palette } from 'lucide-react';
+import { Shield, ArrowLeft, Key, Moon, LogOut, Languages, Trash2, Palette, Download } from 'lucide-react';
+import { exportToExcel } from '@/utils/exportUtils';
 import { useTranslation } from 'react-i18next';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/button';
@@ -11,7 +12,7 @@ import { useNavigate } from 'react-router-dom';
 
 export const SettingsPage: React.FC = () => {
     const { t, i18n } = useTranslation();
-    const { pin, setPin, resetData, logout, setLanguage } = useFinanceStore();
+    const { pin, setPin, resetData, logout, setLanguage, incomes, spendings, obligations, assets } = useFinanceStore();
     const [newPin, setNewPin] = useState('');
     const [confirmPin, setConfirmPin] = useState('');
     const [error, setError] = useState('');
@@ -52,6 +53,10 @@ export const SettingsPage: React.FC = () => {
             await resetData();
             navigate('/');
         }
+    };
+
+    const handleExport = () => {
+        exportToExcel({ incomes, spendings, obligations, assets });
     };
 
     return (
@@ -157,6 +162,32 @@ export const SettingsPage: React.FC = () => {
                         <p className="text-sm text-muted-foreground">{t('settings.category_colors_desc')}</p>
                     </div>
                     <Palette className="h-5 w-5 text-muted-foreground" />
+                </div>
+            </section>
+
+            <section className="space-y-4">
+                <div className="flex items-center gap-3 mb-2">
+                    <div className="w-10 h-10 rounded-2xl bg-sky-500/10 flex items-center justify-center">
+                        <Download className="h-5 w-5 text-sky-500" />
+                    </div>
+                    <h3 className="text-lg font-semibold">{t('settings.data_management')}</h3>
+                </div>
+
+                <div className="bg-card rounded-2xl p-6 border shadow-sm space-y-4">
+                    <div className="flex items-center justify-between">
+                        <div className="space-y-0.5">
+                            <h4 className="font-medium">{t('settings.export')}</h4>
+                            <p className="text-sm text-muted-foreground">{t('settings.export_desc')}</p>
+                        </div>
+                    </div>
+                    <Button
+                        variant="outline"
+                        onClick={handleExport}
+                        className="w-full rounded-xl flex items-center gap-2 hover:bg-sky-500 hover:text-white transition-all"
+                    >
+                        <Download className="h-4 w-4" />
+                        {t('settings.export_excel')}
+                    </Button>
                 </div>
             </section>
 

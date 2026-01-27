@@ -129,7 +129,12 @@
         "category_colors": "Category Colors",
         "category_colors_desc": "Personalize colors for your categories",
         "income_categories": "Income Sources",
-        "expense_categories": "Spending Categories"
+        "expense_categories": "Spending Categories",
+        "data_management": "Data Management",
+        "export": "Export Data",
+        "export_excel": "Export to Excel",
+        "export_desc": "Download your records as an Excel file (XLSX)",
+        "export_success": "Data exported successfully!"
     },
     "income": {
         "title": "Incomes",
@@ -182,6 +187,9 @@
         "placeholder_name": "e.g. Car Loan, Credit Card",
         "active": "Active",
         "closed": "Closed",
+        "locked": "Locked",
+        "inactive": "Inactive",
+        "cancelled": "Cancelled",
         "step_1_desc": "Select the type of obligation you want to track.",
         "amount_min": "Min Payment",
         "total_months": "Total Months",

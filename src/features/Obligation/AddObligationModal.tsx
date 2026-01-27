@@ -45,6 +45,7 @@ export function ObligationModal({ initialData, trigger }: Props) {
     const [paidMonths, setPaidMonths] = useState('0')
     const [creditLimit, setCreditLimit] = useState('')
     const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0])
+    const [status, setStatus] = useState<'active' | 'closed' | 'locked' | 'inactive' | 'cancelled'>('active')
 
     // Initialize form on open
     const resetForm = () => {
@@ -60,6 +61,7 @@ export function ObligationModal({ initialData, trigger }: Props) {
         setPaidMonths('0')
         setCreditLimit('')
         setStartDate(new Date().toISOString().split('T')[0]) // Reset startDate
+        setStatus('active')
     }
 
     useEffect(() => {
@@ -77,6 +79,7 @@ export function ObligationModal({ initialData, trigger }: Props) {
                 setPaidMonths(initialData.paidMonths?.toString() || '0')
                 setCreditLimit(initialData.creditLimit?.toString() || '')
                 setStartDate(initialData.startDate ? new Date(initialData.startDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0])
+                setStatus(initialData.status)
             })
         } else if (open && !initialData) {
             requestAnimationFrame(() => {
@@ -130,7 +133,7 @@ export function ObligationModal({ initialData, trigger }: Props) {
             totalMonths: totalMonths ? parseInt(totalMonths) : undefined,
             paidMonths: paidMonths ? parseInt(paidMonths) : undefined,
             creditLimit: creditLimit ? parseFloat(creditLimit) : undefined,
-            status: (initialData?.status || 'active') as 'active' | 'closed',
+            status: status,
             startDate: startDate || new Date().toISOString(), // Use startDate from state
         }
 
@@ -380,6 +383,30 @@ export function ObligationModal({ initialData, trigger }: Props) {
                                             value={startDate}
                                             onChange={(e) => setStartDate(e.target.value)}
                                         />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="status">{t('common.status')}</Label>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        {(['active', 'closed', 'locked', 'inactive', 'cancelled'] as const).map((s) => (
+                                            <Button
+                                                key={s}
+                                                type="button"
+                                                variant={status === s ? 'default' : 'outline'}
+                                                onClick={() => setStatus(s)}
+                                                className={cn(
+                                                    "text-[10px] h-8 rounded-xl font-bold uppercase tracking-tighter",
+                                                    status === s && s === 'active' && "bg-emerald-500 hover:bg-emerald-600",
+                                                    status === s && s === 'closed' && "bg-slate-500 hover:bg-slate-600",
+                                                    status === s && s === 'locked' && "bg-amber-500 hover:bg-amber-600",
+                                                    status === s && s === 'inactive' && "bg-rose-500 hover:bg-rose-600",
+                                                    status === s && s === 'cancelled' && "bg-destructive hover:bg-destructive/90"
+                                                )}
+                                            >
+                                                {t(`obligations.${s}`)}
+                                            </Button>
+                                        ))}
                                     </div>
                                 </div>
                             </div>
