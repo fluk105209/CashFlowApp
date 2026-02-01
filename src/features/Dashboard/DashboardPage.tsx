@@ -8,13 +8,17 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useEffect, useMemo, useState } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useTranslation } from "react-i18next"
-import { isSameMonth } from "date-fns"
-import { Utensils, Car, Zap, Loader2, Eye, EyeOff } from "lucide-react"
+import { isSameMonth, parseISO } from "date-fns"
+import { useNavigate } from "react-router-dom"
+import { Utensils, Car, Zap, Loader2, Eye, EyeOff, PieChart } from "lucide-react"
+import { getCategoryMetadata } from "@/constants/categories"
 import { Button } from "@/components/ui/button"
+import { formatCurrency } from "@/utils/formatUtils"
 
 export function DashboardPage() {
     const { t } = useTranslation()
-    const { incomes, spendings, obligations, isLoading, initialize, isAmountHidden, toggleAmountVisibility } = useFinanceStore()
+    const navigate = useNavigate()
+    const { incomes, spendings, obligations, budgets, isLoading, initialize, isAmountHidden, toggleAmountVisibility, currency } = useFinanceStore()
 
     const [pullDistance, setPullDistance] = useState(0)
     const [isRefreshing, setIsRefreshing] = useState(false)
@@ -63,8 +67,8 @@ export function DashboardPage() {
     const { monthlyIncome, monthlySpending } = useMemo(() => {
         const now = new Date()
 
-        const mIncomes = incomes.filter(i => isSameMonth(new Date(i.date), now))
-        const mSpendings = spendings.filter(s => isSameMonth(new Date(s.date), now))
+        const mIncomes = incomes.filter(i => isSameMonth(parseISO(i.date.split('T')[0]), now))
+        const mSpendings = spendings.filter(s => isSameMonth(parseISO(s.date.split('T')[0]), now))
 
         const mIncomeSum = mIncomes.reduce((sum, i) => sum + i.amount, 0)
         const mSpendingSum = mSpendings.reduce((sum, s) => sum + s.amount, 0)
@@ -123,11 +127,6 @@ export function DashboardPage() {
         window.dispatchEvent(new CustomEvent('open-unified-add', { detail: prefill }));
     }
 
-    const formatAmount = (amount: number) => {
-        if (isAmountHidden) return "••••••"
-        return amount.toLocaleString()
-    }
-
     return (
         <div className="relative">
             {/* Pull to Refresh Indicator */}
@@ -178,7 +177,7 @@ export function DashboardPage() {
                                             exit={{ opacity: 0, y: -5 }}
                                             transition={{ duration: 0.2 }}
                                         >
-                                            ฿ {formatAmount(netCashFlow)}
+                                            {formatCurrency(netCashFlow, currency, isAmountHidden)}
                                         </motion.span>
                                     </AnimatePresence>
                                 </CardTitle>
@@ -189,13 +188,13 @@ export function DashboardPage() {
                                 <div className="flex flex-col items-center border-r border-border/50">
                                     <span className="text-[9px] text-muted-foreground uppercase font-bold mb-1">{t('dashboard.income')}</span>
                                     <span className="text-emerald-500 font-black text-sm text-center">
-                                        +฿ {formatAmount(monthlyIncome)}
+                                        {formatCurrency(monthlyIncome, currency, isAmountHidden, { signDisplay: 'always' })}
                                     </span>
                                 </div>
                                 <div className="flex flex-col items-center">
                                     <span className="text-[9px] text-muted-foreground uppercase font-bold mb-1">{t('dashboard.actual_expenses')}</span>
                                     <span className="text-rose-500 font-black text-sm text-center">
-                                        -฿ {formatAmount(monthlySpending)}
+                                        {formatCurrency(-monthlySpending, currency, isAmountHidden, { signDisplay: 'always' })}
                                     </span>
                                 </div>
                             </div>
@@ -251,32 +250,99 @@ export function DashboardPage() {
                         <CardContent className="space-y-2">
                             <div className="flex justify-between items-center">
                                 <span className="text-sm">{t('dashboard.total_planned')}</span>
-                                <span className="font-semibold text-rose-500">฿ {formatAmount(totalObligationsPlanned)}</span>
+                                <span className="font-semibold text-rose-500">{formatCurrency(totalObligationsPlanned, currency, isAmountHidden)}</span>
                             </div>
                             <div className="h-[1px] bg-border/50" />
 
                             <div className="flex justify-between items-center text-xs font-medium">
                                 <span>{t('dashboard.total_debt_balance')}</span>
-                                <span>฿ {formatAmount(totalInstallmentBalance + totalDebtBalance)}</span>
+                                <span>{formatCurrency(totalInstallmentBalance + totalDebtBalance, currency, isAmountHidden)}</span>
                             </div>
 
                             <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground bg-muted/20 p-2 rounded-md">
                                 <div>
                                     <span className="block opacity-70 text-[10px]">{t('dashboard.installments')}</span>
-                                    <span className="font-medium">฿ {formatAmount(totalInstallmentBalance)}</span>
+                                    <span className="font-medium">{formatCurrency(totalInstallmentBalance, currency, isAmountHidden)}</span>
                                 </div>
                                 <div className="text-right">
                                     <span className="block opacity-70 text-[10px]">{t('dashboard.consumer_debt')}</span>
-                                    <span className="font-medium">฿ {formatAmount(totalDebtBalance)}</span>
+                                    <span className="font-medium">{formatCurrency(totalDebtBalance, currency, isAmountHidden)}</span>
                                 </div>
                             </div>
                             <div className="flex justify-between items-center text-xs text-muted-foreground pt-1 border-t border-border/50">
                                 <span>{t('dashboard.est_interest')}</span>
-                                <span>฿ {formatAmount(Math.round(estMonthlyInterest))}</span>
+                                <span>{formatCurrency(Math.round(estMonthlyInterest), currency, isAmountHidden)}</span>
                             </div>
                         </CardContent>
                     </Card>
                 </motion.div>
+
+                {budgets.length > 0 && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.25, duration: 0.4 }}
+                        className="space-y-3"
+                    >
+                        <div className="flex items-center justify-between px-1">
+                            <h3 className="font-black text-secondary-foreground uppercase tracking-tight text-xs opacity-60">
+                                {t('budget.title', { defaultValue: 'Budgets' })}
+                            </h3>
+                            <Button variant="ghost" size="sm" className="h-6 text-[10px] font-bold" onClick={() => navigate('/budget')}>
+                                {t('common.view_all', { defaultValue: 'View All' })}
+                            </Button>
+                        </div>
+                        <div className="grid gap-3">
+                            {budgets.slice(0, 3).map(budget => {
+                                const now = new Date()
+                                const spent = spendings
+                                    .filter(s => {
+                                        const date = parseISO(s.date.split('T')[0])
+                                        const matchesCategory = s.category === budget.category
+                                        const matchesMonth = budget.period === 'monthly' ? isSameMonth(date, now) : true
+                                        return matchesCategory && matchesMonth
+                                    })
+                                    .reduce((acc, s) => acc + s.amount, 0)
+
+                                const progress = Math.min(100, (spent / budget.amount) * 100)
+                                const isOver = spent > budget.amount
+                                const metadata = getCategoryMetadata(budget.category)
+                                const Icon = metadata?.icon || PieChart
+
+                                return (
+                                    <Card key={budget.id} className="border-none bg-card/60 backdrop-blur-sm p-3 shadow-sm hover:shadow-md transition-all">
+                                        <div className="flex items-center gap-3">
+                                            <div
+                                                className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0"
+                                                style={{ backgroundColor: (metadata?.defaultColor || '#94a3b8') + '15', color: metadata?.defaultColor }}
+                                            >
+                                                <Icon className="h-5 w-5" />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex justify-between items-end mb-1">
+                                                    <span className="text-xs font-bold truncate pr-2">
+                                                        {t(`categories.${budget.category}`, { defaultValue: budget.category })}
+                                                    </span>
+                                                    <span className={`text-[10px] font-black ${isOver ? 'text-destructive' : 'text-primary'}`}>
+                                                        {Math.round(progress)}%
+                                                    </span>
+                                                </div>
+                                                <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                                                    <motion.div
+                                                        initial={{ width: 0 }}
+                                                        animate={{ width: `${progress}%` }}
+                                                        transition={{ duration: 1, ease: "easeOut" }}
+                                                        className={`h-full ${isOver ? 'bg-destructive' : 'bg-primary'}`}
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </Card>
+                                )
+                            })}
+                        </div>
+                    </motion.div>
+                )}
 
 
                 <div className="space-y-8 pb-10">
@@ -300,6 +366,6 @@ export function DashboardPage() {
                     </section>
                 </div>
             </motion.main>
-        </div>
+        </div >
     )
 }

@@ -2,13 +2,14 @@ import { useFinanceStore } from "@/stores/useFinanceStore"
 import { useTranslation } from "react-i18next"
 import { motion, AnimatePresence } from "framer-motion"
 import { Card, CardContent } from "@/components/ui/card"
-import { Coins, RefreshCcw, Landmark } from "lucide-react"
+import { Coins, RefreshCcw, Landmark, TrendingUp, Wallet, Home, Box } from "lucide-react"
 import { useEffect, useState } from "react"
 import { AddAssetModal } from "./AddAssetModal"
+import { formatCurrency } from "@/utils/formatUtils"
 
 export function AssetsPage() {
     const { t } = useTranslation()
-    const { assets, isAmountHidden } = useFinanceStore()
+    const { assets, isAmountHidden, currency } = useFinanceStore()
     const [prices, setPrices] = useState<Record<string, number>>({ bitcoin: 0, gold: 0 })
     const [isFetching, setIsFetching] = useState(false)
 
@@ -76,6 +77,9 @@ export function AssetsPage() {
                     default:
                         currentPrice = pricePerBaht
                 }
+            } else {
+                // For stock, fund, real-estate, other: use purchasePrice as current if it exists
+                currentPrice = asset.purchasePrice || 0
             }
 
             return total + (asset.quantity * currentPrice)
@@ -113,7 +117,7 @@ export function AssetsPage() {
                                 exit={{ opacity: 0, scale: 0.9 }}
                                 transition={{ duration: 0.2 }}
                             >
-                                ฿ {isAmountHidden ? "••••••" : totalAssetsValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                                {formatCurrency(totalAssetsValue, currency, isAmountHidden)}
                             </motion.span>
                         </AnimatePresence>
                     </h3>
@@ -126,12 +130,14 @@ export function AssetsPage() {
                     price={prices.bitcoin}
                     unit="BTC"
                     icon={<Coins className="h-4 w-4 text-orange-400" />}
+                    currency={currency}
                 />
                 <PriceCard
                     title={t('assets.gold')}
                     price={prices.gold}
                     unit={t('assets.unit_baht', { defaultValue: 'Baht' })}
                     icon={<Landmark className="h-4 w-4 text-yellow-500" />}
+                    currency={currency}
                 />
             </div>
 
@@ -147,7 +153,12 @@ export function AssetsPage() {
                             <AssetItem
                                 key={asset.id}
                                 asset={asset}
-                                currentPrice={asset.type === 'bitcoin' ? prices.bitcoin : prices.gold}
+                                currency={currency}
+                                currentPrice={
+                                    asset.type === 'bitcoin' ? prices.bitcoin :
+                                        asset.type === 'gold' ? prices.gold :
+                                            asset.purchasePrice || 0
+                                }
                             />
                         ))}
                     </div>
@@ -157,7 +168,7 @@ export function AssetsPage() {
     )
 }
 
-function PriceCard({ title, price, unit, icon }: any) {
+function PriceCard({ title, price, unit, icon, currency }: any) {
     return (
         <Card className="bg-card border-none shadow-lg rounded-3xl">
             <CardContent className="p-4 flex flex-col items-center text-center">
@@ -166,7 +177,7 @@ function PriceCard({ title, price, unit, icon }: any) {
                 </div>
                 <span className="text-[10px] text-muted-foreground font-bold uppercase">{title}</span>
                 <span className="text-sm font-black text-primary mt-1">
-                    ฿ {price > 0 ? price.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '...'}
+                    {price > 0 ? formatCurrency(price, currency, false) : '...'}
                 </span>
                 <span className="text-[9px] text-muted-foreground opacity-50 uppercase">/ {unit}</span>
             </CardContent>
@@ -174,7 +185,7 @@ function PriceCard({ title, price, unit, icon }: any) {
     )
 }
 
-function AssetItem({ asset, currentPrice }: any) {
+function AssetItem({ asset, currentPrice, currency }: any) {
     const { t } = useTranslation()
     const { isAmountHidden } = useFinanceStore()
 
@@ -207,33 +218,39 @@ function AssetItem({ asset, currentPrice }: any) {
     const value = asset.quantity * effectivePrice
     const pnl = asset.purchasePrice ? (value - (asset.quantity * asset.purchasePrice)) : 0
 
-    const formatAmount = (amount: number, digits = 0) => {
-        if (isAmountHidden) return "••••••"
-        return amount.toLocaleString(undefined, { maximumFractionDigits: digits })
-    }
-
     return (
         <AddAssetModal initialData={asset}>
             <Card className="bg-card border-none shadow-md rounded-3xl overflow-hidden group cursor-pointer hover:bg-muted/30 transition-colors">
                 <CardContent className="p-4 flex items-center justify-between">
                     <div className="flex items-center gap-4 min-w-0">
-                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${asset.type === 'bitcoin' ? 'bg-orange-500/10 text-orange-500' : 'bg-yellow-500/10 text-yellow-500'}`}>
-                            {asset.type === 'bitcoin' ? <Coins /> : <Landmark />}
+                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${asset.type === 'bitcoin' ? 'bg-orange-500/10 text-orange-500' :
+                            asset.type === 'gold' ? 'bg-yellow-500/10 text-yellow-500' :
+                                asset.type === 'stock' ? 'bg-emerald-500/10 text-emerald-500' :
+                                    asset.type === 'fund' ? 'bg-blue-500/10 text-blue-500' :
+                                        asset.type === 'real-estate' ? 'bg-indigo-500/10 text-indigo-500' :
+                                            'bg-primary/10 text-primary'
+                            }`}>
+                            {asset.type === 'bitcoin' ? <Coins /> :
+                                asset.type === 'gold' ? <Landmark /> :
+                                    asset.type === 'stock' ? <TrendingUp /> :
+                                        asset.type === 'fund' ? <Wallet /> :
+                                            asset.type === 'real-estate' ? <Home /> :
+                                                <Box />}
                         </div>
                         <div className="min-w-0">
                             <div className="font-bold text-sm truncate">{asset.name}</div>
                             <div className="text-[10px] text-muted-foreground flex items-center gap-1.5 font-medium">
                                 {asset.quantity} {t(`assets.unit_${asset.unit.toLowerCase()}`, { defaultValue: asset.unit })}
                                 <span className="opacity-30">•</span>
-                                <span>฿ {formatAmount(effectivePrice)}</span>
+                                <span>{formatCurrency(effectivePrice, currency, isAmountHidden)}</span>
                             </div>
                         </div>
                     </div>
                     <div className="text-right flex flex-col shrink-0">
-                        <span className="font-black text-sm">฿ {formatAmount(value)}</span>
+                        <span className="font-black text-sm">{formatCurrency(value, currency, isAmountHidden)}</span>
                         {asset.purchasePrice && (
                             <span className={`text-[10px] font-bold ${pnl >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                                {isAmountHidden ? "••••" : (pnl >= 0 ? '+' : '') + pnl.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                                {formatCurrency(pnl, currency, isAmountHidden, { signDisplay: 'always' })}
                             </span>
                         )}
                     </div>

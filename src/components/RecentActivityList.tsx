@@ -9,10 +9,11 @@ import { useTranslation } from "react-i18next"
 import { getCategoryMetadata } from "@/constants/categories"
 import { IncomeModal } from "@/features/Income/AddIncomeModal"
 import { SpendingModal } from "@/features/Spending/AddSpendingModal"
+import { formatCurrency } from "@/utils/formatUtils"
 
 export function RecentActivityList({ limit = 8 }: { limit?: number }) {
     const { t, i18n } = useTranslation()
-    const { incomes, spendings, categoryColors } = useFinanceStore()
+    const { incomes, spendings, categoryColors, currency, isAmountHidden } = useFinanceStore()
 
     const combinedActivities = [
         ...incomes.map(i => ({
@@ -106,7 +107,7 @@ export function RecentActivityList({ limit = 8 }: { limit?: number }) {
                             <div className="flex items-center gap-1 ml-2">
                                 <div className="text-right mr-2">
                                     <div className={`font-black text-sm whitespace-nowrap ${item.type === 'income' ? 'text-emerald-500' : 'text-rose-500'}`}>
-                                        {item.type === 'income' ? '+' : '-'}฿{item.amount.toLocaleString()}
+                                        {item.type === 'income' ? '+' : '-'}{formatCurrency(item.amount, currency, isAmountHidden)}
                                     </div>
                                 </div>
                                 <div className="flex items-center">

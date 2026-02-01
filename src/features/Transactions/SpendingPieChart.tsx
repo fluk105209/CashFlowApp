@@ -6,6 +6,7 @@ import { parseISO, getMonth, getYear } from 'date-fns'
 import { Card, CardContent, CardHeader, CardDescription } from '@/components/ui/card'
 import { HelpCircle, Banknote } from 'lucide-react'
 import { getCategoryMetadata } from '@/constants/categories'
+import { getCurrencySymbol } from '@/utils/formatUtils'
 
 interface SpendingPieChartProps {
     selectedMonth: string;
@@ -15,12 +16,12 @@ interface SpendingPieChartProps {
 
 export function SpendingPieChart({ selectedMonth, selectedYear, showIncome = false }: SpendingPieChartProps) {
     const { t } = useTranslation()
-    const { spendings, incomes, categoryColors } = useFinanceStore()
+    const { spendings, incomes, categoryColors, currency } = useFinanceStore()
     const [isExpanded, setIsExpanded] = useState(false)
 
     const { chartData } = useMemo(() => {
         const filteredSpendings = spendings.filter(s => {
-            const date = parseISO(s.date)
+            const date = parseISO(s.date.split('T')[0])
             const matchesMonth = selectedMonth === 'all' || getMonth(date).toString() === selectedMonth
             const matchesYear = getYear(date).toString() === selectedYear
             return matchesMonth && matchesYear
@@ -41,7 +42,7 @@ export function SpendingPieChart({ selectedMonth, selectedYear, showIncome = fal
 
         if (showIncome) {
             const filteredIncomes = incomes.filter(i => {
-                const date = parseISO(i.date)
+                const date = parseISO(i.date.split('T')[0])
                 const matchesMonth = selectedMonth === 'all' || getMonth(date).toString() === selectedMonth
                 const matchesYear = getYear(date).toString() === selectedYear
                 return matchesMonth && matchesYear
@@ -164,7 +165,7 @@ export function SpendingPieChart({ selectedMonth, selectedYear, showIncome = fal
                                 <Tooltip
                                     /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
                                     formatter={(value: any, name: any, item: any) => [
-                                        `฿ ${Number(value || 0).toLocaleString()} (${item.payload.percentage}%)`,
+                                        `${getCurrencySymbol(currency)} ${Number(value || 0).toLocaleString()} (${item.payload.percentage}%)`,
                                         name || ''
                                     ]}
                                     contentStyle={{

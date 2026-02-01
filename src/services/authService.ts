@@ -66,5 +66,18 @@ export const authService = {
         } catch (err) {
             return { error: err instanceof Error ? err.message : 'Unknown error' };
         }
+    },
+
+    async updateProfileField(profileId: string, fields: Partial<Profile>): Promise<{ error: string | null }> {
+        try {
+            const { error } = await supabase
+                .from('profiles')
+                .update(fields)
+                .eq('id', profileId);
+
+            return { error: error ? error.message : null };
+        } catch (err) {
+            return { error: err instanceof Error ? err.message : 'Unknown error' };
+        }
     }
 };

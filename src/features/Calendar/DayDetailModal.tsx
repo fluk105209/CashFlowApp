@@ -13,6 +13,8 @@ import { SpendingModal } from "@/features/Spending/AddSpendingModal"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useTranslation } from "react-i18next"
+import { useFinanceStore } from "@/stores/useFinanceStore"
+import { formatCurrency } from "@/utils/formatUtils"
 
 interface DayDetailModalProps {
     date: Date | null
@@ -24,6 +26,7 @@ interface DayDetailModalProps {
 
 export function DayDetailModal({ date, isOpen, onClose, incomes, spendings }: DayDetailModalProps) {
     const { t, i18n } = useTranslation()
+    const { currency, isAmountHidden } = useFinanceStore()
     if (!date) return null
 
     const totalIncome = incomes.reduce((sum, i) => sum + i.amount, 0)
@@ -44,15 +47,15 @@ export function DayDetailModal({ date, isOpen, onClose, incomes, spendings }: Da
                 <div className="grid grid-cols-3 gap-2 mb-4 text-center">
                     <div className="p-2 bg-emerald-50 text-emerald-700 rounded-lg">
                         <div className="text-xs opacity-70">{t('dashboard.income')}</div>
-                        <div className="font-bold">+฿{totalIncome.toLocaleString()}</div>
+                        <div className="font-bold">+{formatCurrency(totalIncome, currency, isAmountHidden)}</div>
                     </div>
                     <div className="p-2 bg-rose-50 text-rose-700 rounded-lg">
                         <div className="text-xs opacity-70">{t('dashboard.spending')}</div>
-                        <div className="font-bold">-฿{totalSpending.toLocaleString()}</div>
+                        <div className="font-bold">-{formatCurrency(totalSpending, currency, isAmountHidden)}</div>
                     </div>
                     <div className={`p-2 rounded-lg ${net >= 0 ? 'bg-blue-50 text-blue-700' : 'bg-orange-50 text-orange-700'}`}>
                         <div className="text-xs opacity-70">{t('common.net')}</div>
-                        <div className="font-bold">฿{net.toLocaleString()}</div>
+                        <div className="font-bold">{formatCurrency(net, currency, isAmountHidden)}</div>
                     </div>
                 </div>
 

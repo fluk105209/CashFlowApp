@@ -23,6 +23,7 @@ import type { Frequency } from '@/types'
 import { useTranslation } from 'react-i18next'
 import { SPENDING_CATEGORIES, INCOME_CATEGORIES } from '@/constants/categories'
 import { Wallet, Receipt } from 'lucide-react'
+import { getCurrencySymbol } from '@/utils/formatUtils'
 
 interface UnifiedAddModalProps {
     open?: boolean
@@ -51,7 +52,7 @@ export function UnifiedAddModal({
     const setOpen = isControlled ? (externalOnOpenChange || (() => { })) : setInternalOpen
 
     const [activeTab, setActiveTab] = useState<'expense' | 'income'>(initialTab)
-    const { addSpending, addIncome, obligations } = useFinanceStore()
+    const { addSpending, addIncome, obligations, currency } = useFinanceStore()
 
     // Form States
     const [name, setName] = useState('')
@@ -222,7 +223,7 @@ export function UnifiedAddModal({
                                 <div className="space-y-2">
                                     <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t('spending.amount')}</Label>
                                     <div className="relative">
-                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 font-black text-rose-500">฿</span>
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 font-black text-rose-500">{getCurrencySymbol(currency)}</span>
                                         <Input
                                             type="number"
                                             placeholder="0.00"
@@ -287,7 +288,7 @@ export function UnifiedAddModal({
                                 <div className="space-y-2">
                                     <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t('income.amount')}</Label>
                                     <div className="relative">
-                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 font-black text-emerald-500">฿</span>
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 font-black text-emerald-500">{getCurrencySymbol(currency)}</span>
                                         <Input
                                             type="number"
                                             placeholder="0.00"

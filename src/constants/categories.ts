@@ -1,6 +1,7 @@
 import {
     Utensils, Home, Zap, Car, Play, ShoppingBag, HeartPulse, TrendingUp, HelpCircle,
-    Briefcase, Wallet, Landmark, CreditCard, User, CarFront, Gift, Plane
+    Briefcase, Wallet, Landmark, CreditCard, User, CarFront, Gift, Plane,
+    Award, PieChart, Banknote, GraduationCap, Repeat, ShieldCheck, UserCircle, Dog
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -37,6 +38,9 @@ export const INCOME_CATEGORIES: CategoryMetadata[] = [
     { key: 'Freelance', icon: Wallet, defaultColor: '#3b82f6' },
     { key: 'Business', icon: Wallet, defaultColor: '#8b5cf6' },
     { key: 'Investment', icon: TrendingUp, defaultColor: '#f59e0b' },
+    { key: 'Bonus', icon: Award, defaultColor: '#d946ef' },
+    { key: 'Dividend', icon: PieChart, defaultColor: '#14b8a6' },
+    { key: 'Interest', icon: Banknote, defaultColor: '#0ea5e9' },
     { key: 'Gift', icon: Gift, defaultColor: '#ec4899' },
     { key: 'Other', icon: HelpCircle, defaultColor: '#64748b' },
 ];
@@ -47,7 +51,12 @@ export const SPENDING_CATEGORIES: CategoryMetadata[] = [
     { key: 'Housing', icon: Home, defaultColor: '#6366f1' },
     { key: 'Entertainment', icon: Play, defaultColor: '#ec4899' },
     { key: 'Health', icon: HeartPulse, defaultColor: '#06b6d4' },
-    { key: { 'Shopping': 'Shopping' }.Shopping, icon: ShoppingBag, defaultColor: '#8b5cf6' },
+    { key: 'Shopping', icon: ShoppingBag, defaultColor: '#8b5cf6' },
+    { key: 'Education', icon: GraduationCap, defaultColor: '#6366f1' },
+    { key: 'Subscription', icon: Repeat, defaultColor: '#ec4899' },
+    { key: 'Insurance', icon: ShieldCheck, defaultColor: '#10b981' },
+    { key: 'Personal Care', icon: UserCircle, defaultColor: '#f43f5e' },
+    { key: 'Pets', icon: Dog, defaultColor: '#f59e0b' },
     { key: 'Utilities', icon: Zap, defaultColor: '#eab308' },
     { key: 'Travel', icon: Plane, defaultColor: '#14b8a6' },
     { key: 'Obligation Payment', icon: Landmark, defaultColor: '#475569' },

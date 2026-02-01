@@ -19,6 +19,7 @@ const CategoryColorsPage = lazy(() => import("@/features/Settings/CategoryColors
 const PinLock = lazy(() => import("@/components/PinLock").then(module => ({ default: module.PinLock })))
 const LoginPage = lazy(() => import("@/features/Auth/LoginPage").then(module => ({ default: module.LoginPage })))
 const AssetsPage = lazy(() => import("@/features/Assets/AssetsPage").then(module => ({ default: module.AssetsPage })))
+const BudgetPage = lazy(() => import("@/features/Budget/BudgetPage").then(module => ({ default: module.BudgetPage })))
 
 function SyncIndicator() {
   const { isSyncing, lastSyncedAt, error } = useFinanceStore()
@@ -144,6 +145,7 @@ function App() {
               <Route path="/calendar" element={<CalendarView />} />
               <Route path="/transactions" element={<TransactionsPage />} />
               <Route path="/assets" element={<AssetsPage />} />
+              <Route path="/budget" element={<BudgetPage />} />
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="/settings/category-colors" element={<CategoryColorsPage />} />
             </Routes>

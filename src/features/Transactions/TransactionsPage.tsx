@@ -8,7 +8,10 @@ import { IncomeList } from "@/features/Income/IncomeList"
 import { SpendingList } from "@/features/Spending/SpendingList"
 import { ObligationList } from "@/features/Obligation/ObligationList"
 import { Button } from "@/components/ui/button"
-import { ChevronLeft, Search, FilterX, Calendar } from "lucide-react"
+import { ChevronLeft, Search, FilterX, Calendar, SlidersHorizontal, ArrowUpDown } from "lucide-react"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Label } from "@/components/ui/label"
+import { cn } from "@/lib/utils"
 import { motion, AnimatePresence } from "framer-motion"
 import { parseISO, getMonth, getYear } from "date-fns"
 import { useTranslation } from "react-i18next"
@@ -25,6 +28,11 @@ export function TransactionsPage() {
     const [category, setCategory] = useState("all")
     const [selectedMonth, setSelectedMonth] = useState<string>("all")
     const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString())
+
+    // Advanced filters
+    const [minAmount, setMinAmount] = useState<string>("")
+    const [maxAmount, setMaxAmount] = useState<string>("")
+    const [sortBy, setSortBy] = useState<string>("date-desc")
 
     const months = [
         { value: "all", label: t('transactions.all_months') },
@@ -48,26 +56,48 @@ export function TransactionsPage() {
     const obligationTypes = useMemo(() => ["all", ...new Set(obligations.map(o => o.type))], [obligations])
 
     const filteredIncomes = useMemo(() => {
-        return incomes.filter(item => {
-            const date = parseISO(item.date)
+        let items = incomes.filter(item => {
+            const date = parseISO(item.date.split('T')[0])
             const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase())
             const matchesCategory = category === "all" || item.category === category
             const matchesMonth = selectedMonth === "all" || getMonth(date).toString() === selectedMonth
             const matchesYear = getYear(date).toString() === selectedYear
-            return matchesSearch && matchesCategory && matchesMonth && matchesYear
+            const matchesMin = minAmount === "" || item.amount >= parseFloat(minAmount)
+            const matchesMax = maxAmount === "" || item.amount <= parseFloat(maxAmount)
+            return matchesSearch && matchesCategory && matchesMonth && matchesYear && matchesMin && matchesMax
         })
-    }, [incomes, search, category, selectedMonth, selectedYear])
+
+        items.sort((a, b) => {
+            if (sortBy === "date-desc") return new Date(b.date).getTime() - new Date(a.date).getTime()
+            if (sortBy === "date-asc") return new Date(a.date).getTime() - new Date(b.date).getTime()
+            if (sortBy === "amount-desc") return b.amount - a.amount
+            if (sortBy === "amount-asc") return a.amount - b.amount
+            return 0
+        })
+        return items
+    }, [incomes, search, category, selectedMonth, selectedYear, minAmount, maxAmount, sortBy])
 
     const filteredSpendings = useMemo(() => {
-        return spendings.filter(item => {
-            const date = parseISO(item.date)
+        let items = spendings.filter(item => {
+            const date = parseISO(item.date.split('T')[0])
             const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase())
             const matchesCategory = category === "all" || item.category === category
             const matchesMonth = selectedMonth === "all" || getMonth(date).toString() === selectedMonth
             const matchesYear = getYear(date).toString() === selectedYear
-            return matchesSearch && matchesCategory && matchesMonth && matchesYear
+            const matchesMin = minAmount === "" || item.amount >= parseFloat(minAmount)
+            const matchesMax = maxAmount === "" || item.amount <= parseFloat(maxAmount)
+            return matchesSearch && matchesCategory && matchesMonth && matchesYear && matchesMin && matchesMax
         })
-    }, [spendings, search, category, selectedMonth, selectedYear])
+
+        items.sort((a, b) => {
+            if (sortBy === "date-desc") return new Date(b.date).getTime() - new Date(a.date).getTime()
+            if (sortBy === "date-asc") return new Date(a.date).getTime() - new Date(b.date).getTime()
+            if (sortBy === "amount-desc") return b.amount - a.amount
+            if (sortBy === "amount-asc") return a.amount - b.amount
+            return 0
+        })
+        return items
+    }, [spendings, search, category, selectedMonth, selectedYear, minAmount, maxAmount, sortBy])
 
     const filteredObligations = useMemo(() => {
         return obligations.filter(item => {
@@ -90,9 +120,12 @@ export function TransactionsPage() {
         setCategory("all")
         setSelectedMonth("all")
         setSelectedYear(new Date().getFullYear().toString())
+        setMinAmount("")
+        setMaxAmount("")
+        setSortBy("date-desc")
     }
 
-    const isFiltered = search || category !== "all" || selectedMonth !== "all" || selectedYear !== new Date().getFullYear().toString()
+    const isFiltered = search || category !== "all" || selectedMonth !== "all" || selectedYear !== new Date().getFullYear().toString() || minAmount || maxAmount || sortBy !== "date-desc"
 
     return (
         <motion.div
@@ -141,6 +174,63 @@ export function TransactionsPage() {
                                     ))}
                                 </SelectContent>
                             </Select>
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button variant="outline" size="icon" className={cn(minAmount || maxAmount ? "text-primary border-primary bg-primary/10" : "")}>
+                                        <SlidersHorizontal className="h-4 w-4" />
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-80 p-4" align="end">
+                                    <div className="space-y-4">
+                                        <h4 className="font-bold text-sm">{t('transactions.advanced_filters')}</h4>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <div className="space-y-1">
+                                                <Label className="text-[10px] uppercase font-black opacity-50">{t('transactions.min_amount')}</Label>
+                                                <Input
+                                                    type="number"
+                                                    placeholder="0"
+                                                    value={minAmount}
+                                                    onChange={(e) => setMinAmount(e.target.value)}
+                                                    className="h-8 text-xs"
+                                                />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <Label className="text-[10px] uppercase font-black opacity-50">{t('transactions.max_amount')}</Label>
+                                                <Input
+                                                    type="number"
+                                                    placeholder="100000"
+                                                    value={maxAmount}
+                                                    onChange={(e) => setMaxAmount(e.target.value)}
+                                                    className="h-8 text-xs"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <Label className="text-[10px] uppercase font-black opacity-50">{t('transactions.sort_by')}</Label>
+                                            <Select value={sortBy} onValueChange={setSortBy}>
+                                                <SelectTrigger className="h-8 text-xs">
+                                                    <ArrowUpDown className="h-3 w-3 mr-2 opacity-50" />
+                                                    <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="date-desc" className="text-xs">{t('transactions.sort_date_desc')}</SelectItem>
+                                                    <SelectItem value="date-asc" className="text-xs">{t('transactions.sort_date_asc')}</SelectItem>
+                                                    <SelectItem value="amount-desc" className="text-xs">{t('transactions.sort_amount_desc')}</SelectItem>
+                                                    <SelectItem value="amount-asc" className="text-xs">{t('transactions.sort_amount_asc')}</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={resetFilters}
+                                            className="w-full text-xs h-8 text-muted-foreground"
+                                        >
+                                            {t('common.reset')}
+                                        </Button>
+                                    </div>
+                                </PopoverContent>
+                            </Popover>
                             {isFiltered && (
                                 <Button variant="outline" size="icon" onClick={resetFilters}>
                                     <FilterX className="h-4 w-4" />

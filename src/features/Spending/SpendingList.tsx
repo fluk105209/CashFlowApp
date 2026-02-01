@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Link } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import { getCategoryMetadata } from "@/constants/categories"
+import { formatCurrency } from "@/utils/formatUtils"
 
 interface Props {
     limit?: number
@@ -17,7 +18,7 @@ interface Props {
 
 export function SpendingList({ limit, items }: Props) {
     const { t, i18n } = useTranslation()
-    const { spendings: storeSpendings, categoryColors } = useFinanceStore()
+    const { spendings: storeSpendings, categoryColors, currency, isAmountHidden } = useFinanceStore()
 
     const dataSource = [...(items || storeSpendings)].sort((a, b) => {
         const dateComparison = new Date(b.date).getTime() - new Date(a.date).getTime();
@@ -87,7 +88,7 @@ export function SpendingList({ limit, items }: Props) {
                             <div className="flex items-center gap-1 ml-2">
                                 <div className="text-right mr-2">
                                     <div className="font-black text-rose-500 text-sm whitespace-nowrap">
-                                        -฿{spending.amount.toLocaleString()}
+                                        -{formatCurrency(spending.amount, currency, isAmountHidden)}
                                     </div>
                                 </div>
                                 <div className="flex items-center">

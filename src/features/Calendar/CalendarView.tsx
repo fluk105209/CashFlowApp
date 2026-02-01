@@ -6,12 +6,12 @@ import {
     endOfMonth,
     eachDayOfInterval,
     isSameMonth,
-    isSameDay,
     addMonths,
     subMonths,
     startOfWeek,
     endOfWeek,
-    isToday
+    isToday,
+    parseISO
 } from "date-fns"
 import { ChevronLeft, ChevronRight, BarChart3, Calendar as CalendarIcon, LineChart, PieChart as PieChartIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -20,10 +20,11 @@ import { FinanceChart } from "./FinanceChart"
 import { SpendingPieChart } from "../Transactions/SpendingPieChart"
 import { cn } from "@/lib/utils"
 import { useTranslation } from "react-i18next"
+import { formatCurrency, getCurrencySymbol } from "@/utils/formatUtils"
 
 export function CalendarView() {
     const { t, i18n } = useTranslation()
-    const { incomes, spendings } = useFinanceStore()
+    const { incomes, spendings, currency, isAmountHidden } = useFinanceStore()
     const [currentDate, setCurrentDate] = useState(new Date())
     const [selectedDate, setSelectedDate] = useState<Date | null>(null)
     const [viewMode, setViewMode] = useState<'grid' | 'pie' | 'graph-month' | 'graph-year'>('grid')
@@ -45,13 +46,13 @@ export function CalendarView() {
         const map = new Map<string, { income: number; expense: number }>()
 
         incomes.forEach(inc => {
-            const dateKey = format(new Date(inc.date), 'yyyy-MM-dd')
+            const dateKey = inc.date.split('T')[0]
             const current = map.get(dateKey) || { income: 0, expense: 0 }
             map.set(dateKey, { ...current, income: current.income + inc.amount })
         })
 
         spendings.forEach(sp => {
-            const dateKey = format(new Date(sp.date), 'yyyy-MM-dd')
+            const dateKey = sp.date.split('T')[0]
             const current = map.get(dateKey) || { income: 0, expense: 0 }
             map.set(dateKey, { ...current, expense: current.expense + sp.amount })
         })
@@ -65,10 +66,12 @@ export function CalendarView() {
         let expense = 0
 
         incomes.forEach(i => {
-            if (isSameMonth(new Date(i.date), currentDate)) income += i.amount
+            const d = parseISO(i.date)
+            if (isSameMonth(d, currentDate)) income += i.amount
         })
         spendings.forEach(s => {
-            if (isSameMonth(new Date(s.date), currentDate)) expense += s.amount
+            const d = parseISO(s.date)
+            if (isSameMonth(d, currentDate)) expense += s.amount
         })
 
         return { income, expense, net: income - expense }
@@ -80,11 +83,11 @@ export function CalendarView() {
         let expense = 0;
 
         incomes.forEach(i => {
-            if (new Date(i.date) < monthStart) income += i.amount;
+            if (parseISO(i.date) < monthStart) income += i.amount;
         });
 
         spendings.forEach(s => {
-            if (new Date(s.date) < monthStart) expense += s.amount;
+            if (parseISO(s.date) < monthStart) expense += s.amount;
         });
 
         return income - expense;
@@ -169,9 +172,10 @@ export function CalendarView() {
     // Modal Data Filtering
     const selectedDateData = useMemo(() => {
         if (!selectedDate) return { incomes: [], spendings: [] }
+        const selDateKey = format(selectedDate, 'yyyy-MM-dd')
         return {
-            incomes: incomes.filter(i => isSameDay(new Date(i.date), selectedDate)),
-            spendings: spendings.filter(s => isSameDay(new Date(s.date), selectedDate))
+            incomes: incomes.filter(i => i.date.split('T')[0] === selDateKey),
+            spendings: spendings.filter(s => s.date.split('T')[0] === selDateKey)
         }
     }, [selectedDate, incomes, spendings])
 
@@ -238,16 +242,20 @@ export function CalendarView() {
                 <div className="grid grid-cols-3 gap-2 text-center text-[10px] px-1">
                     <div className="bg-card border p-2 rounded-2xl shadow-sm">
                         <div className="text-muted-foreground mb-1">{t('dashboard.income')}</div>
-                        <div className="font-bold text-emerald-600">+{monthlySummary.income.toLocaleString()}</div>
+                        <div className="font-bold text-emerald-600">
+                            {formatCurrency(monthlySummary.income, currency, isAmountHidden, { showSymbol: false, signDisplay: 'always' })}
+                        </div>
                     </div>
                     <div className="bg-card border p-2 rounded-2xl shadow-sm">
                         <div className="text-muted-foreground mb-1">{t('dashboard.spending')}</div>
-                        <div className="font-bold text-rose-600">-{monthlySummary.expense.toLocaleString()}</div>
+                        <div className="font-bold text-rose-600">
+                            {formatCurrency(-monthlySummary.expense, currency, isAmountHidden, { showSymbol: false, signDisplay: 'always' })}
+                        </div>
                     </div>
                     <div className="bg-card border p-2 rounded-2xl shadow-sm">
-                        <div className="text-muted-foreground mb-1">{t('common.net')}</div>
+                        <div className="text-muted-foreground mb-1">{t('common.net')} ({getCurrencySymbol(currency)})</div>
                         <div className={cn("font-bold", monthlySummary.net >= 0 ? "text-blue-600" : "text-orange-600")}>
-                            {monthlySummary.net.toLocaleString()}
+                            {formatCurrency(monthlySummary.net, currency, isAmountHidden, { showSymbol: false })}
                         </div>
                     </div>
                 </div>
@@ -298,12 +306,12 @@ export function CalendarView() {
                                         <div className="space-y-1">
                                             {data.income > 0 && (
                                                 <div className="text-[8px] font-bold bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-1 py-0.5 rounded-lg truncate text-center">
-                                                    +{data.income >= 1000 ? (data.income / 1000).toFixed(1) + 'k' : data.income}
+                                                    {isAmountHidden ? "***" : `+${data.income >= 1000 ? (data.income / 1000).toFixed(1) + 'k' : data.income}`}
                                                 </div>
                                             )}
                                             {data.expense > 0 && (
                                                 <div className="text-[8px] font-bold bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 px-1 py-0.5 rounded-lg truncate text-center">
-                                                    -{data.expense >= 1000 ? (data.expense / 1000).toFixed(1) + 'k' : data.expense}
+                                                    {isAmountHidden ? "***" : `-${data.expense >= 1000 ? (data.expense / 1000).toFixed(1) + 'k' : data.expense}`}
                                                 </div>
                                             )}
                                         </div>

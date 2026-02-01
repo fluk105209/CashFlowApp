@@ -8,6 +8,7 @@ import { Link } from "react-router-dom"
 import { format, parseISO } from "date-fns"
 import { useTranslation } from "react-i18next"
 import { getCategoryMetadata } from "@/constants/categories"
+import { formatCurrency } from "@/utils/formatUtils"
 
 interface Props {
     limit?: number
@@ -16,7 +17,7 @@ interface Props {
 
 export function IncomeList({ limit, items }: Props) {
     const { t, i18n } = useTranslation()
-    const { incomes: storeIncomes, categoryColors } = useFinanceStore()
+    const { incomes: storeIncomes, categoryColors, currency, isAmountHidden } = useFinanceStore()
 
     const dataSource = [...(items || storeIncomes)].sort((a, b) => {
         const dateComparison = new Date(b.date).getTime() - new Date(a.date).getTime();
@@ -79,7 +80,7 @@ export function IncomeList({ limit, items }: Props) {
                             <div className="flex items-center gap-1 ml-2">
                                 <div className="text-right mr-2">
                                     <div className="font-black text-emerald-500 text-sm whitespace-nowrap">
-                                        +฿{income.amount.toLocaleString()}
+                                        +{formatCurrency(income.amount, currency, isAmountHidden)}
                                     </div>
                                 </div>
                                 <div className="flex items-center">

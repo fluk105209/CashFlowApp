@@ -17,6 +17,7 @@ import type { Obligation, ObligationType } from '@/types'
 import { CreditCard, Smartphone, Car, Home, Banknote, HelpCircle } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { cn } from "@/lib/utils"
+import { getCurrencySymbol } from "@/utils/formatUtils"
 
 interface Props {
     initialData?: Obligation
@@ -26,7 +27,7 @@ interface Props {
 export function ObligationModal({ initialData, trigger }: Props) {
     const { t } = useTranslation()
     const [open, setOpen] = useState(false)
-    const { addObligation, updateObligation } = useFinanceStore()
+    const { addObligation, updateObligation, currency } = useFinanceStore()
     const isEdit = !!initialData
 
     const [step, setStep] = useState<1 | 2>(1)
@@ -295,7 +296,10 @@ export function ObligationModal({ initialData, trigger }: Props) {
                                                 </div>
                                                 {amount && (
                                                     <p className="text-[10px] text-emerald-600 font-medium text-right">
-                                                        {t('obligations.calculated_amount', { amount: parseFloat(amount).toLocaleString() })}
+                                                        {t('obligations.calculated_amount', {
+                                                            amount: parseFloat(amount).toLocaleString(),
+                                                            symbol: getCurrencySymbol(currency)
+                                                        })}
                                                     </p>
                                                 )}
                                             </div>

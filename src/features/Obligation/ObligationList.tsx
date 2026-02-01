@@ -16,6 +16,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Link } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import { cn } from "@/lib/utils"
+import { formatCurrency, getCurrencySymbol } from "@/utils/formatUtils"
 
 interface Props {
     limit?: number
@@ -24,7 +25,7 @@ interface Props {
 
 export function ObligationList({ limit, items }: Props) {
     const { t } = useTranslation()
-    const { obligations: storeObligations } = useFinanceStore()
+    const { obligations: storeObligations, currency, isAmountHidden } = useFinanceStore()
 
     const dataSource = [...(items || storeObligations)].sort((a, b) => {
         if (a.created_at && b.created_at) {
@@ -100,7 +101,7 @@ export function ObligationList({ limit, items }: Props) {
                                 <div className="flex flex-col items-end gap-1 shrink-0">
                                     <Badge status={ob.status} label={t(`obligations.${ob.status}`)} />
                                     <div className="font-black text-rose-500 text-sm">
-                                        ฿{ob.amount.toLocaleString()}
+                                        {formatCurrency(ob.amount, currency, isAmountHidden)}
                                     </div>
                                 </div>
                             </div>
@@ -130,7 +131,7 @@ export function ObligationList({ limit, items }: Props) {
                                             <div className="space-y-1">
                                                 <div className="flex justify-between text-[8px] font-bold uppercase tracking-tighter text-muted-foreground/70">
                                                     <span>{t('obligations.limit_usage')}:</span>
-                                                    <span className="whitespace-nowrap">฿{(ob.creditLimit - ob.balance).toLocaleString()} {t('common.left')}</span>
+                                                    <span className="whitespace-nowrap">{getCurrencySymbol(currency)}{(ob.creditLimit - ob.balance).toLocaleString()} {t('common.left')}</span>
                                                 </div>
                                                 <div className="w-full h-1.5 bg-muted/50 rounded-full overflow-hidden">
                                                     <motion.div

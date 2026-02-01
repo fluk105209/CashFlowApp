@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useFinanceStore } from '@/stores/useFinanceStore';
-import { Shield, ArrowLeft, Key, Moon, LogOut, Languages, Trash2, Palette, Download } from 'lucide-react';
-import { exportToExcel } from '@/utils/exportUtils';
+import { Shield, ArrowLeft, Key, Moon, LogOut, Languages, Trash2, Palette, Download, Coins, FileText, Target } from 'lucide-react';
+import { exportToExcel, exportToPDF } from '@/utils/exportUtils';
 import { useTranslation } from 'react-i18next';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,7 @@ import { useNavigate } from 'react-router-dom';
 
 export const SettingsPage: React.FC = () => {
     const { t, i18n } = useTranslation();
-    const { pin, setPin, resetData, logout, setLanguage, incomes, spendings, obligations, assets } = useFinanceStore();
+    const { pin, setPin, resetData, logout, setLanguage, incomes, spendings, obligations, assets, currency, setCurrency } = useFinanceStore();
     const [newPin, setNewPin] = useState('');
     const [confirmPin, setConfirmPin] = useState('');
     const [error, setError] = useState('');
@@ -57,6 +57,10 @@ export const SettingsPage: React.FC = () => {
 
     const handleExport = () => {
         exportToExcel({ incomes, spendings, obligations, assets });
+    };
+
+    const handleExportPDF = () => {
+        exportToPDF({ incomes, spendings, obligations, assets });
     };
 
     return (
@@ -180,14 +184,24 @@ export const SettingsPage: React.FC = () => {
                             <p className="text-sm text-muted-foreground">{t('settings.export_desc')}</p>
                         </div>
                     </div>
-                    <Button
-                        variant="outline"
-                        onClick={handleExport}
-                        className="w-full rounded-xl flex items-center gap-2 hover:bg-sky-500 hover:text-white transition-all"
-                    >
-                        <Download className="h-4 w-4" />
-                        {t('settings.export_excel')}
-                    </Button>
+                    <div className="grid grid-cols-2 gap-2">
+                        <Button
+                            variant="outline"
+                            onClick={handleExport}
+                            className="rounded-xl flex items-center gap-2 hover:bg-sky-500 hover:text-white transition-all"
+                        >
+                            <Download className="h-4 w-4" />
+                            {t('settings.export_excel')}
+                        </Button>
+                        <Button
+                            variant="outline"
+                            onClick={handleExportPDF}
+                            className="rounded-xl flex items-center gap-2 hover:bg-rose-500 hover:text-white transition-all"
+                        >
+                            <FileText className="h-4 w-4" />
+                            {t('settings.export_pdf')}
+                        </Button>
+                    </div>
                 </div>
             </section>
 
@@ -222,6 +236,60 @@ export const SettingsPage: React.FC = () => {
                             ไทย
                         </Button>
                     </div>
+                </div>
+            </section>
+
+            <section className="space-y-4">
+                <div className="flex items-center gap-3 mb-2">
+                    <div className="w-10 h-10 rounded-2xl bg-yellow-500/10 flex items-center justify-center">
+                        <Coins className="h-5 w-5 text-yellow-500" />
+                    </div>
+                    <h3 className="text-lg font-semibold">{t('settings.currency')}</h3>
+                </div>
+
+                <div className="bg-card rounded-2xl p-6 border shadow-sm space-y-4">
+                    <div className="flex items-center justify-between">
+                        <div className="space-y-0.5">
+                            <h4 className="font-medium">{t('settings.currency')}</h4>
+                            <p className="text-sm text-muted-foreground">{t('settings.currency_desc')}</p>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                        <Button
+                            variant={currency === 'THB' ? 'default' : 'outline'}
+                            onClick={() => setCurrency('THB')}
+                            className="rounded-xl"
+                        >
+                            THB (฿)
+                        </Button>
+                        <Button
+                            variant={currency === 'USD' ? 'default' : 'outline'}
+                            onClick={() => setCurrency('USD')}
+                            className="rounded-xl"
+                        >
+                            USD ($)
+                        </Button>
+                    </div>
+                </div>
+            </section>
+
+            <section className="space-y-4">
+                <div className="flex items-center gap-3 mb-2">
+                    <div className="w-10 h-10 rounded-2xl bg-amber-500/10 flex items-center justify-center">
+                        <Target className="h-5 w-5 text-amber-500" />
+                    </div>
+                    <h3 className="text-lg font-semibold">{t('settings.budgeting', { defaultValue: 'Budgeting' })}</h3>
+                </div>
+
+                <div
+                    onClick={() => navigate('/budget')}
+                    className="bg-card rounded-2xl p-6 border shadow-sm flex items-center justify-between cursor-pointer active:scale-[0.98] transition-all hover:bg-muted/30"
+                >
+                    <div className="space-y-0.5">
+                        <h4 className="font-medium">{t('settings.budget_management', { defaultValue: 'Manage Budgets' })}</h4>
+                        <p className="text-sm text-muted-foreground">{t('settings.budget_desc', { defaultValue: 'Set spending limits for categories' })}</p>
+                    </div>
+                    <Target className="h-5 w-5 text-muted-foreground" />
                 </div>
             </section>
 

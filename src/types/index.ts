@@ -38,7 +38,7 @@ export interface Obligation {
     created_at?: string;
 }
 
-export type AssetType = 'gold' | 'bitcoin' | 'other';
+export type AssetType = 'gold' | 'bitcoin' | 'stock' | 'fund' | 'real-estate' | 'other';
 
 export interface Asset {
     id: string;
@@ -50,11 +50,20 @@ export interface Asset {
     created_at?: string;
 }
 
+export interface Budget {
+    id: string;
+    category: string;
+    amount: number;
+    period: 'monthly' | 'yearly';
+    created_at?: string;
+}
+
 export interface Profile {
     id: string;
     user_id_text: string;
     pin_hash: string;
     language: string;
+    currency?: string;
     created_at: string;
 }
 
@@ -63,6 +72,7 @@ export interface FinanceState {
     spendings: Spending[];
     obligations: Obligation[];
     assets: Asset[];
+    budgets: Budget[];
     pin: string | null;
     isLocked: boolean;
     isLoading: boolean;
@@ -73,11 +83,12 @@ export interface FinanceState {
     categoryColors: Record<string, string>;
     userCustomColors: string[];
     isAmountHidden: boolean;
+    currency: string;
 
     login: (userId: string, pin: string) => Promise<{ success: boolean; error?: string }>;
     logout: () => void;
     initialize: () => Promise<void>;
-    syncToCloud: (category?: 'incomes' | 'spendings' | 'obligations' | 'assets') => Promise<void>;
+    syncToCloud: (category?: 'incomes' | 'spendings' | 'obligations' | 'assets' | 'budgets') => Promise<void>;
     addIncome: (income: Omit<Income, 'id'>) => Promise<void>;
     updateIncome: (id: string, income: Partial<Income>) => Promise<void>;
     deleteIncome: (id: string) => Promise<void>;
@@ -94,11 +105,16 @@ export interface FinanceState {
     updateAsset: (id: string, asset: Partial<Asset>) => Promise<void>;
     deleteAsset: (id: string) => Promise<void>;
 
-    setStoreData: (data: { incomes: Income[], spendings: Spending[], obligations: Obligation[], assets?: Asset[] }) => void;
+    addBudget: (budget: Omit<Budget, 'id'>) => Promise<void>;
+    updateBudget: (id: string, budget: Partial<Budget>) => Promise<void>;
+    deleteBudget: (id: string) => Promise<void>;
+
+    setStoreData: (data: { incomes: Income[], spendings: Spending[], obligations: Obligation[], assets?: Asset[], budgets?: Budget[] }) => void;
     setPin: (pin: string) => Promise<void>;
     setLanguage: (lang: string) => Promise<void>;
     setCategoryColor: (category: string, color: string) => void;
     addUserCustomColor: (color: string) => void;
+    setCurrency: (currency: string) => Promise<void>;
     toggleAmountVisibility: () => void;
     unlock: (enteredPin: string) => boolean;
     lock: () => void;

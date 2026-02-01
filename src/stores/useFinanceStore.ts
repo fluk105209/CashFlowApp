@@ -19,6 +19,7 @@ export const useFinanceStore = create<FinanceState>()(
             spendings: [],
             obligations: [],
             assets: [],
+            budgets: [],
             pin: null,
             isLocked: true,
             isLoading: false,
@@ -29,9 +30,10 @@ export const useFinanceStore = create<FinanceState>()(
             categoryColors: defaultCategoryColors,
             userCustomColors: [],
             isAmountHidden: false,
+            currency: 'THB',
 
-            syncToCloud: async (category?: 'incomes' | 'spendings' | 'obligations' | 'assets') => {
-                const { profile, incomes, spendings, obligations, assets } = get();
+            syncToCloud: async (category?: 'incomes' | 'spendings' | 'obligations' | 'assets' | 'budgets') => {
+                const { profile, incomes, spendings, obligations, assets, budgets } = get();
                 if (!profile) return;
 
                 set({ isSyncing: true });
@@ -44,12 +46,15 @@ export const useFinanceStore = create<FinanceState>()(
                         await syncService.syncObligations(profile.id, obligations);
                     } else if (category === 'assets') {
                         await syncService.syncAssets(profile.id, assets);
+                    } else if (category === 'budgets') {
+                        await syncService.syncBudgets(profile.id, budgets);
                     } else {
                         await Promise.all([
                             syncService.syncIncomes(profile.id, incomes),
                             syncService.syncSpendings(profile.id, spendings),
                             syncService.syncObligations(profile.id, obligations),
-                            syncService.syncAssets(profile.id, assets)
+                            syncService.syncAssets(profile.id, assets),
+                            syncService.syncBudgets(profile.id, budgets)
                         ]);
                     }
                     set({ isSyncing: false, lastSyncedAt: new Date().toISOString() });
@@ -88,6 +93,8 @@ export const useFinanceStore = create<FinanceState>()(
                             spendings: cloudData.spendings,
                             obligations: cloudData.obligations,
                             assets: cloudData.assets || [],
+                            budgets: cloudData.budgets || [],
+                            currency: profile.currency || 'THB',
                             isSyncing: false,
                             lastSyncedAt: new Date().toISOString()
                         });
@@ -107,11 +114,11 @@ export const useFinanceStore = create<FinanceState>()(
             },
 
             initialize: async () => {
-                const { profile, incomes, spendings, obligations, assets } = get();
+                const { profile, incomes, spendings, obligations, assets, budgets } = get();
                 if (!profile) return;
 
                 // Only show loading state if we have absolutely no data
-                const hasNoData = incomes.length === 0 && spendings.length === 0 && obligations.length === 0 && (assets || []).length === 0;
+                const hasNoData = incomes.length === 0 && spendings.length === 0 && obligations.length === 0 && (assets || []).length === 0 && (budgets || []).length === 0;
                 if (hasNoData) {
                     set({ isLoading: true, error: null });
                 } else {
@@ -129,6 +136,8 @@ export const useFinanceStore = create<FinanceState>()(
                         spendings: cloudData.spendings.length > 0 ? cloudData.spendings : state.spendings,
                         obligations: cloudData.obligations.length > 0 ? cloudData.obligations : state.obligations,
                         assets: cloudData.assets.length > 0 ? cloudData.assets : (state.assets || []),
+                        budgets: cloudData.budgets.length > 0 ? cloudData.budgets : (state.budgets || []),
+                        currency: profile.currency || state.currency || 'THB',
                         isLoading: false,
                         isSyncing: false,
                         lastSyncedAt: new Date().toISOString()
@@ -260,6 +269,26 @@ export const useFinanceStore = create<FinanceState>()(
                 await get().syncToCloud('assets');
             },
 
+            addBudget: async (budget) => {
+                const id = uuidv4();
+                set((state) => ({
+                    budgets: [...(state.budgets || []), { ...budget, id, created_at: new Date().toISOString() }],
+                }));
+                await get().syncToCloud('budgets');
+            },
+            updateBudget: async (id, budget) => {
+                set((state) => ({
+                    budgets: (state.budgets || []).map((b) => (b.id === id ? { ...b, ...budget } : b)),
+                }));
+                await get().syncToCloud('budgets');
+            },
+            deleteBudget: async (id) => {
+                set((state) => ({
+                    budgets: (state.budgets || []).filter((b) => b.id !== id),
+                }));
+                await get().syncToCloud('budgets');
+            },
+
             setStoreData: (data) => set(() => data),
 
             setPin: async (pin) => {
@@ -277,6 +306,17 @@ export const useFinanceStore = create<FinanceState>()(
                 if (profile) {
                     await authService.updateLanguage(profile.id, lang);
                     set({ profile: { ...profile, language: lang } });
+                }
+            },
+
+            setCurrency: async (currency: string) => {
+                set({ currency });
+                const { profile } = get();
+                if (profile) {
+                    // Note: We need to implement updateCurrency in authService or similar
+                    // For now, let's assume updateLanguage approach applies
+                    await authService.updateProfileField(profile.id, { currency });
+                    set({ profile: { ...profile, currency } });
                 }
             },
 
@@ -308,7 +348,7 @@ export const useFinanceStore = create<FinanceState>()(
             },
             lock: () => set({ isLocked: true }),
             resetData: async () => {
-                set({ incomes: [], spendings: [], obligations: [], assets: [], isLocked: false });
+                set({ incomes: [], spendings: [], obligations: [], assets: [], budgets: [], isLocked: false });
                 await get().syncToCloud(); // Full sync to clear everything
             },
         }),

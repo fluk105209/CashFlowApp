@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Plus, Coins, Landmark, Box } from "lucide-react"
+import { Plus, Coins, Landmark, Box, TrendingUp, Wallet, Home } from "lucide-react"
 import type { Asset, AssetType } from "@/types"
+import { getCurrencySymbol } from "@/utils/formatUtils"
 
 interface AddAssetModalProps {
     initialData?: Asset
@@ -16,7 +17,7 @@ interface AddAssetModalProps {
 
 export function AddAssetModal({ initialData, children }: AddAssetModalProps) {
     const { t } = useTranslation()
-    const { addAsset, updateAsset } = useFinanceStore()
+    const { addAsset, updateAsset, currency } = useFinanceStore()
     const [open, setOpen] = useState(false)
     const [quantityInput, setQuantityInput] = useState(initialData?.quantity?.toString() || '0')
     const [formData, setFormData] = useState<Omit<Asset, 'id' | 'created_at'>>({
@@ -64,11 +65,13 @@ export function AddAssetModal({ initialData, children }: AddAssetModalProps) {
     }
 
     const handleTypeChange = (val: string) => {
-        let unit = 'gram'
-        if (val === 'bitcoin') unit = 'BTC'
-        else if (val === 'gold') unit = 'baht'
+        let unit = 'unit';
+        if (val === 'bitcoin') unit = 'BTC';
+        else if (val === 'gold') unit = 'baht';
+        else if (val === 'stock') unit = 'share';
+        else if (val === 'fund') unit = 'unit';
 
-        setFormData({ ...formData, type: val as AssetType, unit })
+        setFormData({ ...formData, type: val as AssetType, unit });
     }
 
     return (
@@ -94,7 +97,7 @@ export function AddAssetModal({ initialData, children }: AddAssetModalProps) {
                             <Input
                                 value={formData.name}
                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                placeholder="เช่น ทองคำแท่ง, Bitcoin Wallet"
+                                placeholder={t('assets.name_placeholder', { defaultValue: 'เช่น ทองแท่ง, หุ้น Apple, กองทุน K-SET50' })}
                                 className="rounded-2xl bg-muted/50 border-none h-12"
                                 required
                             />
@@ -117,6 +120,24 @@ export function AddAssetModal({ initialData, children }: AddAssetModalProps) {
                                         <div className="flex items-center gap-2">
                                             <Coins className="h-4 w-4 text-orange-500" />
                                             {t('assets.bitcoin')}
+                                        </div>
+                                    </SelectItem>
+                                    <SelectItem value="stock" className="rounded-xl">
+                                        <div className="flex items-center gap-2">
+                                            <TrendingUp className="h-4 w-4 text-emerald-500" />
+                                            {t('assets.stock')}
+                                        </div>
+                                    </SelectItem>
+                                    <SelectItem value="fund" className="rounded-xl">
+                                        <div className="flex items-center gap-2">
+                                            <Wallet className="h-4 w-4 text-blue-500" />
+                                            {t('assets.fund')}
+                                        </div>
+                                    </SelectItem>
+                                    <SelectItem value="real-estate" className="rounded-xl">
+                                        <div className="flex items-center gap-2">
+                                            <Home className="h-4 w-4 text-indigo-500" />
+                                            {t('assets.real-estate')}
                                         </div>
                                     </SelectItem>
                                     <SelectItem value="other" className="rounded-xl">
@@ -175,7 +196,7 @@ export function AddAssetModal({ initialData, children }: AddAssetModalProps) {
                                 type="number"
                                 value={formData.purchasePrice || ''}
                                 onChange={(e) => setFormData({ ...formData, purchasePrice: Number(e.target.value) })}
-                                placeholder="฿ ... (ไม่บังคับ)"
+                                placeholder={`${getCurrencySymbol(currency)} ... (${t('common.optional', { defaultValue: 'Optional' })})`}
                                 className="rounded-2xl bg-muted/50 border-none h-12"
                             />
                         </div>
