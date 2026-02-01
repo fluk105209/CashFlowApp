@@ -56,7 +56,7 @@ export function TransactionsPage() {
     const obligationTypes = useMemo(() => ["all", ...new Set(obligations.map(o => o.type))], [obligations])
 
     const filteredIncomes = useMemo(() => {
-        let items = incomes.filter(item => {
+        const items = incomes.filter(item => {
             const date = parseISO(item.date.split('T')[0])
             const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase())
             const matchesCategory = category === "all" || item.category === category
@@ -78,7 +78,7 @@ export function TransactionsPage() {
     }, [incomes, search, category, selectedMonth, selectedYear, minAmount, maxAmount, sortBy])
 
     const filteredSpendings = useMemo(() => {
-        let items = spendings.filter(item => {
+        const items = spendings.filter(item => {
             const date = parseISO(item.date.split('T')[0])
             const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase())
             const matchesCategory = category === "all" || item.category === category

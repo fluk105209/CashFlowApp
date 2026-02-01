@@ -1,5 +1,12 @@
 export type Frequency = 'monthly' | 'yearly' | 'one-time' | 'irregular';
 
+export interface UnifiedAddData {
+    type: 'expense' | 'income';
+    name: string;
+    amount?: string;
+    category: string;
+}
+
 export interface Income {
     id: string;
     name: string;

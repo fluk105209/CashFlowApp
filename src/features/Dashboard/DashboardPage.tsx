@@ -64,7 +64,7 @@ export function DashboardPage() {
     }, [initialize])
 
     // Filter for Current Month
-    const { monthlyIncome, monthlySpending } = useMemo(() => {
+    const { monthlyIncome, monthlySpending, totalIncome, totalSpending } = useMemo(() => {
         const now = new Date()
 
         const mIncomes = incomes.filter(i => isSameMonth(parseISO(i.date.split('T')[0]), now))
@@ -99,7 +99,7 @@ export function DashboardPage() {
         return sum
     }, 0)
 
-    const netCashFlow = monthlyIncome - monthlySpending
+    const netCashFlow = totalIncome - totalSpending
     const totalVolume = monthlyIncome + monthlySpending
     const incomePercent = totalVolume > 0 ? (monthlyIncome / totalVolume) * 100 : 0
 
@@ -157,7 +157,7 @@ export function DashboardPage() {
                     <Card className="bg-card border-none shadow-xl rounded-[2rem] overflow-hidden group">
                         <CardHeader className="pb-2 text-center pt-8 relative">
                             <div className="flex flex-col items-center">
-                                <CardDescription className="text-muted-foreground font-medium uppercase tracking-widest text-[10px]">{t('dashboard.net_monthly')}</CardDescription>
+                                <CardDescription className="text-muted-foreground font-medium uppercase tracking-widest text-[10px]">{t('dashboard.total_balance')}</CardDescription>
                                 <div className="absolute top-4 right-4">
                                     <Button
                                         variant="ghost"

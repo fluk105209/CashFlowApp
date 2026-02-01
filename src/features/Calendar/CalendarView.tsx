@@ -253,9 +253,9 @@ export function CalendarView() {
                         </div>
                     </div>
                     <div className="bg-card border p-2 rounded-2xl shadow-sm">
-                        <div className="text-muted-foreground mb-1">{t('common.net')} ({getCurrencySymbol(currency)})</div>
-                        <div className={cn("font-bold", monthlySummary.net >= 0 ? "text-blue-600" : "text-orange-600")}>
-                            {formatCurrency(monthlySummary.net, currency, isAmountHidden, { showSymbol: false })}
+                        <div className="text-muted-foreground mb-1">{t('dashboard.total_balance')} ({getCurrencySymbol(currency)})</div>
+                        <div className={cn("font-bold", (previousBalance + monthlySummary.net) >= 0 ? "text-blue-600" : "text-orange-600")}>
+                            {formatCurrency(previousBalance + monthlySummary.net, currency, isAmountHidden, { showSymbol: false })}
                         </div>
                     </div>
                 </div>

@@ -8,6 +8,7 @@ import { StatusBar, Style } from '@capacitor/status-bar'
 import { Capacitor } from '@capacitor/core'
 import { useFinanceStore } from "@/stores/useFinanceStore"
 import { useTranslation } from "react-i18next"
+import type { UnifiedAddData } from "@/types"
 import { format } from "date-fns"
 
 // Lazy load feature components for performance
@@ -50,21 +51,22 @@ function SyncIndicator() {
   )
 }
 
+
 function App() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
   const { profile } = useFinanceStore()
   const [addModalOpen, setAddModalOpen] = useState(false)
-  const [prefillData, setPrefillData] = useState<any>(null)
+  const [prefillData, setPrefillData] = useState<UnifiedAddData | undefined>(undefined)
 
   useEffect(() => {
-    const handleOpenAdd = (e: any) => {
-      setPrefillData(e.detail || null)
+    const handleOpenAdd = (e: CustomEvent<UnifiedAddData>) => {
+      setPrefillData(e.detail || undefined)
       setAddModalOpen(true)
     }
-    window.addEventListener('open-unified-add', handleOpenAdd)
-    return () => window.removeEventListener('open-unified-add', handleOpenAdd)
+    window.addEventListener('open-unified-add', handleOpenAdd as EventListener)
+    return () => window.removeEventListener('open-unified-add', handleOpenAdd as EventListener)
   }, [])
 
   useEffect(() => {

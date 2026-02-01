@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useFinanceStore } from "@/stores/useFinanceStore"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
@@ -17,62 +17,7 @@ interface AddAssetModalProps {
 
 export function AddAssetModal({ initialData, children }: AddAssetModalProps) {
     const { t } = useTranslation()
-    const { addAsset, updateAsset, currency } = useFinanceStore()
     const [open, setOpen] = useState(false)
-    const [quantityInput, setQuantityInput] = useState(initialData?.quantity?.toString() || '0')
-    const [formData, setFormData] = useState<Omit<Asset, 'id' | 'created_at'>>({
-        name: initialData?.name || '',
-        type: initialData?.type || 'gold',
-        quantity: initialData?.quantity || 0,
-        unit: initialData?.unit || 'baht',
-        purchasePrice: initialData?.purchasePrice || undefined
-    })
-
-    useEffect(() => {
-        if (initialData && open) {
-            setFormData({
-                name: initialData.name,
-                type: initialData.type,
-                quantity: initialData.quantity,
-                unit: initialData.unit,
-                purchasePrice: initialData.purchasePrice
-            })
-            setQuantityInput(initialData.quantity.toString())
-        }
-    }, [initialData, open])
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        const finalQuantity = parseFloat(quantityInput) || 0
-        const finalData = { ...formData, quantity: finalQuantity }
-
-        if (initialData) {
-            await updateAsset(initialData.id, finalData)
-        } else {
-            await addAsset(finalData)
-        }
-        setOpen(false)
-        if (!initialData) {
-            setFormData({
-                name: '',
-                type: 'gold',
-                quantity: 0,
-                unit: 'baht',
-                purchasePrice: undefined
-            })
-            setQuantityInput('0')
-        }
-    }
-
-    const handleTypeChange = (val: string) => {
-        let unit = 'unit';
-        if (val === 'bitcoin') unit = 'BTC';
-        else if (val === 'gold') unit = 'baht';
-        else if (val === 'stock') unit = 'share';
-        else if (val === 'fund') unit = 'unit';
-
-        setFormData({ ...formData, type: val as AssetType, unit });
-    }
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -90,140 +35,180 @@ export function AddAssetModal({ initialData, children }: AddAssetModalProps) {
                     </DialogTitle>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit} className="space-y-6 pt-4">
-                    <div className="space-y-4">
-                        <div className="space-y-2">
-                            <Label className="text-xs font-bold uppercase tracking-widest opacity-60 px-1">{t('assets.name')}</Label>
-                            <Input
-                                value={formData.name}
-                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                placeholder={t('assets.name_placeholder', { defaultValue: 'เช่น ทองแท่ง, หุ้น Apple, กองทุน K-SET50' })}
-                                className="rounded-2xl bg-muted/50 border-none h-12"
-                                required
-                            />
-                        </div>
+                <AddAssetForm initialData={initialData} onClose={() => setOpen(false)} />
+            </DialogContent>
+        </Dialog>
+    )
+}
 
-                        <div className="space-y-2">
-                            <Label className="text-xs font-bold uppercase tracking-widest opacity-60 px-1">{t('assets.type')}</Label>
-                            <Select value={formData.type} onValueChange={handleTypeChange}>
+function AddAssetForm({ initialData, onClose }: { initialData?: Asset, onClose: () => void }) {
+    const { t } = useTranslation()
+    const { addAsset, updateAsset, currency } = useFinanceStore()
+    const [quantityInput, setQuantityInput] = useState(initialData?.quantity?.toString() || '0')
+    const [formData, setFormData] = useState<Omit<Asset, 'id' | 'created_at'>>({
+        name: initialData?.name || '',
+        type: initialData?.type || 'gold',
+        quantity: initialData?.quantity || 0,
+        unit: initialData?.unit || 'baht',
+        purchasePrice: initialData?.purchasePrice || undefined
+    })
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        const finalQuantity = parseFloat(quantityInput) || 0
+        const finalData = { ...formData, quantity: finalQuantity }
+
+        if (initialData) {
+            await updateAsset(initialData.id, finalData)
+        } else {
+            await addAsset(finalData)
+        }
+        onClose()
+    }
+
+    const handleTypeChange = (val: string) => {
+        let unit = 'unit';
+        if (val === 'bitcoin') unit = 'BTC';
+        else if (val === 'gold') unit = 'baht';
+        else if (val === 'stock') unit = 'share';
+        else if (val === 'fund') unit = 'unit';
+
+        setFormData({ ...formData, type: val as AssetType, unit });
+    }
+
+    return (
+        <form onSubmit={handleSubmit} className="space-y-6 pt-4">
+            <div className="space-y-4">
+                <div className="space-y-2">
+                    <Label className="text-xs font-bold uppercase tracking-widest opacity-60 px-1">{t('assets.name')}</Label>
+                    <Input
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        placeholder={t('assets.name_placeholder', { defaultValue: 'เช่น ทองแท่ง, หุ้น Apple, กองทุน K-SET50' })}
+                        className="rounded-2xl bg-muted/50 border-none h-12"
+                        required
+                    />
+                </div>
+
+                <div className="space-y-2">
+                    <Label className="text-xs font-bold uppercase tracking-widest opacity-60 px-1">{t('assets.type')}</Label>
+                    <Select value={formData.type} onValueChange={handleTypeChange}>
+                        <SelectTrigger className="rounded-2xl bg-muted/50 border-none h-12 shadow-none focus:ring-1">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-2xl border-none shadow-2xl">
+                            <SelectItem value="gold" className="rounded-xl flex items-center gap-2">
+                                <div className="flex items-center gap-2">
+                                    <Landmark className="h-4 w-4 text-yellow-500" />
+                                    {t('assets.gold')}
+                                </div>
+                            </SelectItem>
+                            <SelectItem value="bitcoin" className="rounded-xl">
+                                <div className="flex items-center gap-2">
+                                    <Coins className="h-4 w-4 text-orange-500" />
+                                    {t('assets.bitcoin')}
+                                </div>
+                            </SelectItem>
+                            <SelectItem value="stock" className="rounded-xl">
+                                <div className="flex items-center gap-2">
+                                    <TrendingUp className="h-4 w-4 text-emerald-500" />
+                                    {t('assets.stock')}
+                                </div>
+                            </SelectItem>
+                            <SelectItem value="fund" className="rounded-xl">
+                                <div className="flex items-center gap-2">
+                                    <Wallet className="h-4 w-4 text-blue-500" />
+                                    {t('assets.fund')}
+                                </div>
+                            </SelectItem>
+                            <SelectItem value="real-estate" className="rounded-xl">
+                                <div className="flex items-center gap-2">
+                                    <Home className="h-4 w-4 text-indigo-500" />
+                                    {t('assets.real-estate')}
+                                </div>
+                            </SelectItem>
+                            <SelectItem value="other" className="rounded-xl">
+                                <div className="flex items-center gap-2">
+                                    <Box className="h-4 w-4 text-primary" />
+                                    {t('assets.other')}
+                                </div>
+                            </SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                        <Label className="text-xs font-bold uppercase tracking-widest opacity-60 px-1">{t('assets.quantity')}</Label>
+                        <Input
+                            type="text"
+                            inputMode="decimal"
+                            value={quantityInput}
+                            onChange={(e) => setQuantityInput(e.target.value)}
+                            className="rounded-2xl bg-muted/50 border-none h-12"
+                            required
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label className="text-xs font-bold uppercase tracking-widest opacity-60 px-1">{t('assets.unit')}</Label>
+                        {formData.type === 'gold' ? (
+                            <Select value={formData.unit} onValueChange={(val) => setFormData({ ...formData, unit: val })}>
                                 <SelectTrigger className="rounded-2xl bg-muted/50 border-none h-12 shadow-none focus:ring-1">
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent className="rounded-2xl border-none shadow-2xl">
-                                    <SelectItem value="gold" className="rounded-xl flex items-center gap-2">
-                                        <div className="flex items-center gap-2">
-                                            <Landmark className="h-4 w-4 text-yellow-500" />
-                                            {t('assets.gold')}
-                                        </div>
-                                    </SelectItem>
-                                    <SelectItem value="bitcoin" className="rounded-xl">
-                                        <div className="flex items-center gap-2">
-                                            <Coins className="h-4 w-4 text-orange-500" />
-                                            {t('assets.bitcoin')}
-                                        </div>
-                                    </SelectItem>
-                                    <SelectItem value="stock" className="rounded-xl">
-                                        <div className="flex items-center gap-2">
-                                            <TrendingUp className="h-4 w-4 text-emerald-500" />
-                                            {t('assets.stock')}
-                                        </div>
-                                    </SelectItem>
-                                    <SelectItem value="fund" className="rounded-xl">
-                                        <div className="flex items-center gap-2">
-                                            <Wallet className="h-4 w-4 text-blue-500" />
-                                            {t('assets.fund')}
-                                        </div>
-                                    </SelectItem>
-                                    <SelectItem value="real-estate" className="rounded-xl">
-                                        <div className="flex items-center gap-2">
-                                            <Home className="h-4 w-4 text-indigo-500" />
-                                            {t('assets.real-estate')}
-                                        </div>
-                                    </SelectItem>
-                                    <SelectItem value="other" className="rounded-xl">
-                                        <div className="flex items-center gap-2">
-                                            <Box className="h-4 w-4 text-primary" />
-                                            {t('assets.other')}
-                                        </div>
-                                    </SelectItem>
+                                    <SelectItem value="baht" className="rounded-xl">{t('assets.unit_baht')}</SelectItem>
+                                    <SelectItem value="salung" className="rounded-xl">{t('assets.unit_salung')}</SelectItem>
+                                    <SelectItem value="satang" className="rounded-xl">{t('assets.unit_satang')}</SelectItem>
+                                    <SelectItem value="gram" className="rounded-xl">{t('assets.unit_gram')}</SelectItem>
                                 </SelectContent>
                             </Select>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label className="text-xs font-bold uppercase tracking-widest opacity-60 px-1">{t('assets.quantity')}</Label>
-                                <Input
-                                    type="text"
-                                    inputMode="decimal"
-                                    value={quantityInput}
-                                    onChange={(e) => setQuantityInput(e.target.value)}
-                                    className="rounded-2xl bg-muted/50 border-none h-12"
-                                    required
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label className="text-xs font-bold uppercase tracking-widest opacity-60 px-1">{t('assets.unit')}</Label>
-                                {formData.type === 'gold' ? (
-                                    <Select value={formData.unit} onValueChange={(val) => setFormData({ ...formData, unit: val })}>
-                                        <SelectTrigger className="rounded-2xl bg-muted/50 border-none h-12 shadow-none focus:ring-1">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent className="rounded-2xl border-none shadow-2xl">
-                                            <SelectItem value="baht" className="rounded-xl">{t('assets.unit_baht')}</SelectItem>
-                                            <SelectItem value="salung" className="rounded-xl">{t('assets.unit_salung')}</SelectItem>
-                                            <SelectItem value="satang" className="rounded-xl">{t('assets.unit_satang')}</SelectItem>
-                                            <SelectItem value="gram" className="rounded-xl">{t('assets.unit_gram')}</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                ) : (
-                                    <Input
-                                        value={formData.unit}
-                                        onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
-                                        className="rounded-2xl bg-muted/50 border-none h-12 uppercase"
-                                        readOnly={formData.type === 'bitcoin'}
-                                        required
-                                    />
-                                )}
-                            </div>
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label className="text-xs font-bold uppercase tracking-widest opacity-60 px-1">
-                                {t('assets.purchase_price')}
-                            </Label>
+                        ) : (
                             <Input
-                                type="number"
-                                value={formData.purchasePrice || ''}
-                                onChange={(e) => setFormData({ ...formData, purchasePrice: Number(e.target.value) })}
-                                placeholder={`${getCurrencySymbol(currency)} ... (${t('common.optional', { defaultValue: 'Optional' })})`}
-                                className="rounded-2xl bg-muted/50 border-none h-12"
+                                value={formData.unit}
+                                onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
+                                className="rounded-2xl bg-muted/50 border-none h-12 uppercase"
+                                readOnly={formData.type === 'bitcoin'}
+                                required
                             />
-                        </div>
-                    </div>
-
-                    <DialogFooter className="pt-4 flex flex-row gap-3">
-                        {initialData && (
-                            <Button
-                                type="button"
-                                variant="outline"
-                                className="flex-1 h-14 rounded-2xl font-bold border-rose-500/20 text-rose-500 hover:bg-rose-500 hover:text-white"
-                                onClick={() => {
-                                    if (window.confirm(t('common.confirm_delete'))) {
-                                        useFinanceStore.getState().deleteAsset(initialData.id)
-                                        setOpen(false)
-                                    }
-                                }}
-                            >
-                                {t('common.delete')}
-                            </Button>
                         )}
-                        <Button type="submit" className="flex-[2] h-14 rounded-2xl font-black text-lg bg-primary shadow-xl shadow-primary/30">
-                            {t('common.save')}
-                        </Button>
-                    </DialogFooter>
-                </form>
-            </DialogContent>
-        </Dialog>
+                    </div>
+                </div>
+
+                <div className="space-y-2">
+                    <Label className="text-xs font-bold uppercase tracking-widest opacity-60 px-1">
+                        {t('assets.purchase_price')}
+                    </Label>
+                    <Input
+                        type="number"
+                        value={formData.purchasePrice || ''}
+                        onChange={(e) => setFormData({ ...formData, purchasePrice: Number(e.target.value) })}
+                        placeholder={`${getCurrencySymbol(currency)} ... (${t('common.optional', { defaultValue: 'Optional' })})`}
+                        className="rounded-2xl bg-muted/50 border-none h-12"
+                    />
+                </div>
+            </div>
+
+            <DialogFooter className="pt-4 flex flex-row gap-3">
+                {initialData && (
+                    <Button
+                        type="button"
+                        variant="outline"
+                        className="flex-1 h-14 rounded-2xl font-bold border-rose-500/20 text-rose-500 hover:bg-rose-500 hover:text-white"
+                        onClick={() => {
+                            if (window.confirm(t('common.confirm_delete'))) {
+                                useFinanceStore.getState().deleteAsset(initialData.id)
+                                onClose()
+                            }
+                        }}
+                    >
+                        {t('common.delete')}
+                    </Button>
+                )}
+                <Button type="submit" className="flex-[2] h-14 rounded-2xl font-black text-lg bg-primary shadow-xl shadow-primary/30">
+                    {t('common.save')}
+                </Button>
+            </DialogFooter>
+        </form>
     )
 }
