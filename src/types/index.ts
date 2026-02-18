@@ -45,7 +45,7 @@ export interface Obligation {
     created_at?: string;
 }
 
-export type AssetType = 'gold' | 'bitcoin' | 'stock' | 'fund' | 'real-estate' | 'other';
+export type AssetType = 'cash' | 'savings' | 'gold' | 'bitcoin' | 'stock' | 'fund' | 'real-estate' | 'other';
 
 export interface Asset {
     id: string;
